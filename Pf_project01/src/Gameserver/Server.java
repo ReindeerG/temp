@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import Chatserver.Message;
+
 class CheckMem extends Thread {
 	Server serv;
 	public CheckMem(Server serv) {
@@ -57,13 +59,14 @@ class UserThread extends Thread {
 				if(stop==true) { return; }
 				else {
 					Gaming gm = (Gaming)in.readObject();
-					int num = gm.getWhat();
 					List<Player> players = serv.getPlayers();
+					Player q=null;
 					for(Player p : players) {
 						if(p.getSocket().equals(socket)) {
-							switch(num) {
-								case Gaming.GAME_UNREADY: p.setReady(0); System.out.println("준비안함"); break;
-								case Gaming.GAME_READY: p.setReady(1); System.out.println("준비함"); break;
+							q = p;
+							switch(gm.getWhat()) {
+								case Gaming.GAME_UNREADY: p.setReady(0); System.out.println("왓져"); break;
+								case Gaming.GAME_READY: p.setReady(1); break;
 								case Gaming.GAME_DIE: p.setBetbool(1); break;
 								case Gaming.GAME_GO: p.setBetbool(2); break;
 								default: break;
@@ -71,11 +74,13 @@ class UserThread extends Thread {
 							break;
 						}
 					}
-					
-					
-					
-					
-					
+					for(Player p : players) {
+						ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+						//-----------------------------------------------------------
+						out.writeObject(new Gaming(q.getOrder(), gm.getWhat(), players));
+						System.out.println("dd");
+						out.flush();
+					}
 				}
 			}
 		}
