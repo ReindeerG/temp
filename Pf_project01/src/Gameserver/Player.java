@@ -1,8 +1,13 @@
 package Gameserver;
 
+import java.io.Serializable;
 import java.net.Socket;
 
-public class Player {
+public class Player implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/**
 	 * order: 게임방 별 플레이어 순서(0-3)
 	 * socket: 플레이어별 고유 소켓
@@ -10,7 +15,8 @@ public class Player {
 	 * ready: 0_안함 / 1_준비 / 2_이미게임중
 	 */
 	private int order;
-	private Socket socket;
+	private transient Socket socket;
+	private String userid;
 	private String nickname;
 	private int card1;
 	private int card2;
@@ -18,7 +24,7 @@ public class Player {
 	private int cardset;
 	private int betbool;
 	private int ready;
-	private UserThread uth;
+	private transient UserThread uth;
 	public int getOrder() {
 		return order;
 	}
@@ -70,9 +76,9 @@ public class Player {
 	public Player(int order, Socket socket, UserThread uth) {
 		this.order=order; this.socket=socket; this.setUth(uth); setReady(0);
 	}
-//	public String idToNick(String id) {
-//		return nickname;
-//	}
+	public String idToNick(String id) {
+		return nickname;
+	}
 //	public Socket getSocket() {
 //		return socket;
 //	}
@@ -90,6 +96,12 @@ public class Player {
 	}
 	public void setUth(UserThread uth) {
 		this.uth = uth;
+	}
+	public String getUserid() {
+		return userid;
+	}
+	public void setUserid(String userid) {
+		this.userid = userid;
 	}
 	
 	
