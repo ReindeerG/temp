@@ -254,7 +254,7 @@ public class Server {
 	private int start;
 	
 	public Server() {
-		Integer[] temp = new Integer[] {11,12,21,22,31,32,41,42,51,52,61,62,71,72,81,82,91,92,101,102};
+		Integer[] temp = new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
 		cards = new ArrayList<>(Arrays.asList(temp));
 		this.run();
 	}
