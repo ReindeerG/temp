@@ -11,13 +11,14 @@ public class Player implements Serializable {
 	/**
 	 * order: 게임방 별 플레이어 순서(0-3)
 	 * socket: 플레이어별 고유 소켓
-	 * betbool: 0_초기화 / 1_다이 / 2_고
+	 * betbool: 0_초기화 / 1_다이 / 2_콜 / 3_하프 / 4_체크
 	 * ready: 0_안함 / 1_준비 / 2_이미게임중
 	 */
 	private int order;
 	private transient Socket socket;
 	private String userid;
 	private String nickname;
+	private int money=8888;
 	private int card1;
 	private int card2;
 	private int card3;
@@ -76,9 +77,6 @@ public class Player implements Serializable {
 	public Player(int order, Socket socket, UserThread uth) {
 		this.order=order; this.socket=socket; this.setUth(uth); setReady(0);
 	}
-	public String idToNick(String id) {
-		return nickname;
-	}
 //	public Socket getSocket() {
 //		return socket;
 //	}
@@ -102,6 +100,12 @@ public class Player implements Serializable {
 	}
 	public void setUserid(String userid) {
 		this.userid = userid;
+	}
+	public int getMoney() {
+		return money;
+	}
+	public void setMoney(int money) {
+		this.money = money;
 	}
 	
 	

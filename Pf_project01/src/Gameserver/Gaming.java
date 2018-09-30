@@ -15,12 +15,20 @@ public class Gaming implements Serializable {
 	public static final int GAME_READY = 2;
 	public static final int GAME_START = 3;
 	public static final int GAME_DIE = 10;
-	public static final int GAME_GO = 11;
+	public static final int GAME_CALL = 11;
+	public static final int GAME_HALF = 12;
+	public static final int GAME_CHECK = 13;
+	public static final int MONEY_REFRESH = 89;
+	public static final int TURN_REFRESH = 87;
 	public static final int GETCARD = 500;
+	public static final int GAME_WHOSTURN = 600;
+	public static final int GAME_TIMER = 606;
 	public static final int CHAT = 330;
 	public static final int CHAT_JOIN = 331;
 	public static final int CHAT_LEAVE = 332;
 	public static final int CHAT_NICKCHANGE = 333;
+	public static final int REFRESH = 88;
+	public static final int IDMATCH = 77;
 	
 	
 	private int who;
@@ -35,40 +43,177 @@ public class Gaming implements Serializable {
 	private int card2;
 	private int card3;
 	
+	private int time;
+	
+	private int moneythisgame;
+	private int minforbet;
+	
+	
+	public Gaming() {}
+	
+	// 클라이언트에서 서버에 어떤 명령 요청시.
 	public Gaming(int what) {
 		setWhat(what);
 	}
+	
+	
+	// 서버용 다음턴 누군지 뿌릴때ddddddddd
+	public Gaming(int what, int who) {
+		setWhat(what); setWho(who);
+	}
+	
+	// 서버용 타이머 뿌릴때, 돈 갱신ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
+	public Gaming(int what, int who, int time) {
+		setWhat(what); setWho(who); setTime(time);
+	}
+	
+	// 서버에서 클라이언트 새로고침요구ㅇㅇㅇㅇㅇ
+	public Gaming(int what, ArrayList<Player> players) {
+		setWhat(what); setPlayers(players);
+	}
+	
+	// 첫연결시 아이디 매칭때ㅇㅇㅇㅇㅇㅇ
+	public Gaming(int what, String id) {
+		setWhat(what); setMsg(id);
+	}
+	
+
+	
+	
+	
+	
+	
+	// 서버에서 클라이언트들에게 다음턴이 누군지 뿌려줄 때
+	public static Gaming Turn(int who) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_WHOSTURN); g.setWho(who);
+		return g;
+	}
+	// 서버에서 게임시작시 카드 나눠줄 때
+	public static Gaming GiveCard(int card1, int card2, int card3) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GETCARD); g.setCard1(card1); g.setCard2(card2); g.setCard3(card3);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 게임 정보를 갱신시켜 줌.
+	public static Gaming GameInfo(String userid, int what, ArrayList<Player> players) {
+		Gaming g = new Gaming();
+		g.setWhat(what); g.setUserid(userid); g.setPlayers(players);
+		return g;
+	}
+	// 클라이언트에서 일반 채팅 송출
+	public static Gaming Chat(String userid, String msg, String date) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT); g.setUserid(userid); g.setMsg(msg); g.setDate(date);
+		return g;
+	}
+	// 클라이언트에서 자기 닉네임 변경 요청
+	public static Gaming NickChange(String userid, String toNick) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_NICKCHANGE); g.setUserid(userid); g.setMsg(toNick);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 변경한 닉네임과 시간을 뿌려줌
+	public static Gaming NickChange(String userid, String toNick, String date, ArrayList<Player> players) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_NICKCHANGE); g.setUserid(userid); g.setMsg(toNick); g.setDate(date); g.setPlayers(players);
+		return g;
+	}
+	// 클라이언트에서 자신의 입장을 알려달라고 부탁함.
+	public static Gaming ImIn(String userid) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_JOIN); g.setUserid(userid);
+		return g;
+	}
+	// 클라이언트에서 자신의 퇴장을 알려달라고 부탁함.
+	public static Gaming ImOut(String userid) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_LEAVE); g.setUserid(userid);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 누군가의 입장을 알리고 갱신하기 위해 뿌려줌.
+	public static Gaming HesIn(String userid, String date, ArrayList<Player> players) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_JOIN); g.setUserid(userid); g.setDate(date); g.setPlayers(players);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 누군가의 퇴장을 알리고 갱신하기 위해 뿌려줌.
+	public static Gaming HesOut(String userid, String date, ArrayList<Player> players) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_LEAVE); g.setUserid(userid); g.setDate(date); g.setPlayers(players);
+		return g;
+	}
+	// 클라이언트에서 서버로 자신의 ID 알려줄 때
+	public static Gaming SendID(String userid) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.IDMATCH); g.setUserid(userid);
+		return g;
+	}
+	// 클라이언트에서 서버로 플레이어 전체 갱신을 요구할 때
+	public static Gaming PlzRefresh() {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.REFRESH);
+		return g;
+	}
+	// 서버에서 클라이언트에 플레이어 갱신 정보를 뿌려줄 때
+	public static Gaming Refresh(ArrayList<Player> players) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.REFRESH); g.setPlayers(players);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 타이머 뿌릴 때
+	public static Gaming Timer(int who, int time) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_TIMER); g.setWho(who); g.setTime(time);
+		return g;
+	}
+	// 서버-클라이언트 양방향 판돈/베팅최소금액 갱신
+	public static Gaming MoneyRefresh(int moneythisgame, int minforbet) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.MONEY_REFRESH); g.setMoneythisgame(moneythisgame); g.setMinforbet(minforbet);
+		return g;
+	}
+	public static Gaming TurnRefresh(int turn) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.TURN_REFRESH); g.setWho(turn);
+		return g;
+	}
+	
+	
+	
+	
+	
 
 //	public Gaming(Socket socket, int what, String msg) {
 //		setSocket(socket); setWhat(what); setMsg(msg);
 //	}
-	// 일반 채팅 송출
+	// 일반 채팅 송출ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
 	public Gaming(String userid, int what, String msg, String date) {
 		setUserid(userid); setWhat(what); setMsg(msg); setDate(date);
 	}
-	// 채팅 알림(입장, 퇴장) - 서버용 
+	// 채팅 알림(입장, 퇴장) - 서버용 ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
 	public Gaming(String userid, int what, String date, ArrayList<Player> players) {
 		setUserid(userid); setWhat(what); setDate(date); setPlayers(players);
 	}
-	// 채팅 알림(닉변경) - 서버용 
+	// 채팅 알림(닉변경) - 서버용 dddddddddddddddddddddddddddddddddddddddd
 	public Gaming(String userid, int what, String toNick, String date, ArrayList<Player> players) {
 		setUserid(userid); setWhat(what); setMsg(toNick); setDate(date); setPlayers(players);
 	}
-	// 채팅 알림(닉변경) - 클라용 
+	// 채팅 알림(닉변경) - 클라용 ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
 	public Gaming(String userid, int what, String toNick) {
 		setUserid(userid); setWhat(what); setMsg(toNick);
 	}
-	// 일반 게임 명령, 서버용
+	// 일반 게임 명령, 서버용ddddddddddddddddddddddddd
 	public Gaming(String userid, int what, ArrayList<Player> players) {
 		setUserid(userid); setWhat(what); setPlayers(players);
 	}
-	// 일반 게임 명령, 채팅 알림(입장, 퇴장) - 클라용
+	// 일반 게임 명령, 채팅 알림(입장, 퇴장) - 클라용ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
 	public Gaming(String userid, int what) {
 		setUserid(userid); setWhat(what);
 	}
 	
 	
-	// 카드 나눠받을 때
+	// 카드 나눠받을 때ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
 	public Gaming(int what, int card1, int card2, int card3) {
 		setWhat(what); this.setCard1(card1); this.setCard2(card2); this.setCard3(card3);
 	}
@@ -136,6 +281,28 @@ public class Gaming implements Serializable {
 
 	public void setPlayers(ArrayList<Player> players) {
 		this.players = players;
+	}
+	public int getTime() {
+		return time;
+	}
+	public void setTime(int time) {
+		this.time = time;
+	}
+
+	public int getMoneythisgame() {
+		return moneythisgame;
+	}
+
+	public void setMoneythisgame(int moneythisgame) {
+		this.moneythisgame = moneythisgame;
+	}
+
+	public int getMinforbet() {
+		return minforbet;
+	}
+
+	public void setMinforbet(int minforbet) {
+		this.minforbet = minforbet;
 	}
 
 }
