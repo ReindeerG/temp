@@ -9,6 +9,9 @@ import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -73,6 +76,23 @@ class Titlebar extends JLabel {
 			ImageIcon i = new ImageIcon(ImageIO.read(new File("Images\\title.png")));
 			this.setIcon(i);
 		} catch(Exception e) {e.printStackTrace();}
+	}
+}
+
+class Movewin implements MouseMotionListener {
+	private Mainwindow frame;
+	private int initx = 0;
+	private int inity = 0;
+	public Movewin(Mainwindow frame) {
+		super();
+		this.frame=frame;
+	}
+	public void mouseDragged(MouseEvent e) {
+		frame.setLocation(frame.getX()+(e.getX()-initx), frame.getY()+(e.getY()-inity));
+	}
+	public void mouseMoved(MouseEvent e) {
+		initx = e.getX();
+		inity = e.getY();
 	}
 }
 
@@ -417,6 +437,8 @@ public class Mainwindow extends JFrame {
 		};
 		makechat.addKeyListener(chatenter);
 		makechat.addKeyListener(chatmax);
+		Movewin mw = new Movewin(this);
+		titlebar.addMouseMotionListener(mw);
 	}
 	private void menu() {
 	}
