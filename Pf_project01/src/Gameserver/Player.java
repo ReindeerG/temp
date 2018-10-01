@@ -13,6 +13,7 @@ public class Player implements Serializable {
 	 * socket: 플레이어별 고유 소켓
 	 * betbool: 0_초기화 / 1_다이 / 2_콜 / 3_하프 / 4_체크
 	 * ready: 0_안함 / 1_준비 / 2_이미게임중
+	 * gameresult: 0_안띄움 / 1_승리 / 2_재경기
 	 */
 	private int order;
 	private transient Socket socket;
@@ -25,6 +26,7 @@ public class Player implements Serializable {
 	private int cardset;
 	private int betbool;
 	private int ready;
+	private int gameresult;
 	private transient UserThread uth;
 	public int getOrder() {
 		return order;
@@ -106,6 +108,12 @@ public class Player implements Serializable {
 	}
 	public void setMoney(int money) {
 		this.money = money;
+	}
+	public int getGameresult() {
+		return gameresult;
+	}
+	public void setGameresult(int gameresult) {
+		this.gameresult = gameresult;
 	}
 	
 	

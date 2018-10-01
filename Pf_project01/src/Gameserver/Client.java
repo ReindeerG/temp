@@ -72,6 +72,7 @@ public class Client extends Thread {
 	private int card1;
 	private int card2;
 	private int card3;
+	private int cardset;
 	public int getCard1() {
 		return card1;
 	}
@@ -90,7 +91,27 @@ public class Client extends Thread {
 	public void setCard3(int card3) {
 		this.card3 = card3;
 	}
+	public int getCardset() {
+		return cardset;
+	}
+	public void setCardset(int cardset) {
+		this.cardset = cardset;
+	}
+	private int thisplaynum;
+	public int getThisplaynum() {
+		return thisplaynum;
+	}
+	public void setThisplaynum(int thisplaynum) {
+		this.thisplaynum=thisplaynum;
+	}
 	
+	private boolean canthalf;
+	public boolean isCanthalf() {
+		return canthalf=true;
+	}
+	public void setCanthalf(boolean canthalf) {
+		this.canthalf = canthalf;
+	}
 	
 	
 	public void setWindow(Mainwindow window) {
@@ -179,6 +200,7 @@ public class Client extends Thread {
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_CALL));
 			out.flush();
+			canthalf=true;
 		}catch(Exception e) {e.printStackTrace();}
 	}
 	public void Bet_Die() {
@@ -197,6 +219,7 @@ public class Client extends Thread {
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_CHECK));
 			out.flush();
+			canthalf=true;
 		}catch(Exception e) {e.printStackTrace();}
 	}
 	public void Money_Refresh() {
@@ -295,7 +318,7 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.GETCARD: {
-					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
+					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3(); cardset = gm.getCardset();
 //					System.out.println(card1);
 					getWindow().DrawCards();
 //					System.out.println(card1+" "+card2+" "+card3);
@@ -310,9 +333,26 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.GAME_START: {
+					thisplaynum=gm.getThisplaynum();
 					inggame=true;
+					canthalf=false;
 					turn=1;
 					getWindow().StartToButton();
+					break;
+				}
+				case Gaming.GAME_RESULT: {
+					players=gm.getPlayers();
+					getWindow().allOpen();
+					getWindow().Refresh();
+					boolean isend=false;
+					for(Player p : players) {
+						if(p.getGameresult()==2) isend=true; break;
+					}
+					if(isend==true) {
+						getWindow().to5secre();
+					} else {
+						getWindow().to5sec();
+					}
 					break;
 				}
 				case Gaming.GAME_CALL:
@@ -329,6 +369,7 @@ public class Client extends Thread {
 			} catch(Exception e) {e.printStackTrace();}
 		}
 	}
+	
 	
 
 }

@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import Chatserver.Message;
+import Logic.Logic;
 
 class Timer extends Thread {
 	Server serv=null;
@@ -158,7 +159,7 @@ class UserThread extends Thread {
 		ArrayList<Player> players = serv.getPlayers();
 		int alive=0;
 		int sumcall=0;
-		int sumcheck=0;
+		int ischecked=0;
 		int sumnone=0;
 		for(Player p : players) {
 			if(p.getBetbool()!=1) {
@@ -168,31 +169,13 @@ class UserThread extends Thread {
 				sumcall++;
 			}
 			if(p.getBetbool()==4) {
-				sumcheck++;
+				ischecked++;
 			}
 			if(p.getBetbool()==0) {
 				sumnone++;
 			}
 		}
-
-//			Player tempp = players.get((serv.getWhosturn()+1)%players.size());
-//			serv.setWhosturn(tempp.getOrder());
-
-		
-		
-		
-		
-
-		if(alive==2 && sumnone==0) {
-			serv.setInggame(false);
-			System.out.println("남은 두명이서 판별내야됨.");
-		}else if(alive==1) {
-			serv.setInggame(false);
-			// 남겨진자가 승리
-		}else if((sumcall+sumcheck)==alive) {
-			serv.setInggame(false);
-			System.out.println("다콜");
-		}else {
+		if(sumnone>0) {
 			for(int i=1;i<players.size();i++) {
 				Player tempp = players.get((serv.getWhosturn()+i)%players.size());
 				if(tempp.getBetbool()!=1) {
@@ -201,10 +184,90 @@ class UserThread extends Thread {
 				}
 			}
 			WhosTurn();
+		} else {
+			if(alive==1) {
+				// 살아있는사람이이김
+				for(Player p : players) {
+					if (p.getBetbool()!=1) {
+						// 얘가 우승자임
+						break;
+					}
+				}
+			}
+			else {
+				if (alive==sumcall+ischecked) {
+					// 결판
+				} else {
+					for(int i=1;i<players.size();i++) {
+						Player tempp = players.get((serv.getWhosturn()+i)%players.size());
+						if(tempp.getBetbool()!=1) {
+							serv.setWhosturn(tempp.getOrder());
+							break;
+						}
+					}
+					WhosTurn();
+				}
+			}
 		}
+			
+		
+		
+		
+//			Player tempp = players.get((serv.getWhosturn()+1)%players.size());
+//			serv.setWhosturn(tempp.getOrder());
+
+		
+		
+		
+		
+
+//		if(alive==2 && sumnone==0) {
+//			serv.setInggame(false);
+//			System.out.println("남은 두명이서 판별내야됨.");
+//		}else if(alive==1) {
+//			serv.setInggame(false);
+//			// 남겨진자가 승리
+//		}else if((sumcall+ischecked)==alive) {
+//			serv.setInggame(false);
+//			System.out.println("다콜");
+//		}else {
+//			for(int i=1;i<players.size();i++) {
+//				Player tempp = players.get((serv.getWhosturn()+i)%players.size());
+//				if(tempp.getBetbool()!=1) {
+//					serv.setWhosturn(tempp.getOrder());
+//					break;
+//				}
+//			}
+//			WhosTurn();
+//		}
 			
 
 		
+	}
+	public void whosWin(ArrayList<Player> players) {
+		int num = players.size();
+		String userid1=players.get(0).getUserid();
+		String userid2=players.get(1).getUserid();
+		int cardresult1=players.get(0).getCardset();
+		int cardresult2=players.get(1).getCardset();
+		String userid3=null;
+		int cardresult3=0;
+		String userid4=null;
+		int cardresult4=0;
+		if(players.size()>2) {
+			userid3=players.get(2).getUserid();
+			cardresult3=players.get(2).getCardset();
+		}
+		if(players.size()>3) {
+			userid4=players.get(3).getUserid();
+			cardresult4=players.get(3).getCardset();
+		}
+		ArrayList<String> result = Logic.GameResult(num, userid1, cardresult1, userid2, cardresult2, userid3, cardresult3, userid4, cardresult4);
+		if(result.size()==1) {
+			// result.get(0) 가 우승
+		} else {
+			// 남은사람끼리 재대결
+		}
 	}
 	public void toDie() {
 		ArrayList<Player> players = serv.getPlayers();
@@ -488,6 +551,13 @@ public class Server {
 	public void increaseTurn() {
 		this.turn++;
 	}
+	private int thisplaynum;
+	public int getThisplaynum() {
+		return thisplaynum;
+	}
+	public void setThisplaynum(int thisplaynum) {
+		this.thisplaynum=thisplaynum;
+	}
 	
 	public Server() {
 		Integer[] temp = new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
@@ -531,6 +601,9 @@ public class Server {
 	public ArrayList<Player> getPlayers() {
 		return players;
 	}
+	public void setPlayers(ArrayList<Player> players) {
+		this.players=players;
+	}
 	
 	public void GameStartBool() {
 		if(players.size()==4) {
@@ -549,10 +622,79 @@ public class Server {
 			System.out.println("플레이어 수가 부족합니다! (현재 "+players.size()+"명)");
 		}
 	}
-	
+	public void rebatch(ArrayList<String> replayers) {
+		ArrayList<Player> init=getPlayers();
+		ArrayList<Player> temp1=null;
+		ArrayList<Player> temp2=null;
+		for(Player p : init) {
+			if (replayers.contains(p.getUserid())) {
+				temp1.add(p);
+				p.setGameresult(2);
+			} else {
+				temp2.add(p);
+				p.setGameresult(0);
+			}
+		}
+		ArrayList<Player> newpl = new ArrayList<>();
+		for(Player p : temp1) {
+			newpl.add(p);
+		}
+		for(Player p : temp2) {
+			newpl.add(p);
+		}
+		setPlayers(newpl);
+		return;
+	}
+	public void calc(Player p) {
+		p.setMoney(p.getMoney()+moneythisgame);
+		for(Player q : players) {
+			q.setGameresult(0);
+		}
+		p.setGameresult(1);
+	}
+	public void rematch(int num) {
+		setInggame(true);
+		setTurn(1);
+		setMinforbet(0);
+		Collections.shuffle(cards);
+		int index=0;
+		for(Player p : players) {
+			p.setBetbool(0);
+			p.setCard1(cards.get(index++));
+		}
+		for(Player p : players) {
+			p.setCard2(cards.get(index++));
+		}
+		for(Player p : players) {
+			p.setCardset(Logic.Result(p.getCard1(), p.getCard2()));
+		}
+		for(int i=num;i<players.size();i++) {
+			players.get(i).setBetbool(1);
+		}
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Gamestart(num));
+				out.flush();
+			}
+			catch (Exception e) {e.printStackTrace();}
+		}
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.GiveCard(p.getCard1(), p.getCard2(), p.getCard3(), p.getCardset()));
+				out.flush();
+			}
+			catch (Exception e) {e.printStackTrace();}
+		}
+		Timer t = new Timer(this, players.get(getWhosturn()));
+		t.setDaemon(true);
+		t.start();
+	}
 	public void GameStart() {
 		setInggame(true);
 		setTurn(1);
+		setMinforbet(0);
 //		for(Player p : players) {
 //			p.setReady(2);
 //			p.setBetbool(0);
@@ -574,24 +716,27 @@ public class Server {
 		Collections.shuffle(cards);
 		int index=0;
 		for(Player p : players) {
+			p.setBetbool(0);
 			p.setCard1(cards.get(index++));
 		}
 		for(Player p : players) {
 			p.setCard2(cards.get(index++));
 		}
 		for(Player p : players) {
+			p.setCardset(Logic.Result(p.getCard1(), p.getCard2()));
+		}
+		for(Player p : players) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(new Gaming(Gaming.GAME_START));
+				out.writeObject(Gaming.Gamestart(players.size()));
 				out.flush();
-				
 			}
 			catch (Exception e) {e.printStackTrace();}
 		}
 		for(Player p : players) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.GiveCard(p.getCard1(), p.getCard2(), p.getCard3()));
+				out.writeObject(Gaming.GiveCard(p.getCard1(), p.getCard2(), p.getCard3(), p.getCardset()));
 				out.flush();
 			}
 			catch (Exception e) {e.printStackTrace();}

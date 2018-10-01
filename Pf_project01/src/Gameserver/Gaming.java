@@ -23,6 +23,7 @@ public class Gaming implements Serializable {
 	public static final int GETCARD = 500;
 	public static final int GAME_WHOSTURN = 600;
 	public static final int GAME_TIMER = 606;
+	public static final int GAME_RESULT = 608;
 	public static final int CHAT = 330;
 	public static final int CHAT_JOIN = 331;
 	public static final int CHAT_LEAVE = 332;
@@ -42,6 +43,8 @@ public class Gaming implements Serializable {
 	private int card1;
 	private int card2;
 	private int card3;
+	private int cardset;
+	private int thisplaynum;
 	
 	private int time;
 	
@@ -82,7 +85,12 @@ public class Gaming implements Serializable {
 	
 	
 	
-	
+	// 서버에서 클라이언트들에게 다음턴이 누군지 뿌려줄 때
+	public static Gaming Gamestart(int thisplaynum) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_START); g.setThisplaynum(thisplaynum);
+		return g;
+	}
 	// 서버에서 클라이언트들에게 다음턴이 누군지 뿌려줄 때
 	public static Gaming Turn(int who) {
 		Gaming g = new Gaming();
@@ -90,9 +98,9 @@ public class Gaming implements Serializable {
 		return g;
 	}
 	// 서버에서 게임시작시 카드 나눠줄 때
-	public static Gaming GiveCard(int card1, int card2, int card3) {
+	public static Gaming GiveCard(int card1, int card2, int card3, int cardset) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GETCARD); g.setCard1(card1); g.setCard2(card2); g.setCard3(card3);
+		g.setWhat(Gaming.GETCARD); g.setCard1(card1); g.setCard2(card2); g.setCard3(card3); g.setCardset(cardset);
 		return g;
 	}
 	// 서버에서 클라이언트들에게 게임 정보를 갱신시켜 줌.
@@ -173,12 +181,18 @@ public class Gaming implements Serializable {
 		g.setWhat(Gaming.MONEY_REFRESH); g.setMoneythisgame(moneythisgame); g.setMinforbet(minforbet);
 		return g;
 	}
+	// 서버에서 클라이언트들에게 다음턴이 누군지 갱신시켜줌
 	public static Gaming TurnRefresh(int turn) {
 		Gaming g = new Gaming();
 		g.setWhat(Gaming.TURN_REFRESH); g.setWho(turn);
 		return g;
 	}
-	
+	// 서버에서 클라이언트들에게 게임 결과화면 띄우게 만듦
+	public static Gaming Gameresult(ArrayList<Player> players) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_RESULT); g.setPlayers(players);
+		return g;
+	}
 	
 	
 	
@@ -274,7 +288,22 @@ public class Gaming implements Serializable {
 	public void setCard3(int card3) {
 		this.card3 = card3;
 	}
+	
+	public int getCardset() {
+		return cardset;
+	}
 
+	public void setCardset(int cardset) {
+		this.cardset = cardset;
+	}
+	public int getThisplaynum() {
+		return thisplaynum;
+	}
+	public void setThisplaynum(int thisplaynum) {
+		this.thisplaynum=thisplaynum;
+	}
+	
+	
 	public ArrayList<Player> getPlayers() {
 		return players;
 	}
