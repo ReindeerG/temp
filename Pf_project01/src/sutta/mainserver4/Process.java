@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
-import sutta.mainserver.MainServer;
-
 public class Process {
 	private ObjectInputStream in;
 	private ArrayList<Room> roomList;
@@ -16,20 +14,25 @@ public class Process {
 	}
 	
 	public void joinRoom(int index) {
-//		System.out.println("방 참가 완료");
-		roomList.get(index).cnt++;
-		if(roomList.get(index).cnt == 4) {
-			roomList.get(index).ing = true;
+		if(index > roomList.size()) {
+			System.out.println("방 목록 refresh후 재 시도");
+		}
+		else {
+			System.out.println((index+1)+"번방 참가 완료");
+			roomList.get(index).cnt++;
+			if(roomList.get(index).cnt == 4) {
+				roomList.get(index).ing = true;
+			}			
 		}
 //		inet = InetAddress.getByName("192.168.0.?");
 //		g_socket = new Socket(inet,g_port);
 //		c_socket = new Socket(inet,c_port);
 	}
 	
-	public void newRoom() throws ClassNotFoundException, IOException {
+	public void newRoom(String name) throws ClassNotFoundException, IOException {
 		Room r = new Room();
-		r.name = (String)in.readObject();
-		r.cnt = 1;
+		r.name = name;
+		r.cnt = 0;
 		r.ing = false;
 		//방 정보 받아서 list에 저장
 		roomList.add(r);
@@ -40,6 +43,7 @@ public class Process {
 	public void process() throws Exception{
 		while(true) {
 			int choose = in.readInt();
+//			System.out.println("choose = "+choose);
 			switch(choose) {
 			case MainServer.JOIN:
 				//해당 방 게임 서버, 채팅 서버에 접속
@@ -51,7 +55,7 @@ public class Process {
 				
 			case MainServer.ADDROOM:
 				//새로운 방 만들기
-				newRoom();
+				newRoom((String)in.readObject());
 				break;
 				
 			case MainServer.QUICKJOIN:
@@ -67,10 +71,11 @@ public class Process {
 					joinRoom(roomList.indexOf(target2));
 				}
 				else {
-					newRoom();
+					newRoom("빠겜");
 				}
 				break;
 			}
+			
 		}
 	}
 	

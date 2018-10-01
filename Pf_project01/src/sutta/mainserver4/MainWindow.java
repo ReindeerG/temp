@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 /**
@@ -43,33 +44,27 @@ public class MainWindow extends JFrame implements Runnable{
 	/**
 	 * 지속적으로 방 목록을 받아오기 위해서 스레드 처리
 	 */
-	@Override
-//	public void run() {
-//		try {
-//			while(true) {
-//				ArrayList<Room> list = (ArrayList<Room>)in.readObject();
-//				if(list!=null && list.size() != 0) {
-//					System.out.println("list의 size = "+list.size());
-//					room_list = list;
-//					model.removeAllElements();
-//					int i = 0;
-//					for(Room r : room_list) {
-//						model.addElement((i+1)+"번방"+r.name);
-//						i++;
-//					}
-//					System.out.println("model = "+model);
-//					room.setModel(model);
-//					room.repaint();
-//				}
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
-
 	public void run() {
-		
+		try {
+			while(true) {
+				ArrayList<Room> list = (ArrayList<Room>)in.readObject();
+				if(list!=null && list.size() != 0) {
+					room_list = (ArrayList<Room>) list.clone();
+					model.removeAllElements();
+					int i = 0;
+					for(Room r : room_list) {
+						model.addElement((i+1)+"번방            "+r.name+"             "+r.cnt+"/4");
+						i++;
+					}
+					room.setModel(model);
+					room.repaint();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
+
 	
 	
 	private void display() {
@@ -85,7 +80,6 @@ public class MainWindow extends JFrame implements Runnable{
 		join.setBounds(925, 38, 141, 36);
 		addRoom.setBounds(925, 84, 141, 36);
 		quick.setBounds(925, 130, 141, 36);
-		
 		
 	}
 
@@ -110,13 +104,21 @@ public class MainWindow extends JFrame implements Runnable{
 				out.flush();
 				//리스트에서 선택 된 방의 인덱스를 얻어와 그 방의 인덱스를 전송해준다 
 				int index = room.getSelectedIndex();
+				ArrayList<Room> target = (ArrayList<Room>) room_list.clone();
 				if(index == -1) {
+					out.writeInt(-1);
+					out.flush();
 					JOptionPane.showMessageDialog(this, "참여할 방을 선택해 주세요");
 				}
-				else if(room_list.get(index).cnt >=4) {
+				else if(target.get(index).cnt >= 4) {
+					System.out.println("꽉찬 방");
+					out.writeInt(-1);
+					out.flush();
 					JOptionPane.showMessageDialog(this, "이미 꽉 찬 방입니다");
 				}
 				else {
+					System.out.println(room.getSelectedIndex());
+					System.out.println(target.get(index).cnt);
 					out.writeInt(room.getSelectedIndex());
 					out.flush();					
 				}

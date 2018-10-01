@@ -29,7 +29,7 @@ public class MainServer  extends Thread{
 	 * 클라이언트 저장소
 	 * 서버소켓 저장소
 	 */
-	private List<Client> list = new ArrayList<>();
+	private ArrayList<Client> list = new ArrayList<>();
 	private ServerSocket m_server;
 	private ArrayList<Room> roomList = new ArrayList<>();
 
@@ -46,8 +46,8 @@ public class MainServer  extends Thread{
 		
 		try {
 			m_server = new ServerSocket(53890);
-//			this.setDaemon(true);
-//			this.start();
+			this.setDaemon(true);
+			this.start();
 			while(true) {
 				Socket socket = m_server.accept();
 				
@@ -59,7 +59,6 @@ public class MainServer  extends Thread{
 				c.setDaemon(true);
 				c.start();
 				list.add(c);
-//				this.start();
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -70,27 +69,34 @@ public class MainServer  extends Thread{
 	 * 방 목록을 전체에게 뿌려주는 메소드
 	 * @throws IOException
 	 */
-	public void broadCast() throws IOException {
-		for(Client c : list) {
-			c.send();			
+	public void broadCast(){
+		try {
+			ArrayList<Client> target = (ArrayList<Client>) list.clone();
+			for(int i=0; i<target.size();i++) {
+				target.get(i).send();
+			}
+		}catch(Exception e) {
 		}
 	}
 	
 	/**
 	 * 계속해서 뿌려주는 상황(실시간)
 	 */
-//	public void run() {
-//		while(true) {
-//			try {
-//				broadCast();
-////				Thread.sleep(1000/60);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//	}
-	@Override
 	public void run() {
+		int size = 0;
+		while(true) {
+//			ArrayList<Room> target = (ArrayList<Room>) roomList.clone();
+			try {
+//				if(size != target.size()) {
+//					broadCast();
+//					size = target.size();
+//				}
+				broadCast();
+				Thread.sleep(3000);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	
@@ -106,6 +112,7 @@ public class MainServer  extends Thread{
 		ObjectInputStream in;
 		ObjectOutputStream out;
 		User user;
+		boolean on = false;
 		private InetAddress inet;
 		private int g_port = 53891;
 		private int c_port = 53892;
@@ -114,10 +121,16 @@ public class MainServer  extends Thread{
 		 * model(방목록)을 List<String>의 형태로 클라이언트에 전송하는 메소드
 		 * @throws IOException
 		 */
-		public void send() throws IOException {
-			ArrayList<Room> target = roomList;
-			out.writeObject(target);
-			out.flush();
+		public void send() {
+			try {
+				if(on == true) {
+					ArrayList<Room> target = (ArrayList<Room>) roomList.clone();
+					out.writeObject(target);
+					out.flush();				
+				}				
+			}catch(Exception e) {
+				e.getMessage();
+			}
 		}
 		
 		public void loginProc(){
@@ -201,6 +214,8 @@ public class MainServer  extends Thread{
 			try {
 				loginProc();
 				//방 목록을 뿌려준다
+				on = true;
+				System.out.println("on = "+on);
 				send();
 				Process p  = new Process(in, roomList);
 				p.process();

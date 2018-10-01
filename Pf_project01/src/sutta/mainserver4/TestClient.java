@@ -31,9 +31,7 @@ public class TestClient {
 			Login login  = new Login(out,in);
 			login.setVisible(true);
 			
-			while(!login.isLogin()) {
-				System.out.println();//??????있으면 실행되지만 없으면 실행이 안되는 이상현상 발생
-			}
+			while(!login.isLogin()) {}
 			MainWindow m = new MainWindow(socket, out, in);
 			m.setVisible(true);
 				
