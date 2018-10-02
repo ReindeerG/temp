@@ -43,6 +43,25 @@ public class Test02 {
 //		while(true) {
 //			if(frame.isVisible()==false) {
 				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
+				frame.setVisible(true);
 				frame.show();
 //			}
 //			frame.hide();

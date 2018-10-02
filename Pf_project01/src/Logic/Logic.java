@@ -114,7 +114,7 @@ public class Logic {
 			} else if ((card1+card2)%10==0) {
 				return 10;		// ¸ÁÅë
 			} else {
-				return 0;
+				return -1;
 			}
 		}
 	}

@@ -28,6 +28,7 @@ public class Gaming implements Serializable {
 	public static final int GAME_WHOSTURN = 600;
 	public static final int GAME_TIMER = 606;
 	public static final int GAME_RESULT = 608;
+	public static final int GAME_RESULT_OK = 688;
 	public static final int BUTTON_OK = 609;
 	public static final int CHAT = 330;
 	public static final int CHAT_JOIN = 331;

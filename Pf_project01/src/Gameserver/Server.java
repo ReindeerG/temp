@@ -21,14 +21,22 @@ import Logic.Logic;
 class Timer extends Thread {
 	Server serv=null;
 	Player p=null;
+	private boolean kill=false;
+	public boolean isKill() {
+		return kill;
+	}
+	public void setKill(boolean kill) {
+		this.kill = kill;
+	}
 	ArrayList<Player> players=null;
 	public Timer(Server serv, Player p) {
 		this.serv=serv; this.p=p;
 	}
 	public void run() {
 		for(int i=0;i<100;i++) {
-			if(p.getBetbool()!=0) {
+			if(p.getBetbool()!=0 || isKill()==true) {
 				p.getUth().IncreaseTurn();
+				this.interrupt();
 				return;
 			}
 			else {
@@ -55,8 +63,10 @@ class Timer extends Thread {
 //				out.flush();
 //			} catch(Exception e) {e.printStackTrace();}
 //		}
+		this.interrupt();
 		return;
 	}
+	
 	
 }
 
@@ -203,7 +213,6 @@ class UserThread extends Thread {
 								case Gaming.GAME_CALL: {
 									if(gm.getCardset()!=0) {
 										p.setTrash(gm.getCardset());
-										serv.Refresh();
 									}
 									p.setBetbool(2);
 									p.setMoney(p.getMoney()-serv.getMinforbet());
@@ -215,7 +224,6 @@ class UserThread extends Thread {
 								case Gaming.GAME_HALF: {
 									if(gm.getCardset()!=0) {
 										p.setTrash(gm.getCardset());
-										serv.Refresh();
 									}
 									p.setBetbool(3);
 									p.setMoney(p.getMoney()-serv.getMoneythisgame()/2);
@@ -228,7 +236,6 @@ class UserThread extends Thread {
 								case Gaming.GAME_CHECK: {
 									if(gm.getCardset()!=0) {
 										p.setTrash(gm.getCardset());
-										serv.Refresh();
 									}
 									p.setBetbool(4);
 									serv.nextTurn();
@@ -292,6 +299,11 @@ class UserThread extends Thread {
 //										out.writeObject(new Gaming(temp, gm.getWhat(), gm.getMsg(), f.format(d), players));
 										out.flush();
 									}
+									break;
+								}
+								case Gaming.GAME_RESULT_OK: {
+									serv.setResultbacksig(serv.getResultbacksig()-1);
+									break;
 								}
 								default: break;
 							}
@@ -417,6 +429,14 @@ public class Server {
 		this.thisplaynum=thisplaynum;
 	}
 	private Format f = new SimpleDateFormat("a hh:mm");
+	
+	private Timer nowtimer;
+	public Timer getNowtimer() {
+		return nowtimer;
+	}
+	public void setNowtimer(Timer nowtimer) {
+		this.nowtimer = nowtimer;
+	}
 	
 	public Server() {
 		Integer[] temp = new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
@@ -565,12 +585,12 @@ public class Server {
 					Refresh();
 					
 					Timer t = new Timer(this, players.get(getWhosturn()));
+					setNowtimer(t);
 					t.setDaemon(true);
 					t.start();
 				}
 			} else {
 				if(isPhase2()==false) {
-					setPhase2(true);
 					Draw2Phase();
 				} else {
 					if (alive==sumcall+ischecked) {
@@ -594,6 +614,7 @@ public class Server {
 							Refresh();
 							
 							Timer t = new Timer(this, players.get(getWhosturn()));
+							setNowtimer(t);
 							t.setDaemon(true);
 							t.start();
 						}
@@ -663,18 +684,40 @@ public class Server {
 				q.setBetbool(0);
 			}
 			Refresh();
-			System.out.println("재대결신호전");
 			rematch(result.size());
 		}
 	}
+	private int resultbacksig;
+	public int getResultbacksig() {
+		return resultbacksig;
+	}
+	public void setResultbacksig(int resultbacksig) {
+		this.resultbacksig = resultbacksig;
+	}
 	public void toresult() {
-		for(Player p : players) {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.Gameresult(players));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
-		}
+//		resultbacksig = players.size();
+//		while(true) {
+			for(Player p : players) {
+				try {
+					ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+					out.writeObject(Gaming.Gameresult(players));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+			}
+//			if(resultbacksig==0) break;
+//		}
+		
+		
+		
+//		for(Player p : players) {
+//			try {
+//				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+//				out.writeObject(Gaming.Gameresult(players));
+//				out.flush();
+//				System.out.println(p.getOrder()+1+"놈에게 보냄"+p.getSocket());
+//			}catch(Exception e) {e.printStackTrace();}
+//		}
+		return;
 	}
 	public void toButtonOk() {
 		for(Player p : players) {
@@ -811,15 +854,24 @@ public class Server {
 		}
 	}
 	public void Draw2Phase() {
+		getNowtimer().setKill(true);
+		setPhase2(true);
 		for(Player p : players) {
 			if(p.getTrash()!=0) {
+				p.setBetbool(0);
 				switch(p.getTrash()) {
 					case 1: {
 						p.setCardset(Logic.Result(p.getCard2(), p.getCard3()));
+						if(p.getCardset()==-1) {
+							System.out.println(p.getCard2()+"랑 "+p.getCard3()+"를 처넣었는데 -1 나오는 이유 대봐.");
+						}
 						break;
 					}
 					case 2: {
 						p.setCardset(Logic.Result(p.getCard1(), p.getCard3()));
+						if(p.getCardset()==-1) {
+							System.out.println(p.getCard1()+"랑 "+p.getCard3()+"를 처넣었는데 -1 나오는 이유 대봐.");
+						}
 						break;
 					}
 					default: break;
@@ -849,6 +901,7 @@ public class Server {
 			Refresh();
 			
 			Timer t = new Timer(this, players.get(getWhosturn()));
+			setNowtimer(t);
 			t.setDaemon(true);
 			t.start();
 		}
@@ -861,6 +914,7 @@ public class Server {
 			p.setTrash(0);
 			p.setBetbool(1);
 			p.setGameresult(0);
+			p.setCardset(0);
 		}
 		for(int i=0;i<num;i++) {
 			players.get(i).setBetbool(0);
@@ -871,8 +925,8 @@ public class Server {
 		setTurn(1);
 		setWhosturn(0);
 		WhosTurn();
+//		setMinforbet(0);
 		MoneyRefresh();
-		setMinforbet(0);
 		Collections.shuffle(cards);
 		int index=0;
 		for(Player p : players) {
@@ -905,6 +959,7 @@ public class Server {
 			catch (Exception e) {e.printStackTrace();}
 		}
 		Timer t = new Timer(this, players.get(getWhosturn()));
+		setNowtimer(t);
 		t.setDaemon(true);
 		t.start();
 	}
@@ -914,14 +969,15 @@ public class Server {
 			p.setTrash(0);
 			p.setBetbool(0);
 			p.setGameresult(0);
+			p.setCardset(0);
 		}
 		setInggame(true);
 		setPhase2(false);
 		setTurn(1);
 		setWhosturn(0);
 		WhosTurn();
-		MoneyRefresh();
 		setMinforbet(0);
+		MoneyRefresh();
 //		for(Player p : players) {
 //			p.setReady(2);
 //			p.setBetbool(0);
@@ -972,10 +1028,13 @@ public class Server {
 		
 		
 		Timer t = new Timer(this, players.get(getWhosturn()));
+		setNowtimer(t);
 		t.setDaemon(true);
 		t.start();
 		
 	}
+	
+	
 	
 	
 	

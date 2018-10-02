@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+
 import Chatserver.Message;
 import Gamewindow.Mainwindow;
 
@@ -152,6 +153,15 @@ public class Client extends Thread {
 	public Socket getSocket() {
 		return socket;
 	}
+	private boolean yetresult;
+	public boolean isYetresult() {
+		return yetresult;
+	}
+	public void setYetresult(boolean yetresult) {
+		this.yetresult = yetresult;
+	}
+	
+	
 	public void callRefresh() {
 		try {
 			out.writeObject(Gaming.PlzRefresh());
@@ -407,6 +417,17 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.GETCARD: {
+					getWindow().ResetCards();
+					setYetresult(false);
+					setBoolTrash(false);
+					setTrash(0);
+					for(Player p : players) {
+						if(p.getUserid().equals(getUserid())) {
+							me=p;
+							break;
+						}
+					}
+					
 					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3(); cardset = gm.getCardset();
 //					System.out.println(card1);
 					getWindow().DrawCards();
@@ -417,6 +438,13 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.DRAW2: {
+					setTurn(1);
+					for(Player p : players) {
+						if(p.getUserid().equals(getUserid())) {
+							me=p;
+							break;
+						}
+					}
 					getWindow().DrawCards2();
 					break;
 				}
@@ -438,10 +466,15 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.GAME_RESULT: {
-					players=gm.getPlayers();
-					getWindow().Refresh();
-					getWindow().Resultgame();
-					whosturn=0;
+//					if(isYetresult()==false) {
+//						setYetresult(true);
+						players=gm.getPlayers();
+						getWindow().Refresh();
+						getWindow().Resultgame();
+						whosturn=0;
+//						out.writeObject(new Gaming(Gaming.GAME_RESULT_OK));
+//						out.flush();
+//					}
 					break;
 				}
 				case Gaming.BUTTON_OK: {
@@ -460,7 +493,7 @@ public class Client extends Thread {
 				default: break;
 			}
 				
-			} catch(Exception e) {e.printStackTrace();}
+			} catch(Exception e) {e.printStackTrace(); System.exit(0); }
 		}
 	}
 	
