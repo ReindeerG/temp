@@ -116,28 +116,6 @@ class UserThread extends Thread {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 	}
-	public void Refresh() {
-		ArrayList<Player> players = serv.getPlayers();
-		for(Player p : players) {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.Refresh(players));
-//				out.writeObject(new Gaming(Gaming.REFRESH, players));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
-		}
-	}
-	public void WhosTurn() {
-		ArrayList<Player> players = serv.getPlayers();
-		for(Player p : players) {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.Turn(serv.getWhosturn()));
-//				out.writeObject(new Gaming(Gaming.GAME_WHOSTURN, serv.getWhosturn()));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
-		}
-	}
 	public void MoneyRefresh() {
 		ArrayList<Player> players = serv.getPlayers();
 		for(Player p : players) {
@@ -155,133 +133,11 @@ class UserThread extends Thread {
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
 	}
-	public void nextTurn() {
-		ArrayList<Player> players = serv.getPlayers();
-		int alive=0;
-		int sumcall=0;
-		int ischecked=0;
-		int sumnone=0;
-		for(Player p : players) {
-			if(p.getBetbool()!=1) {
-				alive++;
-			}
-			if(p.getBetbool()==2) {
-				sumcall++;
-			}
-			if(p.getBetbool()==4) {
-				ischecked++;
-			}
-			if(p.getBetbool()==0) {
-				sumnone++;
-			}
-		}
-		if(sumnone>0) {
-			for(int i=1;i<players.size();i++) {
-				Player tempp = players.get((serv.getWhosturn()+i)%players.size());
-				if(tempp.getBetbool()!=1) {
-					serv.setWhosturn(tempp.getOrder());
-					break;
-				}
-			}
-			WhosTurn();
-		} else {
-			if(alive==1) {
-				// 살아있는사람이이김
-				for(Player p : players) {
-					if (p.getBetbool()!=1) {
-						// 얘가 우승자임
-						break;
-					}
-				}
-			}
-			else {
-				if (alive==sumcall+ischecked) {
-					// 결판
-				} else {
-					for(int i=1;i<players.size();i++) {
-						Player tempp = players.get((serv.getWhosturn()+i)%players.size());
-						if(tempp.getBetbool()!=1) {
-							serv.setWhosturn(tempp.getOrder());
-							break;
-						}
-					}
-					WhosTurn();
-				}
-			}
-		}
-			
-		
-		
-		
-//			Player tempp = players.get((serv.getWhosturn()+1)%players.size());
-//			serv.setWhosturn(tempp.getOrder());
-
-		
-		
-		
-		
-
-//		if(alive==2 && sumnone==0) {
-//			serv.setInggame(false);
-//			System.out.println("남은 두명이서 판별내야됨.");
-//		}else if(alive==1) {
-//			serv.setInggame(false);
-//			// 남겨진자가 승리
-//		}else if((sumcall+ischecked)==alive) {
-//			serv.setInggame(false);
-//			System.out.println("다콜");
-//		}else {
-//			for(int i=1;i<players.size();i++) {
-//				Player tempp = players.get((serv.getWhosturn()+i)%players.size());
-//				if(tempp.getBetbool()!=1) {
-//					serv.setWhosturn(tempp.getOrder());
-//					break;
-//				}
-//			}
-//			WhosTurn();
-//		}
-			
-
-		
-	}
-	public void whosWin(ArrayList<Player> players) {
-		int num = players.size();
-		String userid1=players.get(0).getUserid();
-		String userid2=players.get(1).getUserid();
-		int cardresult1=players.get(0).getCardset();
-		int cardresult2=players.get(1).getCardset();
-		String userid3=null;
-		int cardresult3=0;
-		String userid4=null;
-		int cardresult4=0;
-		if(players.size()>2) {
-			userid3=players.get(2).getUserid();
-			cardresult3=players.get(2).getCardset();
-		}
-		if(players.size()>3) {
-			userid4=players.get(3).getUserid();
-			cardresult4=players.get(3).getCardset();
-		}
-		ArrayList<String> result = Logic.GameResult(num, userid1, cardresult1, userid2, cardresult2, userid3, cardresult3, userid4, cardresult4);
-		if(result.size()==1) {
-			// result.get(0) 가 우승
-		} else {
-			// 남은사람끼리 재대결
-		}
-	}
 	public void toDie() {
 		ArrayList<Player> players = serv.getPlayers();
 		Player p = players.get(serv.getWhosturn());
 		p.setBetbool(1);
-		nextTurn();
-		if(serv.isInggame()==true) {
-			players.get(serv.getWhosturn()).setBetbool(0);
-			Refresh();
-			
-			Timer t = new Timer(serv, players.get(serv.getWhosturn()));
-			t.setDaemon(true);
-			t.start();
-		}
+		serv.nextTurn();
 	}
 	
 	public void run() {
@@ -304,7 +160,7 @@ class UserThread extends Thread {
 									break;
 								}
 								case Gaming.REFRESH: {
-									Refresh();
+									serv.Refresh();
 									break;
 								}
 								case Gaming.MONEY_REFRESH: {
@@ -312,7 +168,7 @@ class UserThread extends Thread {
 									break;
 								}
 								case Gaming.GAME_WHOSTURN: {
-									WhosTurn();
+									serv.WhosTurn();
 									break;
 								}
 								case Gaming.GAME_UNREADY: {
@@ -320,7 +176,7 @@ class UserThread extends Thread {
 									p.setMoney(p.getMoney()+10);
 									serv.setMoneythisgame(serv.getMoneythisgame()-10);
 									MoneyRefresh();
-									Refresh();
+									serv.Refresh();
 									break;
 								}
 								case Gaming.GAME_READY: {
@@ -328,7 +184,7 @@ class UserThread extends Thread {
 									p.setMoney(p.getMoney()-10);
 									serv.setMoneythisgame(serv.getMoneythisgame()+10);
 									MoneyRefresh();
-									Refresh();
+									serv.Refresh();
 									break;
 								}
 								case Gaming.GAME_START: {
@@ -336,7 +192,7 @@ class UserThread extends Thread {
 									for(Player p2 : players) {
 										p2.setReady(0);
 									}
-									WhosTurn();
+									serv.WhosTurn();
 									serv.GameStart();
 									break;
 								}
@@ -359,15 +215,7 @@ class UserThread extends Thread {
 									p.setMoney(p.getMoney()-serv.getMinforbet());
 									serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
 									MoneyRefresh();
-									nextTurn();
-									if(serv.isInggame()==true) {
-										players.get(serv.getWhosturn()).setBetbool(0);
-										Refresh();
-										
-										Timer t = new Timer(serv, players.get(serv.getWhosturn()));
-										t.setDaemon(true);
-										t.start();
-									}
+									serv.nextTurn();
 									break;
 								}
 								case Gaming.GAME_HALF: {
@@ -376,28 +224,12 @@ class UserThread extends Thread {
 									serv.setMinforbet(serv.getMoneythisgame()/2);
 									serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
 									MoneyRefresh();
-									nextTurn();
-									if(serv.isInggame()==true) {
-										players.get(serv.getWhosturn()).setBetbool(0);
-										Refresh();
-										
-										Timer t = new Timer(serv, players.get(serv.getWhosturn()));
-										t.setDaemon(true);
-										t.start();
-									}
+									serv.nextTurn();
 									break;
 								}
 								case Gaming.GAME_CHECK: {
 									p.setBetbool(4);
-									nextTurn();
-									if(serv.isInggame()==true) {
-										players.get(serv.getWhosturn()).setBetbool(0);
-										Refresh();
-										
-										Timer t = new Timer(serv, players.get(serv.getWhosturn()));
-										t.setDaemon(true);
-										t.start();
-									}
+									serv.nextTurn();
 									break;
 								}
 								case Gaming.CHAT: {
@@ -622,10 +454,235 @@ public class Server {
 			System.out.println("플레이어 수가 부족합니다! (현재 "+players.size()+"명)");
 		}
 	}
+	public void Refresh() {
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Refresh(players));
+//				out.writeObject(new Gaming(Gaming.REFRESH, players));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
+	public void WhosTurn() {
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Turn(getWhosturn()));
+//				out.writeObject(new Gaming(Gaming.GAME_WHOSTURN, serv.getWhosturn()));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
+	public void nextTurn() {
+		int alive=0;
+		int sumcall=0;
+		int ischecked=0;
+		int sumnone=0;
+		for(Player p : players) {
+			if(p.getBetbool()!=1) {
+				alive++;
+			}
+			if(p.getBetbool()==2) {
+				sumcall++;
+			}
+			if(p.getBetbool()==4) {
+				ischecked++;
+			}
+			if(p.getBetbool()==0) {
+				sumnone++;
+			}
+		}
+		
+		
+		if(alive==1) {
+			// 살아있는사람이이김
+			for(Player p : players) {
+				if (p.getBetbool()!=1) {
+					// 얘가 우승자임
+					ArrayList<String> tmplist = new ArrayList<>();
+					for(Player q : players) {
+						q.setGameresult(0);
+					}
+					p.setGameresult(1); calc(p);
+					tmplist.add(p.getUserid());
+					toresult();
+					try { Thread.sleep(5000); } catch (InterruptedException e) { e.printStackTrace(); }
+					// 버튼활성화
+					resetcards();
+					justrebatch(tmplist);
+					toButtonOk();
+					for(Player q : players) {
+						q.setBetbool(0);
+					}
+					Refresh();
+					setInggame(false);
+					break;
+				}
+			}
+		}
+		else {
+			if(sumnone>0) {
+				for(int i=1;i<players.size();i++) {
+					Player tempp = players.get((getWhosturn()+i)%players.size());
+					if(tempp.getBetbool()!=1) {
+						setWhosturn(tempp.getOrder());
+						break;
+					}
+				}
+				WhosTurn();
+				if(isInggame()==true) {
+					players.get(getWhosturn()).setBetbool(0);
+					Refresh();
+					
+					Timer t = new Timer(this, players.get(getWhosturn()));
+					t.setDaemon(true);
+					t.start();
+				}
+			} else {
+				if (alive==sumcall+ischecked) {
+					// 결판
+					ArrayList<Player> tmplist = new ArrayList<>();
+					for(Player p : players) {
+						if(p.getBetbool()!=1) tmplist.add(p);
+					}
+					whosWin(tmplist);
+				} else {
+					for(int i=1;i<players.size();i++) {
+						Player tempp = players.get((getWhosturn()+i)%players.size());
+						if(tempp.getBetbool()!=1) {
+							setWhosturn(tempp.getOrder());
+							break;
+						}
+					}
+					WhosTurn();
+					if(isInggame()==true) {
+						players.get(getWhosturn()).setBetbool(0);
+						Refresh();
+						
+						Timer t = new Timer(this, players.get(getWhosturn()));
+						t.setDaemon(true);
+						t.start();
+					}
+				}
+			}
+		}
+			
+
+		return;
+	}
+	public void whosWin(ArrayList<Player> players) {
+		int num = players.size();
+		String userid1=players.get(0).getUserid();
+		String userid2=players.get(1).getUserid();
+		int cardresult1=players.get(0).getCardset();
+		int cardresult2=players.get(1).getCardset();
+		String userid3=null;
+		int cardresult3=0;
+		String userid4=null;
+		int cardresult4=0;
+		if(players.size()>2) {
+			userid3=players.get(2).getUserid();
+			cardresult3=players.get(2).getCardset();
+		}
+		if(players.size()>3) {
+			userid4=players.get(3).getUserid();
+			cardresult4=players.get(3).getCardset();
+		}
+		ArrayList<String> result = Logic.GameResult(num, userid1, cardresult1, userid2, cardresult2, userid3, cardresult3, userid4, cardresult4);
+		for(Player p : players) {
+			p.setGameresult(0);
+		}
+		if(result.size()==1) {
+			ArrayList<String> tmplist = new ArrayList<>();
+			for(Player p : players) {
+				if(p.getUserid().equals(result.get(0))) { p.setGameresult(1); calc(p); tmplist.add(p.getUserid()); break; }
+			}
+			// result.get(0) 가 우승
+			toresult();
+			try { Thread.sleep(5000); } catch (InterruptedException e) { e.printStackTrace(); }
+			// 버튼활성화
+			resetcards();
+			justrebatch(tmplist);
+			
+			
+			
+			toButtonOk();
+			for(Player q : players) {
+				q.setBetbool(0);
+			}
+			Refresh();
+			setInggame(false);
+		} else {
+			for(String s : result) {
+				for(Player p : players) {
+					if(p.getUserid().equals(s)) { p.setGameresult(2); break; }
+				}
+			}
+			// 남은사람끼리 재대결
+			toresult();
+			try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
+			resetcards();
+			rebatch(result);
+			for(Player q : players) {
+				q.setBetbool(0);
+			}
+			Refresh();
+			rematch(result.size());
+		}
+	}
+	public void toresult() {
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Gameresult(players));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
+	public void toButtonOk() {
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.ButtonOk());
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
+	public void resetcards() {
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.ResetCard());
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
+	public void justrebatch(ArrayList<String> replayers) {
+		ArrayList<Player> init=getPlayers();
+		ArrayList<Player> temp1=new ArrayList<>();
+		ArrayList<Player> temp2=new ArrayList<>();
+		for(Player p : init) {
+			if (replayers.contains(p.getUserid())) {
+				temp1.add(p);
+			} else {
+				temp2.add(p);
+			}
+		}
+		ArrayList<Player> newpl = new ArrayList<>();
+		for(Player p : temp1) {
+			newpl.add(p);
+		}
+		for(Player p : temp2) {
+			newpl.add(p);
+		}
+		setPlayers(newpl);
+		return;
+	}
 	public void rebatch(ArrayList<String> replayers) {
 		ArrayList<Player> init=getPlayers();
-		ArrayList<Player> temp1=null;
-		ArrayList<Player> temp2=null;
+		ArrayList<Player> temp1=new ArrayList<>();
+		ArrayList<Player> temp2=new ArrayList<>();
 		for(Player p : init) {
 			if (replayers.contains(p.getUserid())) {
 				temp1.add(p);
@@ -653,6 +710,14 @@ public class Server {
 		p.setGameresult(1);
 	}
 	public void rematch(int num) {
+		for(Player p : players) {
+			p.setBetbool(1);
+			p.setGameresult(0);
+		}
+		for(int i=0;i<num;i++) {
+			players.get(i).setBetbool(0);
+		}
+		
 		setInggame(true);
 		setTurn(1);
 		setMinforbet(0);
@@ -692,8 +757,13 @@ public class Server {
 		t.start();
 	}
 	public void GameStart() {
+		for(Player p : players) {
+			p.setBetbool(0);
+			p.setGameresult(0);
+		}
 		setInggame(true);
 		setTurn(1);
+		setMoneythisgame(0);
 		setMinforbet(0);
 //		for(Player p : players) {
 //			p.setReady(2);

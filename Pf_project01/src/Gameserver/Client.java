@@ -327,6 +327,10 @@ public class Client extends Thread {
 					callRefresh();
 					break;
 				}
+				case Gaming.RESETCARDS: {
+					getWindow().ResetCards();
+					break;
+				}
 				case Gaming.GAME_TIMER: {
 					getWindow().Timer(gm.getWho(), gm.getTime());
 //					getWindow().Clockicons();
@@ -342,17 +346,13 @@ public class Client extends Thread {
 				}
 				case Gaming.GAME_RESULT: {
 					players=gm.getPlayers();
-					getWindow().allOpen();
 					getWindow().Refresh();
-					boolean isend=false;
-					for(Player p : players) {
-						if(p.getGameresult()==2) isend=true; break;
-					}
-					if(isend==true) {
-						getWindow().to5secre();
-					} else {
-						getWindow().to5sec();
-					}
+					getWindow().Resultgame();
+					break;
+				}
+				case Gaming.BUTTON_OK: {
+					inggame=false;
+					getWindow().fornextgame();
 					break;
 				}
 				case Gaming.GAME_CALL:

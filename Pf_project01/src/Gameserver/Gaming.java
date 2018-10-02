@@ -20,10 +20,12 @@ public class Gaming implements Serializable {
 	public static final int GAME_CHECK = 13;
 	public static final int MONEY_REFRESH = 89;
 	public static final int TURN_REFRESH = 87;
+	public static final int RESETCARDS = 501;
 	public static final int GETCARD = 500;
 	public static final int GAME_WHOSTURN = 600;
 	public static final int GAME_TIMER = 606;
 	public static final int GAME_RESULT = 608;
+	public static final int BUTTON_OK = 609;
 	public static final int CHAT = 330;
 	public static final int CHAT_JOIN = 331;
 	public static final int CHAT_LEAVE = 332;
@@ -103,6 +105,12 @@ public class Gaming implements Serializable {
 		g.setWhat(Gaming.GETCARD); g.setCard1(card1); g.setCard2(card2); g.setCard3(card3); g.setCardset(cardset);
 		return g;
 	}
+	// 서버에서 게임시작시 카드 제자리위치하게 요구
+		public static Gaming ResetCard() {
+			Gaming g = new Gaming();
+			g.setWhat(Gaming.RESETCARDS);
+			return g;
+		}
 	// 서버에서 클라이언트들에게 게임 정보를 갱신시켜 줌.
 	public static Gaming GameInfo(String userid, int what, ArrayList<Player> players) {
 		Gaming g = new Gaming();
@@ -193,7 +201,12 @@ public class Gaming implements Serializable {
 		g.setWhat(Gaming.GAME_RESULT); g.setPlayers(players);
 		return g;
 	}
-	
+	// 서버에서 클라이언트들에게 게임 끝나서 버튼활성화되게 만듦
+	public static Gaming ButtonOk() {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.BUTTON_OK);
+		return g;
+	}
 	
 	
 	
