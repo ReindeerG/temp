@@ -14,6 +14,8 @@ public class Gaming implements Serializable {
 	public static final int GAME_UNREADY = 1;
 	public static final int GAME_READY = 2;
 	public static final int GAME_START = 3;
+	public static final int PANDON = 4;
+	public static final int MUCHPANDON = 5;
 	public static final int GAME_DIE = 10;
 	public static final int GAME_CALL = 11;
 	public static final int GAME_HALF = 12;
@@ -22,6 +24,7 @@ public class Gaming implements Serializable {
 	public static final int TURN_REFRESH = 87;
 	public static final int RESETCARDS = 501;
 	public static final int GETCARD = 500;
+	public static final int DRAW2 = 505;
 	public static final int GAME_WHOSTURN = 600;
 	public static final int GAME_TIMER = 606;
 	public static final int GAME_RESULT = 608;
@@ -54,6 +57,7 @@ public class Gaming implements Serializable {
 	
 	private int moneythisgame;
 	private int minforbet;
+	private int pandon;
 	
 	
 	public Gaming() {}
@@ -101,12 +105,49 @@ public class Gaming implements Serializable {
 		g.setWhat(Gaming.GAME_WHOSTURN); g.setWho(who);
 		return g;
 	}
-	// 서버에서 게임시작시 카드 나눠줄 때
-	public static Gaming GiveCard(int card1, int card2, int card3, int cardset) {
+	// 방장이 서버에게, 서버에서 클라이언트들에게 판돈이 얼마로 바뀌는지 뿌려줄 때
+	public static Gaming Pandon(int pandon) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GETCARD); g.setCard1(card1); g.setCard2(card2); g.setCard3(card3); g.setCardset(cardset);
+		g.setWhat(Gaming.PANDON); g.setPandon(pandon);
 		return g;
 	}
+	// 클라이언트들이 처음에 판돈 서버로부터 얼마인지 받아올 때
+	public static Gaming MuchPandon() {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.MUCHPANDON);
+		return g;
+	}
+	// 서버에서 게임시작시 카드 나눠줄 때
+	public static Gaming GiveCard(int card1, int card2, int card3) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GETCARD); g.setCard1(card1); g.setCard2(card2); g.setCard3(card3);
+		return g;
+	}
+	// 서버에서 2번째 카드 뽑으라고 할 때
+	public static Gaming Draw2Phase() {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.DRAW2);
+		return g;
+	}
+	// 클라이언트에서 콜할때
+	public static Gaming Call(int trash) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_CALL); g.setCardset(trash);
+		return g;
+	}
+	// 클라이언트에서 체크할때
+	public static Gaming Check(int trash) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_CHECK); g.setCardset(trash);
+		return g;
+	}
+	// 클라이언트에서 하프할때
+	public static Gaming Half(int trash) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_HALF); g.setCardset(trash);
+		return g;
+	}
+	
 	// 서버에서 게임시작시 카드 제자리위치하게 요구
 		public static Gaming ResetCard() {
 			Gaming g = new Gaming();
@@ -259,7 +300,12 @@ public class Gaming implements Serializable {
 		setWhat(what); this.setCard1(card1); this.setCard2(card2); this.setCard3(card3);
 	}
 	
-	
+	public int getPandon() {
+		return pandon;
+	}
+	public void setPandon(int pandon) {
+		this.pandon = pandon;
+	}
 	
 	public int getWhat() {
 		return what;

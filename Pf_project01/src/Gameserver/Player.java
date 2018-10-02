@@ -23,6 +23,7 @@ public class Player implements Serializable {
 	private int card1;
 	private int card2;
 	private int card3;
+	private int trash;
 	private int cardset;
 	private int betbool;
 	private int ready;
@@ -114,6 +115,12 @@ public class Player implements Serializable {
 	}
 	public void setGameresult(int gameresult) {
 		this.gameresult = gameresult;
+	}
+	public int getTrash() {
+		return trash;
+	}
+	public void setTrash(int trash) {
+		this.trash = trash;
 	}
 	
 	

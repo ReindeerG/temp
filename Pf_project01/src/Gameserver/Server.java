@@ -116,16 +116,6 @@ class UserThread extends Thread {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 	}
-	public void MoneyRefresh() {
-		ArrayList<Player> players = serv.getPlayers();
-		for(Player p : players) {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.MoneyRefresh(serv.getMoneythisgame(), serv.getMinforbet()));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
-		}
-	}
 	public void MatchId() {
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
@@ -164,7 +154,7 @@ class UserThread extends Thread {
 									break;
 								}
 								case Gaming.MONEY_REFRESH: {
-									MoneyRefresh();
+									serv.MoneyRefresh();
 									break;
 								}
 								case Gaming.GAME_WHOSTURN: {
@@ -173,17 +163,17 @@ class UserThread extends Thread {
 								}
 								case Gaming.GAME_UNREADY: {
 									p.setReady(0);
-									p.setMoney(p.getMoney()+10);
-									serv.setMoneythisgame(serv.getMoneythisgame()-10);
-									MoneyRefresh();
+									p.setMoney(p.getMoney()+serv.getPandon());
+									serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
+									serv.MoneyRefresh();
 									serv.Refresh();
 									break;
 								}
 								case Gaming.GAME_READY: {
 									p.setReady(1);
-									p.setMoney(p.getMoney()-10);
-									serv.setMoneythisgame(serv.getMoneythisgame()+10);
-									MoneyRefresh();
+									p.setMoney(p.getMoney()-serv.getPandon());
+									serv.setMoneythisgame(serv.getMoneythisgame()+serv.getPandon());
+									serv.MoneyRefresh();
 									serv.Refresh();
 									break;
 								}
@@ -211,25 +201,45 @@ class UserThread extends Thread {
 									break;
 								}
 								case Gaming.GAME_CALL: {
+									if(gm.getCardset()!=0) {
+										p.setTrash(gm.getCardset());
+										serv.Refresh();
+									}
 									p.setBetbool(2);
 									p.setMoney(p.getMoney()-serv.getMinforbet());
 									serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
-									MoneyRefresh();
+									serv.MoneyRefresh();
 									serv.nextTurn();
 									break;
 								}
 								case Gaming.GAME_HALF: {
+									if(gm.getCardset()!=0) {
+										p.setTrash(gm.getCardset());
+										serv.Refresh();
+									}
 									p.setBetbool(3);
 									p.setMoney(p.getMoney()-serv.getMoneythisgame()/2);
 									serv.setMinforbet(serv.getMoneythisgame()/2);
 									serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
-									MoneyRefresh();
+									serv.MoneyRefresh();
 									serv.nextTurn();
 									break;
 								}
 								case Gaming.GAME_CHECK: {
+									if(gm.getCardset()!=0) {
+										p.setTrash(gm.getCardset());
+										serv.Refresh();
+									}
 									p.setBetbool(4);
 									serv.nextTurn();
+									break;
+								}
+								case Gaming.MUCHPANDON: {
+									serv.Pandon(serv.getPandon());
+									break;
+								}
+								case Gaming.PANDON: {
+									serv.Pandon(gm.getPandon());
 									break;
 								}
 								case Gaming.CHAT: {
@@ -251,6 +261,7 @@ class UserThread extends Thread {
 //										out.writeObject(new Gaming(q.getNickname(), gm.getWhat(), f.format(d), players));
 										out.flush();
 									}
+									serv.Pandon(serv.getPandon());
 									break;
 								}
 								case Gaming.CHAT_LEAVE: {
@@ -373,6 +384,21 @@ public class Server {
 	public void setMinforbet(int minforbet) {
 		this.minforbet = minforbet;
 	}
+	private int pandon;
+	public int getPandon() {
+		return pandon;
+	}
+	public void setPandon(int pandon) {
+		this.pandon = pandon;
+	}
+	private boolean phase2;
+	public boolean isPhase2() {
+		return phase2;
+	}
+	public void setPhase2(boolean phase2) {
+		this.phase2 = phase2;
+	}
+	
 	private int turn;
 	public int getTurn() {
 		return turn;
@@ -395,6 +421,7 @@ public class Server {
 	public Server() {
 		Integer[] temp = new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
 		cards = new ArrayList<>(Arrays.asList(temp));
+		setPandon(10);
 		this.run();
 	}
 	
@@ -542,29 +569,34 @@ public class Server {
 					t.start();
 				}
 			} else {
-				if (alive==sumcall+ischecked) {
-					// 결판
-					ArrayList<Player> tmplist = new ArrayList<>();
-					for(Player p : players) {
-						if(p.getBetbool()!=1) tmplist.add(p);
-					}
-					whosWin(tmplist);
+				if(isPhase2()==false) {
+					setPhase2(true);
+					Draw2Phase();
 				} else {
-					for(int i=1;i<players.size();i++) {
-						Player tempp = players.get((getWhosturn()+i)%players.size());
-						if(tempp.getBetbool()!=1) {
-							setWhosturn(tempp.getOrder());
-							break;
+					if (alive==sumcall+ischecked) {
+						// 결판
+						ArrayList<Player> tmplist = new ArrayList<>();
+						for(Player p : players) {
+							if(p.getBetbool()!=1) tmplist.add(p);
 						}
-					}
-					WhosTurn();
-					if(isInggame()==true) {
-						players.get(getWhosturn()).setBetbool(0);
-						Refresh();
-						
-						Timer t = new Timer(this, players.get(getWhosturn()));
-						t.setDaemon(true);
-						t.start();
+						whosWin(tmplist);
+					} else {
+						for(int i=1;i<players.size();i++) {
+							Player tempp = players.get((getWhosturn()+i)%players.size());
+							if(tempp.getBetbool()!=1) {
+								setWhosturn(tempp.getOrder());
+								break;
+							}
+						}
+						WhosTurn();
+						if(isInggame()==true) {
+							players.get(getWhosturn()).setBetbool(0);
+							Refresh();
+							
+							Timer t = new Timer(this, players.get(getWhosturn()));
+							t.setDaemon(true);
+							t.start();
+						}
 					}
 				}
 			}
@@ -653,6 +685,15 @@ public class Server {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 	}
+	public void MoneyRefresh() {
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.MoneyRefresh(getMoneythisgame(), getMinforbet()));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
 	public void resetcards() {
 		for(Player p : players) {
 			try {
@@ -661,6 +702,24 @@ public class Server {
 				out.flush();
 			}catch(Exception e) {e.printStackTrace();}
 		}
+	}
+	public void timeToCardset() {
+		for(Player p : players) {
+			if(p.getBetbool()!=1) {
+				switch(p.getTrash()) {
+					case 1: {
+						p.setCardset(Logic.Result(p.getCard2(), p.getCard3()));
+						break;
+					}
+					case 2: {
+						p.setCardset(Logic.Result(p.getCard1(), p.getCard3()));
+						break;
+					}
+					default: break;
+				}
+			}
+		}
+		return;
 	}
 	public void justrebatch(ArrayList<String> replayers) {
 		ArrayList<Player> init=getPlayers();
@@ -731,6 +790,16 @@ public class Server {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 	}
+	public void Pandon(int pandon) {
+		setPandon(pandon);
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Pandon(pandon));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
 	public void Message_Re() {
 		Date d = new Date();
 		for(Player p : players) {
@@ -741,8 +810,55 @@ public class Server {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 	}
-	public void rematch(int num) {
+	public void Draw2Phase() {
 		for(Player p : players) {
+			if(p.getTrash()!=0) {
+				switch(p.getTrash()) {
+					case 1: {
+						p.setCardset(Logic.Result(p.getCard2(), p.getCard3()));
+						break;
+					}
+					case 2: {
+						p.setCardset(Logic.Result(p.getCard1(), p.getCard3()));
+						break;
+					}
+					default: break;
+				}
+			}
+		}
+		Refresh();
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Draw2Phase());
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
+		
+		for(int i=1;i<players.size();i++) {
+			Player tempp = players.get((getWhosturn()+i)%players.size());
+			if(tempp.getBetbool()!=1) {
+				setWhosturn(tempp.getOrder());
+				break;
+			}
+		}
+		WhosTurn();
+		if(isInggame()==true) {
+			players.get(getWhosturn()).setBetbool(0);
+			Refresh();
+			
+			Timer t = new Timer(this, players.get(getWhosturn()));
+			t.setDaemon(true);
+			t.start();
+		}
+		
+		return;
+	}
+	public void rematch(int num) {
+		setPhase2(false);
+		for(Player p : players) {
+			p.setTrash(0);
 			p.setBetbool(1);
 			p.setGameresult(0);
 		}
@@ -751,9 +867,11 @@ public class Server {
 		}
 		
 		setInggame(true);
+		setPhase2(false);
 		setTurn(1);
 		setWhosturn(0);
 		WhosTurn();
+		MoneyRefresh();
 		setMinforbet(0);
 		Collections.shuffle(cards);
 		int index=0;
@@ -765,7 +883,7 @@ public class Server {
 			p.setCard2(cards.get(index++));
 		}
 		for(Player p : players) {
-			p.setCardset(Logic.Result(p.getCard1(), p.getCard2()));
+			p.setCard3(cards.get(index++));
 		}
 		for(int i=num;i<players.size();i++) {
 			players.get(i).setBetbool(1);
@@ -781,7 +899,7 @@ public class Server {
 		for(Player p : players) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.GiveCard(p.getCard1(), p.getCard2(), p.getCard3(), p.getCardset()));
+				out.writeObject(Gaming.GiveCard(p.getCard1(), p.getCard2(), p.getCard3()));
 				out.flush();
 			}
 			catch (Exception e) {e.printStackTrace();}
@@ -791,14 +909,18 @@ public class Server {
 		t.start();
 	}
 	public void GameStart() {
+		setPhase2(false);
 		for(Player p : players) {
+			p.setTrash(0);
 			p.setBetbool(0);
 			p.setGameresult(0);
 		}
 		setInggame(true);
+		setPhase2(false);
 		setTurn(1);
 		setWhosturn(0);
 		WhosTurn();
+		MoneyRefresh();
 		setMinforbet(0);
 //		for(Player p : players) {
 //			p.setReady(2);
@@ -828,7 +950,7 @@ public class Server {
 			p.setCard2(cards.get(index++));
 		}
 		for(Player p : players) {
-			p.setCardset(Logic.Result(p.getCard1(), p.getCard2()));
+			p.setCard3(cards.get(index++));
 		}
 		for(Player p : players) {
 			try {
@@ -841,7 +963,7 @@ public class Server {
 		for(Player p : players) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.GiveCard(p.getCard1(), p.getCard2(), p.getCard3(), p.getCardset()));
+				out.writeObject(Gaming.GiveCard(p.getCard1(), p.getCard2(), p.getCard3()));
 				out.flush();
 			}
 			catch (Exception e) {e.printStackTrace();}
@@ -854,6 +976,7 @@ public class Server {
 		t.start();
 		
 	}
+	
 	
 	
 }

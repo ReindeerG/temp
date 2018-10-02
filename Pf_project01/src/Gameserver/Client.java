@@ -25,6 +25,13 @@ public class Client extends Thread {
 	private Mainwindow window=null;
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
+	private int pandon;
+	public int getPandon() {
+		return pandon;
+	}
+	public void setPandon(int pandon) {
+		this.pandon = pandon;
+	}
 	public String getUserid() {
 		return userid;
 	}
@@ -112,7 +119,20 @@ public class Client extends Thread {
 	public void setCanthalf(boolean canthalf) {
 		this.canthalf = canthalf;
 	}
-	
+	private boolean boolTrash;
+	public boolean isBoolTrash() {
+		return boolTrash;
+	}
+	public void setBoolTrash(boolean boolTrash) {
+		this.boolTrash = boolTrash;
+	}
+	private int trash;
+	public int getTrash() {
+		return trash;
+	}
+	public void setTrash(int trash) {
+		this.trash = trash;
+	}
 	
 	public void setWindow(Mainwindow window) {
 		this.window = window;
@@ -205,14 +225,25 @@ public class Client extends Thread {
 		return;
 	}
 	public void Bet_Call() {
-		try {
-			out.writeObject(new Gaming(Gaming.GAME_CALL));
-			out.flush();
-			canthalf=true;
-		}catch(Exception e) {e.printStackTrace();}
+		if(isBoolTrash()==false) {
+			setBoolTrash(true);
+			try {
+				out.writeObject(Gaming.Call(getTrash()));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		} else {
+			try {
+				out.writeObject(Gaming.Call(0));
+				out.flush();
+				canthalf=true;
+			}catch(Exception e) {e.printStackTrace();}
+		}
 		return;
 	}
 	public void Bet_Die() {
+		if(isBoolTrash()==false) {
+			getWindow().surrender();
+		}
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_DIE));
 			out.flush();
@@ -220,23 +251,53 @@ public class Client extends Thread {
 		return;
 	}
 	public void Bet_Half() {
-		try {
-			out.writeObject(new Gaming(Gaming.GAME_HALF));
-			out.flush();
-		}catch(Exception e) {e.printStackTrace();}
+		if(isBoolTrash()==false) {
+			setBoolTrash(true);
+			try {
+				out.writeObject(Gaming.Half(getTrash()));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		} else {
+			try {
+				out.writeObject(Gaming.Half(0));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
 		return;
 	}
 	public void Bet_Check() {
-		try {
-			out.writeObject(new Gaming(Gaming.GAME_CHECK));
-			out.flush();
-			canthalf=true;
-		}catch(Exception e) {e.printStackTrace();}
+		if(isBoolTrash()==false) {
+			setBoolTrash(true);
+			try {
+				out.writeObject(Gaming.Check(getTrash()));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		} else {
+			try {
+				out.writeObject(Gaming.Check(0));
+				out.flush();
+				canthalf=true;
+			}catch(Exception e) {e.printStackTrace();}
+		}
 		return;
 	}
 	public void Money_Refresh() {
 		try {
 			out.writeObject(new Gaming(Gaming.MONEY_REFRESH));
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
+	public void MuchPandon() {
+		try {
+			out.writeObject(Gaming.MuchPandon());
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
+	public void Pandon(int pandon) {
+		try {
+			out.writeObject(Gaming.Pandon(pandon));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
 		return;
@@ -298,6 +359,10 @@ public class Client extends Thread {
 //					getWindow().Refresh();
 					break;
 				}
+				case Gaming.PANDON: {
+					setPandon(gm.getPandon());
+					break;
+				}
 				case Gaming.CHAT: {
 					getWindow().ReceiveMsg(gm.getUserid(), gm.getMsg(), gm.getDate());
 					break;
@@ -313,6 +378,7 @@ public class Client extends Thread {
 					}
 					getWindow().Refresh();
 					getWindow().ChatJoin(gm.getUserid(), gm.getDate());
+					MuchPandon();
 					break;
 				} 
 				case Gaming.CHAT_LEAVE: {
@@ -348,6 +414,10 @@ public class Client extends Thread {
 //					getWindow().DrawCards();
 //					getWindow().MycardOpen(card1, card2);
 					callRefresh();
+					break;
+				}
+				case Gaming.DRAW2: {
+					getWindow().DrawCards2();
 					break;
 				}
 				case Gaming.RESETCARDS: {
@@ -393,6 +463,8 @@ public class Client extends Thread {
 			} catch(Exception e) {e.printStackTrace();}
 		}
 	}
+	
+	
 	
 	
 
