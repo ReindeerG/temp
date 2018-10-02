@@ -33,19 +33,23 @@ public class MainServer  extends Thread{
 	private ServerSocket m_server;
 	private ArrayList<Room> roomList = new ArrayList<>();
 
-	//회원 정보 관리 
+	/**
+	 * 회원 정보 저장소
+	 */
 	private ArrayList<User> user_list = new ArrayList<>();
 	
 	
 	
 	
 	/**
-	 * 접속자를 무한대로 받아 저장소에 저장하고 화면을 실행시키는 생성자
+	 * 접속자(Client)를 무한대로 받아
+	 * 저장소(list)에 저장하는 일을 한다
 	 */
 	private MainServer() {
 		
 		try {
 			m_server = new ServerSocket(53890);
+			//계속해서 방 목록을 뿌려주는 스레드 시작
 			this.setDaemon(true);
 			this.start();
 			while(true) {
@@ -66,33 +70,28 @@ public class MainServer  extends Thread{
 	}	
 
 	/**
-	 * 방 목록을 전체에게 뿌려주는 메소드
+	 * 방 목록을 접속자 전체에게 뿌려주는 메소드
 	 * @throws IOException
 	 */
 	public void broadCast(){
 		try {
-			ArrayList<Client> target = (ArrayList<Client>) list.clone();
-			for(int i=0; i<target.size();i++) {
-				target.get(i).send();
+			System.out.println("list.size = "+list.size());
+			for(int i=0; i<list.size();i++) {
+				list.get(i).send();
 			}
 		}catch(Exception e) {
 		}
 	}
 	
 	/**
-	 * 계속해서 뿌려주는 상황(실시간)
+	 * 계속해서 방 목록을 뿌려주는 일을 하는 메소드(스레드)
 	 */
 	public void run() {
-		int size = 0;
 		while(true) {
-//			ArrayList<Room> target = (ArrayList<Room>) roomList.clone();
 			try {
-//				if(size != target.size()) {
-//					broadCast();
-//					size = target.size();
-//				}
 				broadCast();
-				Thread.sleep(3000);
+				//1초에 한 번 씩 - 추후 변경 가능 
+				Thread.sleep(1000);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -101,30 +100,31 @@ public class MainServer  extends Thread{
 
 	
 	/**
-	 * 접속자 관리 클래스로 스레드를 상속
-	 * 스레드는 계속해서 클라이언트가 보내는 신호를 대기하고 
-	 * 신호에 따라 적절한 처리를 해준다
+	 * 접속자 정보 관리 클래스로 스레드를 상속
+	 * 접속자의 아이디와 비밀번호를 확인하고 회원 가입을 진행해준다 
 	 */
 	class Client extends Thread{
 		Socket socket;
-		Socket g_socket = null;
-		Socket c_socket = null;
+		Socket g_socket = null;		//게임서버 소켓 보관
 		ObjectInputStream in;
 		ObjectOutputStream out;
 		User user;
-		boolean on = false;
-		private InetAddress inet;
-		private int g_port = 53891;
-		private int c_port = 53892;
+		boolean on = false;			//접속자의 로그인 상태
+		private InetAddress inet;	//게임서버 주소
+		private int g_port = 53891;	//게임서버 포트
 		
 		/**
-		 * model(방목록)을 List<String>의 형태로 클라이언트에 전송하는 메소드
+		 * model(방목록)을 ArrayList<Room>의 형태로 클라이언트에 전송하는 메소드
 		 * @throws IOException
 		 */
 		public void send() {
 			try {
 				if(on == true) {
 					ArrayList<Room> target = (ArrayList<Room>) roomList.clone();
+//					for(int i = 0 ; i < target.size();i++) {
+//						System.out.println("target.get("+i+").cnt = "+target.get(i).getCnt());
+//					}
+					System.out.println("send = "+target.hashCode()+" / "+target);
 					out.writeObject(target);
 					out.flush();				
 				}				
@@ -133,6 +133,9 @@ public class MainServer  extends Thread{
 			}
 		}
 		
+		/**
+		 * 회원가입 및 아이디 비밀번호가 일치하는지 확인하는 메소드 
+		 */
 		public void loginProc(){
 			try {
 				boolean isMember = false;
@@ -144,11 +147,12 @@ public class MainServer  extends Thread{
 					int num = in.readInt();
 					switch(num) {
 					case 0:
-						//회원가입
+						//회원가입 기입된 정보를 받아온다(u1)
 						User u1 = (User)in.readObject();
+						//이미 가입되어있는 아이디 혹은 닉네임인지 확인
 						boolean isUser = false;
 						if(user_list.size()>0) {
-							//회원이 있을 때 회원 가입
+							//회원수가 0이 아닐 때 회원 가입
 							for(int i = 0; i < user_list.size(); i++) {
 								User target = user_list.get(i);
 								//같은 아이디 혹은 닉네임이 존재하면 회원가입 진행 중단
@@ -159,20 +163,18 @@ public class MainServer  extends Thread{
 							}
 							//회원목록에 없을 경우 회원 가입 진행
 							if(!isUser) {
-								u1.money = 300000;//초기 돈 설정 (임의로 설정 추후 변경)
+								u1.money = 10000;//초기 돈 설정 (임의로 설정 추후 변경)
 								user_list.add(u1);
 							}
 							out.writeBoolean(!isUser);
 							out.flush();
 							user = u1;
-							System.out.println(!isUser+"전송");
 						}
 						else {
 							//회원이 없을때 가입
 							user_list.add(u1);
 							out.writeBoolean(true);
 							out.flush();
-							System.out.println("true 전송");
 						}
 						break;
 					case 1:
@@ -191,14 +193,9 @@ public class MainServer  extends Thread{
 						//회원일 때 실행 시킨다  
 						if(isMember) {
 							user = u2;
-							out.writeBoolean(isMember);
-							out.flush();
 						}
-						//아이디 혹은 비밀번호가 일치하지 않을 때 
-						else {
-							out.writeBoolean(isMember);
-							out.flush();
-						}
+						out.writeBoolean(isMember);
+						out.flush();
 						break;
 					}
 				}
@@ -213,11 +210,10 @@ public class MainServer  extends Thread{
 		public void run() {
 			try {
 				loginProc();
-				//방 목록을 뿌려준다
+				//방 목록을 1회(시작시 뿌려준다)
 				on = true;
-				System.out.println("on = "+on);
-				send();
-				Process p  = new Process(in, roomList);
+//				send();
+				Process p  = new Process(in, roomList, user);
 				p.process();
 			}catch(Exception e) {}
 		}

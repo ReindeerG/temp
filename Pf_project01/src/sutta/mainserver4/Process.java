@@ -7,33 +7,35 @@ import java.util.ArrayList;
 public class Process {
 	private ObjectInputStream in;
 	private ArrayList<Room> roomList;
+	private User user;
 	
-	public Process(ObjectInputStream in, ArrayList<Room> roomList) {
+	public Process(ObjectInputStream in, ArrayList<Room> roomList, User user) {
 		this.in = in;
 		this.roomList = roomList;
+		this.user = user;
 	}
 	
 	public void joinRoom(int index) {
-		if(index > roomList.size()) {
-			System.out.println("방 목록 refresh후 재 시도");
+		if(roomList.get(index).getCnt()>=4) {
+			System.out.println("만원");
 		}
 		else {
 			System.out.println((index+1)+"번방 참가 완료");
-			roomList.get(index).cnt++;
-			if(roomList.get(index).cnt == 4) {
-				roomList.get(index).ing = true;
-			}			
-		}
+			roomList.get(index).plusCnt();
+			roomList.get(index).addUser(user);
+			System.out.println(roomList.get(index).getCnt()+"명");
+			if(roomList.get(index).getCnt() == 4) {
+				roomList.get(index).setIng(true);		
+			}
 //		inet = InetAddress.getByName("192.168.0.?");
 //		g_socket = new Socket(inet,g_port);
 //		c_socket = new Socket(inet,c_port);
+//		연결하고 정보 전달(참가자 정보 전달)
+		}
 	}
 	
 	public void newRoom(String name) throws ClassNotFoundException, IOException {
-		Room r = new Room();
-		r.name = name;
-		r.cnt = 0;
-		r.ing = false;
+		Room r = new Room(name);
 		//방 정보 받아서 list에 저장
 		roomList.add(r);
 		//새 방 접속
@@ -62,7 +64,7 @@ public class Process {
 //				System.out.println("빠른 시작할 수 있는 방 참가");
 				Room target2 = null;
 				for(Room r2 : roomList) {
-					if(r2.cnt < 4) {
+					if(r2.getCnt() < 4) {
 						target2 = r2;
 						break;
 					}

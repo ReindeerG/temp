@@ -1,6 +1,9 @@
 package sutta.mainserver4;
 
 import java.awt.Container;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -19,6 +22,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * 메인 화면 창(임시)
@@ -33,13 +37,18 @@ public class MainWindow extends JFrame implements Runnable{
 //	컴포넌트 배치용 공간
 	private ArrayList<Room> room_list;
 	private Container con = this.getContentPane();
-	private DefaultListModel<String> model = new DefaultListModel<>();
+	private DefaultListModel<String> model1 = new DefaultListModel<>();
+	private DefaultListModel<String> model2 = new DefaultListModel<>();
+	private DefaultListModel<String> tg;
 	private JList<String> room = new JList<String>();
 	private JButton join = new JButton("방참가");
 	private JButton addRoom = new JButton("방 만들기");
 	private JButton quick = new JButton("빠른 플레이");
 	private JLabel label = new JLabel("방 목록");
+	private JButton refresh = new JButton("방 목록 새로 고침");
 	private JScrollPane pane = new JScrollPane(room);
+
+	
 	
 	/**
 	 * 지속적으로 방 목록을 받아오기 위해서 스레드 처리
@@ -47,25 +56,32 @@ public class MainWindow extends JFrame implements Runnable{
 	public void run() {
 		try {
 			while(true) {
-				ArrayList<Room> list = (ArrayList<Room>)in.readObject();
-				if(list!=null && list.size() != 0) {
-					room_list = (ArrayList<Room>) list.clone();
-					model.removeAllElements();
-					int i = 0;
-					for(Room r : room_list) {
-						model.addElement((i+1)+"번방            "+r.name+"             "+r.cnt+"/4");
-						i++;
+				ArrayList<Room> list;
+				try {
+					list = (ArrayList<Room>)in.readObject();
+					System.out.println("receive = "+list.hashCode()+" / "+list);
+//					for(Room r : list) {
+//						System.out.println("방 인원수 = "+r.getCnt());
+//					}
+					if(list!=null && list.size() != 0) {
+						room_list = list;
+						model1.clear();
+						for(int i = 0 ; i < room_list.size(); i++) {
+							model1.addElement((i+1)+"번방                  "+room_list.get(i).getName()+"             "+room_list.get(i).getCnt()+"/4");
+						}
+						tg = model2;
+						model2 = model1;
+						model1 = tg;
+						room.setModel(model2);
 					}
-					room.setModel(model);
-					room.repaint();
-				}
-			}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	
 	
 	private void display() {
 		con.setLayout(null);
@@ -74,12 +90,14 @@ public class MainWindow extends JFrame implements Runnable{
 		con.add(addRoom);
 		con.add(quick);
 		con.add(label);
+		con.add(refresh);
 		
 		label.setBounds(12, 0, 130, 25);
 		pane.setBounds(12, 27, 900, 678);
 		join.setBounds(925, 38, 141, 36);
 		addRoom.setBounds(925, 84, 141, 36);
 		quick.setBounds(925, 130, 141, 36);
+		refresh.setBounds(925, 180, 141, 36);
 		
 	}
 
@@ -104,24 +122,31 @@ public class MainWindow extends JFrame implements Runnable{
 				out.flush();
 				//리스트에서 선택 된 방의 인덱스를 얻어와 그 방의 인덱스를 전송해준다 
 				int index = room.getSelectedIndex();
-				ArrayList<Room> target = (ArrayList<Room>) room_list.clone();
-				if(index == -1) {
-					out.writeInt(-1);
-					out.flush();
-					JOptionPane.showMessageDialog(this, "참여할 방을 선택해 주세요");
-				}
-				else if(target.get(index).cnt >= 4) {
-					System.out.println("꽉찬 방");
-					out.writeInt(-1);
-					out.flush();
-					JOptionPane.showMessageDialog(this, "이미 꽉 찬 방입니다");
+				
+				if(room_list != null) {
+					if(index == -1) {
+						out.writeInt(-1);
+						out.flush();
+						JOptionPane.showMessageDialog(this, "참여할 방을 선택해 주세요");
+					}
+					else if(room_list.get(index).getCnt() >= 4) {
+						System.out.println("꽉찬 방");
+						out.writeInt(-1);
+						out.flush();
+						JOptionPane.showMessageDialog(this, "이미 꽉 찬 방입니다");					}
+					else {
+//						System.out.println(room.getSelectedIndex());
+//						System.out.println(room_list.get(index).getCnt());
+						out.writeInt(room.getSelectedIndex());
+						out.flush();					
+					}										
 				}
 				else {
-					System.out.println(room.getSelectedIndex());
-					System.out.println(target.get(index).cnt);
-					out.writeInt(room.getSelectedIndex());
-					out.flush();					
+					JOptionPane.showMessageDialog(this, "방이 없습니다", "", JOptionPane.PLAIN_MESSAGE);
+					out.writeInt(-1);
+					out.flush();
 				}
+				
 				
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -148,6 +173,62 @@ public class MainWindow extends JFrame implements Runnable{
 				e1.printStackTrace();
 			}
 		});
+		
+		MouseListener m = new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() ==2) {
+					try {
+						out.writeInt(MainServer.JOIN);
+						out.flush();
+						//리스트에서 선택 된 방의 인덱스를 얻어와 그 방의 인덱스를 전송해준다 
+						int index = room.getSelectedIndex();
+						ArrayList<Room> target = (ArrayList<Room>) room_list.clone();
+						
+						if(index == -1) {
+							out.writeInt(-1);
+							out.flush();
+							JOptionPane.showMessageDialog(null, "참여할 방을 선택해 주세요");
+						}
+						else if(target.get(index).getCnt() >= 4) {
+							System.out.println("꽉찬 방");
+							out.writeInt(-1);
+							out.flush();
+							JOptionPane.showMessageDialog(null, "이미 꽉 찬 방입니다");					}
+						else {
+							System.out.println(room.getSelectedIndex());
+							System.out.println(target.get(index).getCnt());
+							out.writeInt(room.getSelectedIndex());
+							out.flush();					
+						}					
+						
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		};
+		room.addMouseListener(m);
+		
+//		refresh.addActionListener(e->{
+//			ArrayList<Room> list;
+//			try {
+//				list = (ArrayList<Room>)in.readObject();
+//				for(Room r : list) {
+//					System.out.println("방 인원수 = "+r.getCnt());
+//				}
+//				if(list!=null && list.size() != 0) {
+//					room_list = (ArrayList<Room>) list.clone();
+//					model.removeAllElements();
+//					for(int i = 0 ; i < list.size(); i++) {
+//						model.addElement((i+1)+"번방                  "+list.get(i).getName()+"             "+list.get(i).getCnt()+"/4");
+//					}
+//					room.setModel(model);
+//				}
+//			} catch (Exception e1) {
+//				e1.printStackTrace();
+//			}
+//		});
 		
 	}
 
@@ -176,7 +257,7 @@ public class MainWindow extends JFrame implements Runnable{
 		this.setSize(1100, 800);
 		this.setResizable(false);
 		this.setLocationByPlatform(true);
-		Thread t = new Thread(this);
+		Thread t= new Thread(this);
 		t.setDaemon(true);
 		t.start();
 	}

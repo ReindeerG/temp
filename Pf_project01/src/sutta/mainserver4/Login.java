@@ -23,6 +23,7 @@ public class Login extends JDialog {
 	private JPasswordField pw = new JPasswordField();
 	private JLabel ID = new JLabel("아이디 :");
 	private JLabel PW = new JLabel("비밀번호 :");
+	private JLabel KG = new JLabel("KG섯다 로그인");
 	private JButton ok = new JButton("확인");
 	private JButton cancel = new JButton("취소");
 	private JButton member = new JButton("회원가입");
@@ -49,14 +50,16 @@ public class Login extends JDialog {
 		con.add(member);
 		con.add(ID);
 		con.add(PW);
+		con.add(KG);
 		
+		KG.setBounds(57, 10, 93, 23);
 		id.setBounds(80, 54, 175, 23);
 		pw.setBounds(80, 87, 175, 23);
 		ID.setBounds(12,54,93,23);
 		PW.setBounds(12,87,93,23);
-		ok.setBounds(30, 131, 67, 34);
-		member.setBounds(109, 131, 67, 34);
-		cancel.setBounds(188, 131, 67, 34);
+		ok.setBounds(57, 131, 67, 34);
+		member.setBounds(156, 10, 99, 23);
+		cancel.setBounds(156, 131, 67, 34);
 		
 	}
 

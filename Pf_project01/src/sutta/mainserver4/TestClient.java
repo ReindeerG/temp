@@ -29,7 +29,7 @@ public class TestClient {
 			in = new ObjectInputStream(socket.getInputStream());
 			
 			Login login  = new Login(out,in);
-			login.setVisible(true);
+		 	login.setVisible(true);
 			
 			while(!login.isLogin()) {}
 			MainWindow m = new MainWindow(socket, out, in);

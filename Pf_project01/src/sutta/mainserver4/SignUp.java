@@ -61,9 +61,7 @@ class SignUp extends JDialog{
 				u.nickname = nickname.getText();
 				out.writeObject(u);
 				out.flush();
-				
-				System.out.println("test");
-				
+								
 				try {
 					while(true) {
 						in.readObject();
@@ -71,7 +69,6 @@ class SignUp extends JDialog{
 				}catch(Exception err) {}
 				
 				Boolean isSignUp = in.readBoolean();
-				System.out.println("isSignUp = "+isSignUp);
 				if(isSignUp) {
 					JOptionPane.showMessageDialog(this, "회원 가입이 완료되었습니다", "", JOptionPane.PLAIN_MESSAGE);
 					this.dispose();
