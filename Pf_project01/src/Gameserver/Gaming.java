@@ -30,6 +30,8 @@ public class Gaming implements Serializable {
 	public static final int CHAT_JOIN = 331;
 	public static final int CHAT_LEAVE = 332;
 	public static final int CHAT_NICKCHANGE = 333;
+	public static final int CHAT_WIN = 335;
+	public static final int CHAT_RE = 336;
 	public static final int REFRESH = 88;
 	public static final int IDMATCH = 77;
 	
@@ -133,6 +135,18 @@ public class Gaming implements Serializable {
 	public static Gaming NickChange(String userid, String toNick, String date, ArrayList<Player> players) {
 		Gaming g = new Gaming();
 		g.setWhat(Gaming.CHAT_NICKCHANGE); g.setUserid(userid); g.setMsg(toNick); g.setDate(date); g.setPlayers(players);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 누가 승리했는지 채팅알림으로도 뿌려줌
+	public static Gaming Message_Win(String userid, String date) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_WIN); g.setUserid(userid); g.setDate(date);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 재경기한다고 채팅알림으로도 뿌려줌
+	public static Gaming Message_Re(String date) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.CHAT_RE); g.setDate(date);
 		return g;
 	}
 	// 클라이언트에서 자신의 입장을 알려달라고 부탁함.

@@ -382,7 +382,9 @@ public class Mainwindow extends JFrame {
 			if(tmpstr!=null) {
 				if(!tmpstr.equals("")) {
 					if(tmpstr.length()<9) {
-						client.ChangeNick(tmpstr);
+						if(!tmpstr.equals(client.getMe().getNickname())) {
+							client.ChangeNick(tmpstr);
+						}
 					} else {
 						JOptionPane.showMessageDialog(this, "닉네임은 8글자 이하로 해주세요!", "글자수 초과", JOptionPane.ERROR_MESSAGE);
 					}
@@ -419,8 +421,8 @@ public class Mainwindow extends JFrame {
 					} else if(makechat.getText().equals("/카드")) {
 						allOpen();
 					} else if(makechat.getText().equals("/새로고침")) {
-						System.out.println(client.getMe().getBetbool());
 						client.callRefresh();
+						System.out.println(client.getMe().getOrder());
 					}
 					else {
 						client.MakeChat(makechat.getText());
@@ -525,18 +527,32 @@ public class Mainwindow extends JFrame {
 	public void ReceiveMsg(String userid, String msg, String time) {
 		chatlog.append("["+time+"] <"+userid+"> "+msg+"\n");
 		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
 	}
 	public void NickChange(String userid, String msg, String time) {
 		chatlog.append("["+time+"] ("+userid+"님이 "+msg+"로 닉네임을 변경하셨습니다.)\n");
 		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
 	}
 	public void ChatJoin(String userid, String time) {
 		chatlog.append("["+time+"] ("+userid+"님이 입장하셨습니다.)\n");
 		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
 	}
 	public void ChatLeave(String userid, String time) {
 		chatlog.append("["+time+"] ("+userid+"님이 퇴장하셨습니다.)\n");
 		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
+	}
+	public void Winmsg(String nick, String time) {
+		chatlog.append("["+time+"] ("+nick+"님이 이겼습니다.)\n");
+		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
+	}
+	public void Remsg(String time) {
+		chatlog.append("["+time+"] (3초 후 대상자끼리 재경기가 시작됩니다.)\n");
+		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
 	}
 	public void Refresh() {
 		players = client.getPlayers();
@@ -836,7 +852,7 @@ public class Mainwindow extends JFrame {
 		Lbl_2p_bet.setIcon(null);
 		Lbl_3p_bet.setIcon(null);
 		Lbl_4p_bet.setIcon(null);
-		Refresh();
+		client.callRefresh();
 		return;
 	}
 	public void allOpen() {
@@ -998,6 +1014,7 @@ public class Mainwindow extends JFrame {
 		bt_bet_die.setEnabled(false);
 		bt_bet_check.setEnabled(false);
 		bt_bet_half.setEnabled(false);
+		client.setCanthalf(false);
 		allOpen();
 		players = client.getPlayers();
 		if(client.getMe().getOrder()==0) {
@@ -1481,10 +1498,10 @@ public class Mainwindow extends JFrame {
 //			try { Thread.sleep(20); } catch (InterruptedException e) {e.printStackTrace();}
 //		}
 	}
-	public void MycardOpen(int card1, int card2) {
-		cards[0].setIcon(cardimages[card1-1]);
-		cards[4].setIcon(cardimages[card2-1]);
-	}
+//	public void MycardOpen(int card1, int card2) {
+//		cards[0].setIcon(cardimages[card1-1]);
+//		cards[4].setIcon(cardimages[card2-1]);
+//	}
 	public Mainwindow(Client client) {
 		this.client=client;
 		titlebar = new Titlebar();

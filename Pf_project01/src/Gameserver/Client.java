@@ -105,9 +105,9 @@ public class Client extends Thread {
 		this.thisplaynum=thisplaynum;
 	}
 	
-	private boolean canthalf;
+	private boolean canthalf=false;
 	public boolean isCanthalf() {
-		return canthalf=true;
+		return canthalf;
 	}
 	public void setCanthalf(boolean canthalf) {
 		this.canthalf = canthalf;
@@ -145,6 +145,7 @@ public class Client extends Thread {
 			out.writeObject(new Gaming(Gaming.GAME_WHOSTURN));
 			out.flush();
 		} catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void StartMyJoin() {
 		callRefresh();
@@ -156,6 +157,7 @@ public class Client extends Thread {
 //			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT_JOIN));
 			out.flush();
 		} catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void ChangeNick(String nick) {
 		try {
@@ -163,6 +165,7 @@ public class Client extends Thread {
 //			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT_NICKCHANGE, nick));
 			out.flush();
 		} catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void MakeChat(String msg) {
 		try {
@@ -170,6 +173,7 @@ public class Client extends Thread {
 //			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT, msg, ""));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void Leave() {
 		try {
@@ -177,24 +181,28 @@ public class Client extends Thread {
 //			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT_LEAVE));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void GameReady() {
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_READY));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void GameUnready() {
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_UNREADY));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void GameStart() {
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_START));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void Bet_Call() {
 		try {
@@ -202,18 +210,21 @@ public class Client extends Thread {
 			out.flush();
 			canthalf=true;
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void Bet_Die() {
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_DIE));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void Bet_Half() {
 		try {
 			out.writeObject(new Gaming(Gaming.GAME_HALF));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void Bet_Check() {
 		try {
@@ -221,18 +232,21 @@ public class Client extends Thread {
 			out.flush();
 			canthalf=true;
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public void Money_Refresh() {
 		try {
 			out.writeObject(new Gaming(Gaming.MONEY_REFRESH));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public Client() {
 		try {
 			InetAddress inet = InetAddress.getByName("localhost");
 			socket = new Socket(inet, port);
 		} catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	public Client(String id) {
 		setUserid(id);
@@ -241,6 +255,7 @@ public class Client extends Thread {
 			socket = new Socket(inet, port);
 			out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 		} catch(Exception e) {e.printStackTrace();}
+		return;
 	}
 	
 	public void run() {
@@ -312,6 +327,14 @@ public class Client extends Thread {
 					getWindow().Refresh();
 					break;
 				}
+				case Gaming.CHAT_WIN: {
+					getWindow().Winmsg(gm.getUserid(), gm.getDate());
+					break;
+				}
+				case Gaming.CHAT_RE: {
+					getWindow().Remsg(gm.getDate());
+					break;
+				}
 				case Gaming.GAME_WHOSTURN: {
 					setWhosturn(gm.getWho());
 //					getWindow().Clockicons();
@@ -348,6 +371,7 @@ public class Client extends Thread {
 					players=gm.getPlayers();
 					getWindow().Refresh();
 					getWindow().Resultgame();
+					whosturn=0;
 					break;
 				}
 				case Gaming.BUTTON_OK: {

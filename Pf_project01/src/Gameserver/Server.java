@@ -390,6 +390,7 @@ public class Server {
 	public void setThisplaynum(int thisplaynum) {
 		this.thisplaynum=thisplaynum;
 	}
+	private Format f = new SimpleDateFormat("a hh:mm");
 	
 	public Server() {
 		Integer[] temp = new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
@@ -507,6 +508,7 @@ public class Server {
 					p.setGameresult(1); calc(p);
 					tmplist.add(p.getUserid());
 					toresult();
+					Message_Win(p.getNickname());
 					try { Thread.sleep(5000); } catch (InterruptedException e) { e.printStackTrace(); }
 					// 버튼활성화
 					resetcards();
@@ -596,7 +598,7 @@ public class Server {
 		if(result.size()==1) {
 			ArrayList<String> tmplist = new ArrayList<>();
 			for(Player p : players) {
-				if(p.getUserid().equals(result.get(0))) { p.setGameresult(1); calc(p); tmplist.add(p.getUserid()); break; }
+				if(p.getUserid().equals(result.get(0))) { p.setGameresult(1); calc(p); tmplist.add(p.getUserid()); Message_Win(p.getNickname()); break; }
 			}
 			// result.get(0) 가 우승
 			toresult();
@@ -621,6 +623,7 @@ public class Server {
 			}
 			// 남은사람끼리 재대결
 			toresult();
+			Message_Re();
 			try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
 			resetcards();
 			rebatch(result);
@@ -628,6 +631,7 @@ public class Server {
 				q.setBetbool(0);
 			}
 			Refresh();
+			System.out.println("재대결신호전");
 			rematch(result.size());
 		}
 	}
@@ -670,10 +674,13 @@ public class Server {
 			}
 		}
 		ArrayList<Player> newpl = new ArrayList<>();
+		int index=0;
 		for(Player p : temp1) {
+			p.setOrder(index++);
 			newpl.add(p);
 		}
 		for(Player p : temp2) {
+			p.setOrder(index++);
 			newpl.add(p);
 		}
 		setPlayers(newpl);
@@ -693,10 +700,13 @@ public class Server {
 			}
 		}
 		ArrayList<Player> newpl = new ArrayList<>();
+		int index=0;
 		for(Player p : temp1) {
+			p.setOrder(index++);
 			newpl.add(p);
 		}
 		for(Player p : temp2) {
+			p.setOrder(index++);
 			newpl.add(p);
 		}
 		setPlayers(newpl);
@@ -704,10 +714,32 @@ public class Server {
 	}
 	public void calc(Player p) {
 		p.setMoney(p.getMoney()+moneythisgame);
+		setMoneythisgame(0);
 		for(Player q : players) {
 			q.setGameresult(0);
 		}
 		p.setGameresult(1);
+		Refresh();
+	}
+	public void Message_Win(String nick) {
+		Date d = new Date();
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Message_Win(nick, f.format(d)));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+	}
+	public void Message_Re() {
+		Date d = new Date();
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.Message_Re(f.format(d)));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
 	}
 	public void rematch(int num) {
 		for(Player p : players) {
@@ -720,6 +752,8 @@ public class Server {
 		
 		setInggame(true);
 		setTurn(1);
+		setWhosturn(0);
+		WhosTurn();
 		setMinforbet(0);
 		Collections.shuffle(cards);
 		int index=0;
@@ -763,7 +797,8 @@ public class Server {
 		}
 		setInggame(true);
 		setTurn(1);
-		setMoneythisgame(0);
+		setWhosturn(0);
+		WhosTurn();
 		setMinforbet(0);
 //		for(Player p : players) {
 //			p.setReady(2);
