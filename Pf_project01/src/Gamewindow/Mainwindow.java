@@ -108,6 +108,13 @@ public class Mainwindow extends JFrame {
 	public void setClient(Client client) {
 		this.client=client;
 	}
+	private boolean ban=false;
+	public boolean isBan() {
+		return ban;
+	}
+	public void setBan(boolean ban) {
+		this.ban = ban;
+	}
 	
 	private Card[] cards = null;	
 	public Card[] getCards() {
@@ -190,6 +197,7 @@ public class Mainwindow extends JFrame {
 	private ImageIcon img_bt_moneymod_on;
 	private ImageIcon img_win;
 	private ImageIcon img_re;
+	private ImageIcon img_ban;
 	private Image icon;
 	
 	private JTextArea chatlog = new JTextArea();
@@ -224,6 +232,7 @@ public class Mainwindow extends JFrame {
 	private JLabel Lbl_2p_ready = new JLabel("");
 	private JLabel Lbl_2p_clock = new JLabel();
 	private JLabel Lbl_2p_bet = new JLabel();
+	private JButton bt_2p_ban = new JButton();
 	private JLabel Lbl_3p_nick = new JLabel("");
 	private JLabel Lbl_3p_money = new JLabel("");
 	private JLabel Lbl_3p_time = new JLabel("");
@@ -231,6 +240,7 @@ public class Mainwindow extends JFrame {
 	private JLabel Lbl_3p_ready = new JLabel("");
 	private JLabel Lbl_3p_clock = new JLabel();
 	private JLabel Lbl_3p_bet = new JLabel();
+	private JButton bt_3p_ban = new JButton();
 	private JLabel Lbl_4p_nick = new JLabel("");
 	private JLabel Lbl_4p_money = new JLabel("");
 	private JLabel Lbl_4p_time = new JLabel("");
@@ -238,6 +248,14 @@ public class Mainwindow extends JFrame {
 	private JLabel Lbl_4p_ready = new JLabel("");
 	private JLabel Lbl_4p_clock = new JLabel();
 	private JLabel Lbl_4p_bet = new JLabel();
+	private JButton bt_4p_ban = new JButton();
+	
+	private String name_2p=null;
+	private String name_3p=null;
+	private String name_4p=null;
+	private String userid_2p=null;
+	private String userid_3p=null;
+	private String userid_4p=null;
 	
 	private Container con = this.getContentPane();
 	
@@ -280,10 +298,16 @@ public class Mainwindow extends JFrame {
 		con.add(bt_moneymod);
 		
 		bt_inv_card1.setBounds(-100, -156, 100, 156);
+		bt_inv_card1.setBorderPainted(false);
+		bt_inv_card1.setFocusPainted(false);
+		bt_inv_card1.setContentAreaFilled(false);
 		bt_inv_card1.setOpaque(false);
 		bt_inv_card1.addActionListener(alcard1);
 		con.add(bt_inv_card1);
 		bt_inv_card2.setBounds(-100, -156, 100, 156);
+		bt_inv_card2.setBorderPainted(false);
+		bt_inv_card2.setFocusPainted(false);
+		bt_inv_card2.setContentAreaFilled(false);
 		bt_inv_card2.setOpaque(false);
 		bt_inv_card2.addActionListener(alcard2);
 		con.add(bt_inv_card2);
@@ -330,7 +354,7 @@ public class Mainwindow extends JFrame {
 		Lbl_gamemoney.setFont(new Font(null, Font.BOLD, 14));
 		Lbl_gamemoney.setForeground(Color.WHITE);
 		con.add(Lbl_gamemoney);
-		Lbl_2p_nick.setBounds(0, 280, 250, 16);
+		Lbl_2p_nick.setBounds(16, 280, 250, 16);
 		Lbl_2p_nick.setFont(new Font(null, Font.BOLD, 16));
 		Lbl_2p_nick.setForeground(Color.WHITE);
 		con.add(Lbl_2p_nick);
@@ -402,6 +426,24 @@ public class Mainwindow extends JFrame {
 		con.add(Lbl_4p_clock);
 		Lbl_4p_bet.setBounds(880, 295, 80, 40);
 		con.add(Lbl_4p_bet);
+		bt_2p_ban.setBounds(-16, -16, 16, 16);
+		bt_2p_ban.setBorderPainted(false);
+		bt_2p_ban.setFocusPainted(false);
+		bt_2p_ban.setContentAreaFilled(false);
+		bt_2p_ban.setIcon(img_ban);
+		con.add(bt_2p_ban);
+		bt_3p_ban.setBounds(-16, -16, 16, 16);
+		bt_3p_ban.setBorderPainted(false);
+		bt_3p_ban.setFocusPainted(false);
+		bt_3p_ban.setContentAreaFilled(false);
+		bt_3p_ban.setIcon(img_ban);
+		con.add(bt_3p_ban);
+		bt_4p_ban.setBounds(-16, -16, 16, 16);
+		bt_4p_ban.setBorderPainted(false);
+		bt_4p_ban.setFocusPainted(false);
+		bt_4p_ban.setContentAreaFilled(false);
+		bt_4p_ban.setIcon(img_ban);
+		con.add(bt_4p_ban);
 		
 		BG panel = new BG();
 		panel.setBounds(0, 40, 1200, 760);
@@ -409,6 +451,27 @@ public class Mainwindow extends JFrame {
 	}
 	private void event() {
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		bt_2p_ban.addActionListener(e->{
+			String tmp = userid_2p;
+			int banresult = JOptionPane.showConfirmDialog(this, name_2p+"님을 퇴장시키겠습니까?", "강제퇴장", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if(banresult==0 && tmp.equals(userid_2p)) {
+				client.Ban(userid_2p);
+			}
+		});
+		bt_3p_ban.addActionListener(e->{
+			String tmp = userid_3p;
+			int banresult = JOptionPane.showConfirmDialog(this, name_3p+"님을 퇴장시키겠습니까?", "강제퇴장", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if(banresult==0 && tmp.equals(userid_3p)) {
+				client.Ban(userid_3p);
+			}
+		});
+		bt_4p_ban.addActionListener(e->{
+			String tmp = userid_4p;
+			int banresult = JOptionPane.showConfirmDialog(this, name_4p+"님을 퇴장시키겠습니까?", "강제퇴장", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if(banresult==0 && tmp.equals(userid_4p)) {
+				client.Ban(userid_4p);
+			}
+		});
 		bt_bet_call.addActionListener(e->{
 			if(Lbl_myset.getText().equals("베팅을 마무리하세요.")) {
 				Lbl_myset.setText("");
@@ -594,6 +657,7 @@ public class Mainwindow extends JFrame {
 			img_bt_moneymod_on = new ImageIcon(ImageIO.read(new File("Images\\moneymod_on.png")));
 			img_win = new ImageIcon(ImageIO.read(new File("Images\\win.png")));
 			img_re = new ImageIcon(ImageIO.read(new File("Images\\re.png")));
+			img_ban = new ImageIcon(ImageIO.read(new File("Images\\BAN.png")));
 			icon = Toolkit.getDefaultToolkit().getImage("Images\\ico.png");
 		} catch(Exception e) {e.printStackTrace();}
 	}
@@ -621,6 +685,17 @@ public class Mainwindow extends JFrame {
 	public void ChatLeave(String userid, String time) {
 		chatlog.append("["+time+"] ("+userid+"님이 퇴장하셨습니다.)\n");
 		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
+	}
+	public void ChatBan(String userid, String time) {
+		chatlog.append("["+time+"] ("+userid+"님이 방장에 의해 강제퇴장 당하셨습니다.)\n");
+		chatlog.setCaretPosition(chatlog.getDocument().getLength());
+		return;
+	}
+	public void ImBanned() {
+		JOptionPane.showMessageDialog(this, "방장에 의해 강제퇴장당하셨습니다.", "강제퇴장", JOptionPane.WARNING_MESSAGE);
+		setBan(true);
+		dispose();
 		return;
 	}
 	public void Winmsg(String nick, String time) {
@@ -718,9 +793,18 @@ public class Mainwindow extends JFrame {
 		Lbl_4p_ready.setText("");
 		Lbl_4p_bet.setIcon(null);
 		
+		bt_2p_ban.setLocation(-16, -16);
+		bt_3p_ban.setLocation(-16, -16);
+		bt_4p_ban.setLocation(-16, -16);
+		
 		int temporder = client.getMe().getOrder();
 		for(Player p : players) {
 			if((p.getOrder()%4)==((temporder+1)%4)) {
+				if(client.getMe().getOrder()==0) {
+					bt_2p_ban.setLocation(0, 280);
+				} else {
+					bt_2p_ban.setLocation(-16, -16);
+				}
 				if(client.isInggame()==true && p.getTrash()!=0) {
 					switch(p.getTrash()) {
 					case 1: p2card1.setIcon(cardimages[p.getCard1()-1]); break;
@@ -729,7 +813,7 @@ public class Mainwindow extends JFrame {
 					}
 				}
 				if(p.getOrder()==0) { Lbl_2p_nick.setText("<"+p.getNickname()+"> (방장)"); }
-				else { Lbl_2p_nick.setText("<"+p.getNickname()+">"); }
+				else { name_2p=p.getNickname(); userid_2p=p.getUserid(); Lbl_2p_nick.setText("<"+name_2p+">"); }
 				Lbl_2p_money.setText("가진 돈: "+p.getMoney()+"전");
 				if(p.getReady()==0) {
 					Lbl_2p_ready.setText("");
@@ -754,6 +838,11 @@ public class Mainwindow extends JFrame {
 				}
 			}
 			if((p.getOrder()%4)==((temporder+2)%4)) {
+				if(client.getMe().getOrder()==0) {
+					bt_3p_ban.setLocation(710-16, 40);
+				} else {
+					bt_3p_ban.setLocation(-16, -16);
+				}
 				if(client.isInggame()==true && p.getTrash()!=0) {
 					switch(p.getTrash()) {
 					case 1: p3card1.setIcon(cardimages[p.getCard1()-1]); break;
@@ -762,7 +851,7 @@ public class Mainwindow extends JFrame {
 					}
 				}
 				if(p.getOrder()==0) { Lbl_3p_nick.setText("<"+p.getNickname()+"> (방장)"); }
-				else { Lbl_3p_nick.setText("<"+p.getNickname()+">"); }
+				else { name_3p=p.getNickname(); userid_3p=p.getUserid(); Lbl_3p_nick.setText("<"+name_3p+">"); }
 				Lbl_3p_money.setText("가진 돈: "+p.getMoney()+"전");
 				if(p.getReady()==0) {
 					Lbl_3p_ready.setText("");
@@ -787,6 +876,11 @@ public class Mainwindow extends JFrame {
 				}
 			}
 			if((p.getOrder()%4)==((temporder+3)%4)) {
+				if(client.getMe().getOrder()==0) {
+					bt_4p_ban.setLocation(1000-16, 280);
+				} else {
+					bt_4p_ban.setLocation(-16, -16);
+				}
 				if(client.isInggame()==true && p.getTrash()!=0) {
 					switch(p.getTrash()) {
 					case 1: p4card1.setIcon(cardimages[p.getCard1()-1]); break;
@@ -795,7 +889,7 @@ public class Mainwindow extends JFrame {
 					}
 				}
 				if(p.getOrder()==0) { Lbl_4p_nick.setText("<"+p.getNickname()+"> (방장)"); }
-				else { Lbl_4p_nick.setText("<"+p.getNickname()+">"); }
+				else { name_4p=p.getNickname(); userid_4p=p.getUserid(); Lbl_4p_nick.setText("<"+name_4p+">"); }
 				Lbl_4p_money.setText("가진 돈: "+p.getMoney()+"전");
 				if(p.getReady()==0) {
 					Lbl_4p_ready.setText("");

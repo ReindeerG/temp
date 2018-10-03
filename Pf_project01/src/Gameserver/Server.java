@@ -101,6 +101,9 @@ class CheckMem extends Thread {
 
 class UserThread extends Thread {
 	private Socket socket;
+	public Socket getSocket() {
+		return socket;
+	}
 	private boolean stop;
 	private Server serv;
 	private Format f = new SimpleDateFormat("a hh:mm");
@@ -109,10 +112,17 @@ class UserThread extends Thread {
 		return in;
 	}
 	public UserThread(Socket socket, Server serv) {
-		stop=false; this.socket=socket; this.serv=serv;
+		stop=false; this.socket=socket; this.serv=serv; this.in=null;
+	}
+	public UserThread(Socket socket, Server serv, ObjectInputStream in) {
+		stop=false; this.socket=socket; this.serv=serv; this.in=in;
+	}
+	public boolean isStop() {
+		return stop;
 	}
 	public void toStop() {
 		stop=true;
+		return;
 	}	
 	
 	public void IncreaseTurn() {
@@ -141,18 +151,28 @@ class UserThread extends Thread {
 	}
 	
 	public void run() {
-		MatchId();
+		if(in==null) MatchId();
 		try {
-			in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+			if(in==null) in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 			while(true) {
-				if(stop==true) { return; }
+				if(stop==true) { in.close(); this.interrupt(); break; }
 				else {
+					for(Player tmpp : serv.getPlayers()) {
+						if(tmpp.getUth().isStop()==false && tmpp.getUth().getThreadGroup()==null) {
+							ObjectInputStream tmpin = tmpp.getUth().getIn();
+							tmpp.getUth().toStop();
+							UserThread uth = new UserThread(tmpp.getSocket(), serv, tmpin);
+							uth.setDaemon(true);
+							tmpp.setUth(uth);
+							uth.start();
+						}
+					}
 					Gaming gm = (Gaming)in.readObject();
-					ArrayList<Player> players = serv.getPlayers();
 					Player q=null;
 					int index=0;
-					for(Player p : players) {
+					for(Player p : serv.getPlayers()) {
 						if(p.getSocket().equals(socket)) {
+							ArrayList<Player> players = serv.getPlayers();
 							q = p;
 							switch(gm.getWhat()) {
 								case Gaming.IDMATCH: {
@@ -273,20 +293,39 @@ class UserThread extends Thread {
 								}
 								case Gaming.CHAT_LEAVE: {
 									String strtemp = q.getNickname();
-									q.getUth().getIn().close();
-									q.getUth().toStop();
-									players.remove(index);
+									UserThread tmpUth = q.getUth();
+//									q.getUth().getIn().close();
+//									q.getUth().getSocket().close();
+									tmpUth.toStop();
+									while(!tmpUth.isStop()) {
+									}
+									p.getSocket().close();
+									while(!p.getSocket().isClosed()) {
+									}
+									serv.getPlayers().remove(q);
 									index=0;
 									for(Player pl : players) {
 										pl.setOrder(index++);
 									}
 									Date d = new Date();
 									for(Player p2 : players) {
+										if(p2.getUth().isStop()==false && p2.getUth().getThreadGroup()==null) {
+											ObjectInputStream tmpin = p2.getUth().getIn();
+											p2.getUth().toStop();
+											UserThread uth = new UserThread(p2.getSocket(), serv, tmpin);
+											uth.setDaemon(true);
+											p2.setUth(uth);
+											uth.start();
+										}
 										ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p2.getSocket().getOutputStream()));
 										out.writeObject(Gaming.HesOut(strtemp, f.format(d), players));
 //										out.writeObject(new Gaming(strtemp, gm.getWhat(), f.format(d), players));
 										out.flush();
 									}
+									break;
+								}
+								case Gaming.BAN: {
+									serv.Ban(gm.getUserid());
 									break;
 								}
 								case Gaming.CHAT_NICKCHANGE: {
@@ -315,37 +354,7 @@ class UserThread extends Thread {
 			}
 		}
 		catch(Exception e) {e.printStackTrace();}
-		
-		
-//		while(true) {
-//			try {
-//				ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-//					if(stop==true) { return; }
-//					else {
-//						Gaming gm = (Gaming)in.readObject();
-//						int num = gm.getWhat();
-//						List<Player> players = serv.getPlayers();
-//						for(Player p : players) {
-//							if(p.getSocket().equals(socket)) {
-//								switch(num) {
-//									case Gaming.GAME_UNREADY: p.setReady(0); System.out.println("준비안함"); break;
-//									case Gaming.GAME_READY: p.setReady(1); System.out.println("준비함"); break;
-//									case Gaming.GAME_DIE: p.setBetbool(1); break;
-//									case Gaming.GAME_GO: p.setBetbool(2); break;
-//									default: break;
-//								}
-//								break;
-//							}
-//						}
-//						
-//						
-//						
-//						
-//						
-//					}
-//			}
-//			catch(Exception e) {}
-//		}
+		return;
 		
 		
 		
@@ -511,6 +520,61 @@ public class Server {
 				out.flush();
 			}catch(Exception e) {e.printStackTrace();}
 		}
+	}
+	public void Ban(String userid) {
+		String strtemp = null;
+		for(Player p : players) {
+			if(p.getUserid().equals(userid)) {
+				strtemp = p.getNickname();
+				if(p.getReady()==1) {
+					p.setMoney(p.getMoney()+getPandon());
+					setMoneythisgame(getMoneythisgame()-getPandon());
+					p.setReady(0);
+					MoneyRefresh();
+					Refresh();
+				}
+				try {
+					ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+					out.writeObject(Gaming.UrBanned());
+					out.flush();
+					UserThread tmpUth = p.getUth();
+					tmpUth.toStop();
+					while(!tmpUth.isStop()) {
+					}
+					p.getSocket().close();
+					while(!p.getSocket().isClosed()) {
+					}
+				} catch(Exception e) {e.printStackTrace();}
+				players.remove(p);
+				int index=0;
+				for(Player q : players) {
+					q.setOrder(index++);
+				}
+				break;
+			}
+		}
+		for(Player tmpp : getPlayers()) {
+			if(tmpp.getUth().isStop()==false && tmpp.getUth().getThreadGroup()==null) {
+				ObjectInputStream tmpin = tmpp.getUth().getIn();
+				tmpp.getUth().toStop();
+				UserThread uth = new UserThread(tmpp.getSocket(), this, tmpin);
+				uth.setDaemon(true);
+				tmpp.setUth(uth);
+				uth.start();
+			}
+//			System.out.println(tmpp.getOrder()+"번-"+tmpp.getUserid()+"/"+tmpp.getUth()+"//"+!tmpp.getSocket().isClosed());
+			MoneyRefresh();
+			Date d = new Date();
+			try {
+				for(Player p : players) {
+					ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+					out.writeObject(Gaming.HesBanned(strtemp, f.format(d), players));
+					out.flush();
+				}
+			} catch(Exception e) {e.printStackTrace();}
+			break;
+		}
+		return;
 	}
 	public void WhosTurn() {
 		for(Player p : players) {
@@ -862,16 +926,10 @@ public class Server {
 				switch(p.getTrash()) {
 					case 1: {
 						p.setCardset(Logic.Result(p.getCard2(), p.getCard3()));
-						if(p.getCardset()==-1) {
-							System.out.println(p.getCard2()+"랑 "+p.getCard3()+"를 처넣었는데 -1 나오는 이유 대봐.");
-						}
 						break;
 					}
 					case 2: {
 						p.setCardset(Logic.Result(p.getCard1(), p.getCard3()));
-						if(p.getCardset()==-1) {
-							System.out.println(p.getCard1()+"랑 "+p.getCard3()+"를 처넣었는데 -1 나오는 이유 대봐.");
-						}
 						break;
 					}
 					default: break;

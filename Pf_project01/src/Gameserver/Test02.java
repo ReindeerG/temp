@@ -17,7 +17,6 @@ import Gamewindow.Mainwindow;
 public class Test02 {
 	public static void main(String[] args) {
 		try{ UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }catch(Exception e) {e.printStackTrace();}
-		
 		String str = JOptionPane.showInputDialog("¾ÆÀÌµð");
 		
 //		Mainwindow frame = new Mainwindow(null);
@@ -40,37 +39,41 @@ public class Test02 {
 		Mainwindow frame = new Mainwindow(a);
 		a.setWindow(frame);
 //		frame.show();
-//		while(true) {
-//			if(frame.isVisible()==false) {
+		while(true) {
+			if(frame.isVisible()==false) {
 				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.setVisible(true);
-				frame.show();
-//			}
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.setVisible(true);
+//				frame.show();
+			} else break;
 //			frame.hide();
 //			System.out.println("dd");
 //			break;¤Ä
 //			if(frame.isVisible()==true) break;
-//		}
-		
-
+		}
+		while(true) {
+			if(frame.isBan()==true) {
+				System.exit(0);
+				return;
+			}
+		}
 		
 		
 //		a.callWhosturn();

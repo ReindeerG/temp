@@ -36,6 +36,8 @@ public class Gaming implements Serializable {
 	public static final int CHAT_NICKCHANGE = 333;
 	public static final int CHAT_WIN = 335;
 	public static final int CHAT_RE = 336;
+	public static final int BAN = 444;
+	public static final int IMBANNED = 445;
 	public static final int REFRESH = 88;
 	public static final int IDMATCH = 77;
 	
@@ -148,7 +150,6 @@ public class Gaming implements Serializable {
 		g.setWhat(Gaming.GAME_HALF); g.setCardset(trash);
 		return g;
 	}
-	
 	// 서버에서 게임시작시 카드 제자리위치하게 요구
 		public static Gaming ResetCard() {
 			Gaming g = new Gaming();
@@ -213,6 +214,24 @@ public class Gaming implements Serializable {
 	public static Gaming HesOut(String userid, String date, ArrayList<Player> players) {
 		Gaming g = new Gaming();
 		g.setWhat(Gaming.CHAT_LEAVE); g.setUserid(userid); g.setDate(date); g.setPlayers(players);
+		return g;
+	}
+	// 클라이언트에서 서버로 방장이 누군가의 강퇴를 요청함
+	public static Gaming callBan(String userid) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.BAN); g.setUserid(userid);
+		return g;
+	}
+	// 서버에서 클라이언트들에게 누가 퇴장당했는지 알려줌
+	public static Gaming HesBanned(String userid, String date, ArrayList<Player> players) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.BAN); g.setUserid(userid); g.setDate(date); g.setPlayers(players);
+		return g;
+	}
+	// 클라이언트가 퇴장요구를 받게됨.
+	public static Gaming UrBanned() {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.IMBANNED);
 		return g;
 	}
 	// 클라이언트에서 서버로 자신의 ID 알려줄 때

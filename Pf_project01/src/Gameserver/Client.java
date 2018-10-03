@@ -298,6 +298,13 @@ public class Client extends Thread {
 		}catch(Exception e) {e.printStackTrace();}
 		return;
 	}
+	public void Ban(String userid) {
+		try {
+			out.writeObject(Gaming.callBan(userid));
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
 	public void MuchPandon() {
 		try {
 			out.writeObject(Gaming.MuchPandon());
@@ -394,7 +401,20 @@ public class Client extends Thread {
 				case Gaming.CHAT_LEAVE: {
 					players=gm.getPlayers();
 					getWindow().ChatLeave(gm.getUserid(), gm.getDate());
+					getWindow().Refresh();
+//					callRefresh();
+					break;
+				}
+				case Gaming.BAN: {
+					players=gm.getPlayers();
+					getWindow().ChatBan(gm.getUserid(), gm.getDate());
+//					getWindow().Refresh();
+					Thread.sleep(500);
 					callRefresh();
+					break;
+				}
+				case Gaming.IMBANNED: {
+					getWindow().ImBanned();
 					break;
 				}
 				case Gaming.CHAT_NICKCHANGE: {
