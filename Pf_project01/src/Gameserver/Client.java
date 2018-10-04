@@ -242,11 +242,19 @@ public class Client extends Thread {
 				out.flush();
 			}catch(Exception e) {e.printStackTrace();}
 		} else {
-			try {
-				out.writeObject(Gaming.Call(0));
-				out.flush();
-				canthalf=true;
-			}catch(Exception e) {e.printStackTrace();}
+			if(getCardset()>0 && getCardset()<4) {
+				try {
+					out.writeObject(Gaming.SetNCall(getCardset()));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+				setCardset(4);
+			}
+			else {
+				try {
+					out.writeObject(Gaming.Call(0));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+			}
 		}
 		return;
 	}
@@ -268,10 +276,19 @@ public class Client extends Thread {
 				out.flush();
 			}catch(Exception e) {e.printStackTrace();}
 		} else {
-			try {
-				out.writeObject(Gaming.Half(0));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
+			if(getCardset()>0 && getCardset()<4) {
+				try {
+					out.writeObject(Gaming.SetNHalf(getCardset()));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+				setCardset(4);
+			}
+			else {
+				try {
+					out.writeObject(Gaming.Half(0));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+			}
 		}
 		return;
 	}
@@ -283,11 +300,19 @@ public class Client extends Thread {
 				out.flush();
 			}catch(Exception e) {e.printStackTrace();}
 		} else {
-			try {
-				out.writeObject(Gaming.Check(0));
-				out.flush();
-				canthalf=true;
-			}catch(Exception e) {e.printStackTrace();}
+			if(getCardset()>0 && getCardset()<4) {
+				try {
+					out.writeObject(Gaming.SetNCheck(getCardset()));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+				setCardset(4);
+			}
+			else {
+				try {
+					out.writeObject(Gaming.Check(0));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+			}
 		}
 		return;
 	}
@@ -409,8 +434,8 @@ public class Client extends Thread {
 					players=gm.getPlayers();
 					getWindow().ChatBan(gm.getUserid(), gm.getDate());
 //					getWindow().Refresh();
-					Thread.sleep(500);
-					callRefresh();
+//					Thread.sleep(500);
+//					callRefresh();
 					break;
 				}
 				case Gaming.IMBANNED: {
@@ -441,6 +466,7 @@ public class Client extends Thread {
 					setYetresult(false);
 					setBoolTrash(false);
 					setTrash(0);
+					setCardset(0);
 					for(Player p : players) {
 						if(p.getUserid().equals(getUserid())) {
 							me=p;
@@ -448,7 +474,7 @@ public class Client extends Thread {
 						}
 					}
 					
-					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3(); cardset = gm.getCardset();
+					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
 //					System.out.println(card1);
 					getWindow().DrawCards();
 //					System.out.println(card1+" "+card2+" "+card3);

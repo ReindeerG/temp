@@ -15,17 +15,20 @@ import javax.swing.JOptionPane;
 public class Test3 {
 	public static void main(String[] args) {
 		
-		List<Player> players = new ArrayList<>();
-		Player a = new Player(players.size(), null, null);
-		Player b = new Player(players.size(), null, null);
-		Player c = new Player(players.size(), null, null);
-		players.add(a);
-		players.add(b);
-		players.add(c);
-		Object[] cb = players.toArray();
-		Player[] arr = (Player[])cb;
-		System.out.println(cb);
+		Thread a = new Thread();
+		a.setDaemon(true);
+		a.start();
 		
-		
+		System.out.println(a.isAlive()+"/"+a.getThreadGroup());
+		a.interrupt();
+		while(true) {
+			System.out.println(a.isAlive()+"/"+a.getThreadGroup());
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }

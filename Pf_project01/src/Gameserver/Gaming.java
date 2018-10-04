@@ -132,22 +132,40 @@ public class Gaming implements Serializable {
 		g.setWhat(Gaming.DRAW2);
 		return g;
 	}
-	// 클라이언트에서 콜할때
+	// 클라이언트에서 오픈하면서 콜할때
 	public static Gaming Call(int trash) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_CALL); g.setCardset(trash);
+		g.setWhat(Gaming.GAME_CALL); g.setCard3(trash);
 		return g;
 	}
-	// 클라이언트에서 체크할때
+	// 클라이언트에서 오픈하면서 체크할때
 	public static Gaming Check(int trash) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_CHECK); g.setCardset(trash);
+		g.setWhat(Gaming.GAME_CHECK); g.setCard3(trash);
 		return g;
 	}
-	// 클라이언트에서 하프할때
+	// 클라이언트에서 오픈하면서 하프할때
 	public static Gaming Half(int trash) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_HALF); g.setCardset(trash);
+		g.setWhat(Gaming.GAME_HALF); g.setCard3(trash);
+		return g;
+	}
+	// 클라이언트에서 마지막 정하면서 콜할때
+	public static Gaming SetNCall(int set) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_CALL); g.setCardset(set);
+		return g;
+	}
+	// 클라이언트에서 마지막 정하면서 체크할때
+	public static Gaming SetNCheck(int set) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_CHECK); g.setCardset(set);
+		return g;
+	}
+	// 클라이언트에서 마지막 정하면서 하프할때
+	public static Gaming SetNHalf(int set) {
+		Gaming g = new Gaming();
+		g.setWhat(Gaming.GAME_HALF); g.setCardset(set);
 		return g;
 	}
 	// 서버에서 게임시작시 카드 제자리위치하게 요구

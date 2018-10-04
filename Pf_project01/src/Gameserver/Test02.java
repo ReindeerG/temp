@@ -18,7 +18,7 @@ public class Test02 {
 	public static void main(String[] args) {
 		try{ UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }catch(Exception e) {e.printStackTrace();}
 		String str = JOptionPane.showInputDialog("¾ÆÀÌµð");
-		
+		System.out.println(str);
 //		Mainwindow frame = new Mainwindow(null);
 //		frame.setVisible(true);
 //		Client a = new Client(str);
@@ -73,6 +73,15 @@ public class Test02 {
 				System.exit(0);
 				return;
 			}
+//			if(str.equals("p2")) {
+//				try {
+//					Thread.sleep(2000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				System.exit(0);
+//			}
 		}
 		
 		

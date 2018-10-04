@@ -119,6 +119,15 @@ public class Logic {
 		}
 	}
 	
+	public static int[] ResultSet(int card1, int card2, int card3) {
+		int[] temp = new int[4];
+		temp[0] = Result(card1, card2);
+		temp[1] = Result(card1, card3);
+		temp[2] = Result(card2, card3);
+		temp[3] = 0;
+		return temp;
+	}
+	
 	public static String lastName(int result) {
 		switch(result) {
 		case 93800: return "3¡¤8±¤¶¯";

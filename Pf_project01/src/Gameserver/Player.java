@@ -24,7 +24,7 @@ public class Player implements Serializable {
 	private int card2;
 	private int card3;
 	private int trash;
-	private int cardset;
+	private int[] cardset;
 	private int betbool;
 	private int ready;
 	private int gameresult;
@@ -65,11 +65,33 @@ public class Player implements Serializable {
 	public void setCard3(int card3) {
 		this.card3 = card3;
 	}
-	public int getCardset() {
+	public int[] getCardset() {
 		return cardset;
 	}
-	public void setCardset(int cardset) {
+	public void setCardset(int[] cardset) {
 		this.cardset = cardset;
+	}
+	public int getSelCardset() {
+		return cardset[3];
+	}
+	public void SelectSet(int num) {
+		int[] tmp = getCardset();
+		switch(num) {
+			case 1: {
+				tmp[3]=tmp[0];
+				break;
+			}
+			case 2: {
+				tmp[3]=tmp[1];
+				break;
+			}
+			case 3: {
+				tmp[3]=tmp[2];
+				break;
+			}
+		}
+		setCardset(tmp);
+		return;
 	}
 	public int getBetbool() {
 		return betbool;
