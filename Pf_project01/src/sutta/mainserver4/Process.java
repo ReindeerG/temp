@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
+import sutta.useall.Room;
+import sutta.useall.Signal;
+import sutta.useall.User;
+
 public class Process {
 	private ObjectInputStream in;
 	private ArrayList<Room> roomList;
@@ -13,6 +17,10 @@ public class Process {
 		this.in = in;
 		this.roomList = roomList;
 		this.user = user;
+	}
+	
+	public void removeRoom() {
+//		게임서버로부터 방의 접속자 수를 받아서 접속자 수가 0이면 방 삭제
 	}
 	
 	public void joinRoom(int index) {
@@ -47,7 +55,7 @@ public class Process {
 			int choose = in.readInt();
 //			System.out.println("choose = "+choose);
 			switch(choose) {
-			case MainServer.JOIN:
+			case Signal.JOIN:
 				//해당 방 게임 서버, 채팅 서버에 접속
 				int index = in.readInt();
 				if(index != -1) {
@@ -55,12 +63,15 @@ public class Process {
 				}
 				break;
 				
-			case MainServer.ADDROOM:
+			case Signal.ADDROOM:
 				//새로운 방 만들기
-				newRoom((String)in.readObject());
+				String roomName = (String)in.readObject();
+				if(roomName!=null) {
+					newRoom(roomName);					
+				}
 				break;
 				
-			case MainServer.QUICKJOIN:
+			case Signal.QUICKJOIN:
 //				System.out.println("빠른 시작할 수 있는 방 참가");
 				Room target2 = null;
 				for(Room r2 : roomList) {

@@ -3,19 +3,15 @@ package sutta.mainserver4;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
 
-class User implements Serializable{
-	String nickname;
-	String id;
-	String pw;
-	int money;
-}
+import sutta.useall.Room;
+import sutta.useall.Signal;
+import sutta.useall.User;
+
 
 /**
  *메인 서버 클래스
@@ -32,6 +28,7 @@ public class MainServer  extends Thread{
 	private ArrayList<Client> list = new ArrayList<>();
 	private ServerSocket m_server;
 	private ArrayList<Room> roomList = new ArrayList<>();
+	private ArrayList<String> roomList2 = new ArrayList<>();
 
 	/**
 	 * 회원 정보 저장소
@@ -75,11 +72,17 @@ public class MainServer  extends Thread{
 	 */
 	public void broadCast(){
 		try {
+			roomList2.clear();
+			for(int i = 0; i<roomList.size(); i++) {
+				Room t = roomList.get(i);
+				roomList2.add((i+1)+"번방        "+t.getName()+"                "+t.getCnt()+"/4");
+			}
 			System.out.println("list.size = "+list.size());
 			for(int i=0; i<list.size();i++) {
 				list.get(i).send();
 			}
 		}catch(Exception e) {
+			e.getMessage();
 		}
 	}
 	
@@ -91,9 +94,16 @@ public class MainServer  extends Thread{
 			try {
 				broadCast();
 				//1초에 한 번 씩 - 추후 변경 가능 
-				Thread.sleep(1000);
+				Thread.sleep(5000);
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			
+			for(int i = 0; i<list.size(); i++) {
+				if(list.get(i).socket.isClosed()) {
+					Client removed = list.get(i);
+					list.remove(removed);
+				}
 			}
 		}
 	}
@@ -120,13 +130,13 @@ public class MainServer  extends Thread{
 		public void send() {
 			try {
 				if(on == true) {
-					ArrayList<Room> target = (ArrayList<Room>) roomList.clone();
+					ArrayList<Room> target = (ArrayList<Room>) roomList2.clone();
 //					for(int i = 0 ; i < target.size();i++) {
 //						System.out.println("target.get("+i+").cnt = "+target.get(i).getCnt());
 //					}
-					System.out.println("send = "+target.hashCode()+" / "+target);
+//					System.out.println("send = "+target.hashCode()+" / "+target);
 					out.writeObject(target);
-					out.flush();				
+					out.flush();	
 				}				
 			}catch(Exception e) {
 				e.getMessage();
@@ -146,7 +156,7 @@ public class MainServer  extends Thread{
 					//1 로그인
 					int num = in.readInt();
 					switch(num) {
-					case 0:
+					case Signal.ADDMEMBER:
 						//회원가입 기입된 정보를 받아온다(u1)
 						User u1 = (User)in.readObject();
 						//이미 가입되어있는 아이디 혹은 닉네임인지 확인
@@ -156,14 +166,14 @@ public class MainServer  extends Thread{
 							for(int i = 0; i < user_list.size(); i++) {
 								User target = user_list.get(i);
 								//같은 아이디 혹은 닉네임이 존재하면 회원가입 진행 중단
-								if(target.id.equals(u1.id)||target.nickname.equals(u1.nickname)) {
+								if(target.getId().equals(u1.getId())||target.getNickname().equals(u1.getNickname())) {
 									isUser = true;
 									break;
 								}
 							}
 							//회원목록에 없을 경우 회원 가입 진행
 							if(!isUser) {
-								u1.money = 10000;//초기 돈 설정 (임의로 설정 추후 변경)
+								u1.setMoney(10000);//초기 돈 설정 (임의로 설정 추후 변경)
 								user_list.add(u1);
 							}
 							out.writeBoolean(!isUser);
@@ -177,14 +187,14 @@ public class MainServer  extends Thread{
 							out.flush();
 						}
 						break;
-					case 1:
+					case Signal.LOGIN:
 						//로그인
 						User u2 = (User)in.readObject();
 						
 						//회원 목록에서 일치하는 것을 받아와 로그인 진행
 						for(int i = 0; i<user_list.size(); i++) {
 							User user = user_list.get(i);
-							if(user.id.equals(u2.id) && user.pw.equals(u2.pw)) {
+							if(user.getId().equals(u2.getId()) && user.getPw().equals(u2.getPw())) {
 								isMember = true;
 								u2 = user_list.get(i);
 								break;
@@ -212,7 +222,7 @@ public class MainServer  extends Thread{
 				loginProc();
 				//방 목록을 1회(시작시 뿌려준다)
 				on = true;
-//				send();
+				send();
 				Process p  = new Process(in, roomList, user);
 				p.process();
 			}catch(Exception e) {}
