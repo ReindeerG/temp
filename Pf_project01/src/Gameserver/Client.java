@@ -160,8 +160,26 @@ public class Client extends Thread {
 	public void setYetresult(boolean yetresult) {
 		this.yetresult = yetresult;
 	}
-	
-	
+	private boolean phase2;
+	public boolean isPhase2() {
+		return phase2;
+	}
+	public void setPhase2(boolean phase2) {
+		this.phase2 = phase2;
+	}
+	private boolean onceneglecttimer;
+	public boolean isOnceneglecttimer() {
+		return onceneglecttimer;
+	}
+	public void setOnceneglecttimer(boolean onceneglecttimer) {
+		this.onceneglecttimer = onceneglecttimer;
+	}
+
+	public void SelectSet(int n, String str) {
+		setCardset(n);
+		getWindow().nameset(str);
+		return;
+	}
 	public void callRefresh() {
 		try {
 			out.writeObject(Gaming.PlzRefresh());
@@ -235,6 +253,7 @@ public class Client extends Thread {
 		return;
 	}
 	public void Bet_Call() {
+		setCanthalf(true);
 		if(isBoolTrash()==false) {
 			setBoolTrash(true);
 			try {
@@ -293,6 +312,7 @@ public class Client extends Thread {
 		return;
 	}
 	public void Bet_Check() {
+		setCanthalf(true);
 		if(isBoolTrash()==false) {
 			setBoolTrash(true);
 			try {
@@ -368,6 +388,7 @@ public class Client extends Thread {
 			try {
 				in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 				Gaming gm = (Gaming)in.readObject();
+//				System.out.println(gm.getWhat()+"받음");
 				switch(gm.getWhat()) {
 				case Gaming.IDMATCH: {
 					out.writeObject(Gaming.SendID(getUserid()));
@@ -462,11 +483,13 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.GETCARD: {
+					setPhase2(false);
 					getWindow().ResetCards();
 					setYetresult(false);
 					setBoolTrash(false);
 					setTrash(0);
 					setCardset(0);
+					players = gm.getPlayers();
 					for(Player p : players) {
 						if(p.getUserid().equals(getUserid())) {
 							me=p;
@@ -474,7 +497,8 @@ public class Client extends Thread {
 						}
 					}
 					
-					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
+					card1 = getMe().getCard1(); card2 = getMe().getCard2(); card3 = getMe().getCard3();
+//					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
 //					System.out.println(card1);
 					getWindow().DrawCards();
 //					System.out.println(card1+" "+card2+" "+card3);
@@ -484,6 +508,8 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.DRAW2: {
+					setOnceneglecttimer(true);
+					setPhase2(true);
 					setTurn(1);
 					for(Player p : players) {
 						if(p.getUserid().equals(getUserid())) {
@@ -499,13 +525,24 @@ public class Client extends Thread {
 					break;
 				}
 				case Gaming.GAME_TIMER: {
-					getWindow().Timer(gm.getWho(), gm.getTime());
-//					getWindow().Clockicons();
+					if(isOnceneglecttimer()==false) {
+	//					System.out.println(gm.getWho()+"번째가 "+gm.getTime());
+						setTurn(gm.getTurn());
+	//					System.out.println("지금"+gm.getWho()+"/"+getTurn()+"턴~~~");
+						getWindow().Timer(gm.getWho(), gm.getTime());
+	//					getWindow().Clockicons();
+					} else {
+						setOnceneglecttimer(false);
+					}
 					break;
 				}
 				case Gaming.GAME_START: {
+					setOnceneglecttimer(false);
 					thisplaynum=gm.getThisplaynum();
+					setMoneythisgame(gm.getMoneythisgame());
+					setMinforbet(gm.getMinforbet());
 					inggame=true;
+					setPhase2(false);
 					canthalf=false;
 					turn=1;
 					getWindow().StartToButton();
@@ -516,6 +553,14 @@ public class Client extends Thread {
 //						setYetresult(true);
 						players=gm.getPlayers();
 						getWindow().Refresh();
+//						boolean isRe = false;
+//						for(Player p : players) {
+//							if(p.getGameresult()==2) { isRe=true; break; }
+//						}
+//						if(isRe==false) setMinforbet(0);
+						
+						
+						
 						getWindow().Resultgame();
 						whosturn=0;
 //						out.writeObject(new Gaming(Gaming.GAME_RESULT_OK));

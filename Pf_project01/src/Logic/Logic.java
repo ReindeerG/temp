@@ -152,9 +152,9 @@ public class Logic {
 		case 7940: return "厘荤(10·4)";
 		case 7946: return "技氟(4·6)";
 		
-		case 64171: return "4·7鞠青绢荤";
-		case 63171: return "3·7动棱捞";
-		case 64191: return "港胖备府备荤";
+		case 64171: return "鞠青绢荤";
+		case 63171: return "动棱捞(3·7)";
+		case 64191: return "港备荤(9·4)";
 		case 64090: return "备荤(9·4)";
 		
 		case 19: return "癌坷(9昌)";

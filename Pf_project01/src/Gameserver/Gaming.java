@@ -20,7 +20,6 @@ public class Gaming implements Serializable {
 	public static final int GAME_CALL = 11;
 	public static final int GAME_HALF = 12;
 	public static final int GAME_CHECK = 13;
-	public static final int MONEY_REFRESH = 89;
 	public static final int TURN_REFRESH = 87;
 	public static final int RESETCARDS = 501;
 	public static final int GETCARD = 500;
@@ -39,6 +38,7 @@ public class Gaming implements Serializable {
 	public static final int BAN = 444;
 	public static final int IMBANNED = 445;
 	public static final int REFRESH = 88;
+	public static final int MONEY_REFRESH = 89;
 	public static final int IDMATCH = 77;
 	
 	
@@ -55,6 +55,7 @@ public class Gaming implements Serializable {
 	private int card3;
 	private int cardset;
 	private int thisplaynum;
+	private int turn;
 	
 	private int time;
 	
@@ -96,10 +97,10 @@ public class Gaming implements Serializable {
 	
 	
 	
-	// 서버에서 클라이언트들에게 다음턴이 누군지 뿌려줄 때
-	public static Gaming Gamestart(int thisplaynum) {
+	// 서버에서 클라이언트들에게 게임시작하라고 할 때
+	public static Gaming Gamestart(int thisplaynum, int moneythisgame, int minforbet) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_START); g.setThisplaynum(thisplaynum);
+		g.setWhat(Gaming.GAME_START); g.setThisplaynum(thisplaynum); g.setMoneythisgame(moneythisgame); g.setMinforbet(minforbet);
 		return g;
 	}
 	// 서버에서 클라이언트들에게 다음턴이 누군지 뿌려줄 때
@@ -121,9 +122,9 @@ public class Gaming implements Serializable {
 		return g;
 	}
 	// 서버에서 게임시작시 카드 나눠줄 때
-	public static Gaming GiveCard(int card1, int card2, int card3) {
+	public static Gaming GiveCard(ArrayList<Player> players) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GETCARD); g.setCard1(card1); g.setCard2(card2); g.setCard3(card3);
+		g.setWhat(Gaming.GETCARD); g.setPlayers(players);
 		return g;
 	}
 	// 서버에서 2번째 카드 뽑으라고 할 때
@@ -271,9 +272,9 @@ public class Gaming implements Serializable {
 		return g;
 	}
 	// 서버에서 클라이언트들에게 타이머 뿌릴 때
-	public static Gaming Timer(int who, int time) {
+	public static Gaming Timer(int who, int time, int turn) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_TIMER); g.setWho(who); g.setTime(time);
+		g.setWhat(Gaming.GAME_TIMER); g.setWho(who); g.setTime(time); g.setTurn(turn);
 		return g;
 	}
 	// 서버-클라이언트 양방향 판돈/베팅최소금액 갱신
@@ -443,6 +444,14 @@ public class Gaming implements Serializable {
 
 	public void setMinforbet(int minforbet) {
 		this.minforbet = minforbet;
+	}
+
+	public int getTurn() {
+		return turn;
+	}
+
+	public void setTurn(int turn) {
+		this.turn = turn;
 	}
 
 }

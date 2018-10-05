@@ -134,6 +134,13 @@ public class Mainwindow extends JFrame {
 	private Card p4card2=null;
 	private Card p4card3=null;
 	
+	private SetWindow nowsw=null;
+	public void toemptysw() {
+		nowsw=null;
+		return;
+	}
+
+	
 	private ActionListener alcard1 = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			if(client.isBoolTrash()==false && client.isInggame()==true) {
@@ -195,6 +202,8 @@ public class Mainwindow extends JFrame {
 	private ImageIcon img_bt_half_on;
 	private ImageIcon img_bt_moneymod;
 	private ImageIcon img_bt_moneymod_on;
+	private ImageIcon img_bt_jokbo;
+	private ImageIcon img_bt_jokbo_on;
 	private ImageIcon img_win;
 	private ImageIcon img_re;
 	private ImageIcon img_ban;
@@ -210,6 +219,7 @@ public class Mainwindow extends JFrame {
 	private JButton bt_invite = new JButton();
 	private JButton bt_exit = new JButton();
 	private JButton bt_moneymod = new JButton();
+	private JButton bt_jokbo = new JButton();
 	private JButton bt_bet_call = new JButton();
 	private JButton bt_bet_die = new JButton();
 	private JButton bt_bet_check = new JButton();
@@ -295,7 +305,11 @@ public class Mainwindow extends JFrame {
 		bt_exit.setIcon(img_bt_leave_ok);
 		bt_exit.setRolloverIcon(img_bt_leave_on);
 		con.add(bt_exit);
-		bt_moneymod.setBounds(1000, 680, 100, 40);
+		bt_jokbo.setBounds(1000, 680, 100, 40);
+		bt_jokbo.setIcon(img_bt_jokbo);
+		bt_jokbo.setRolloverIcon(img_bt_jokbo_on); 
+		con.add(bt_jokbo);
+		bt_moneymod.setBounds(1100, 680, 100, 40);
 		bt_moneymod.setIcon(img_bt_moneymod);
 		bt_moneymod.setRolloverIcon(img_bt_moneymod_on);
 		bt_moneymod.setEnabled(false);
@@ -515,20 +529,20 @@ public class Mainwindow extends JFrame {
 			}
 			client.Bet_Half();
 		});
-		bt_cardset1.addActionListener(e->{
-			Lbl_myset.setText(bt_cardset1.getText());
-			client.setCardset(1);
-		});
-		bt_cardset2.addActionListener(e->{
-			Lbl_myset.setText(bt_cardset2.getText());
-			client.setCardset(2);
-		});
-		bt_cardset3.addActionListener(e->{
-			Lbl_myset.setText(bt_cardset3.getText());
-			client.setCardset(3);
-		});
+//		bt_cardset1.addActionListener(e->{
+//			Lbl_myset.setText(bt_cardset1.getText());
+//			client.setCardset(1);
+//		});
+//		bt_cardset2.addActionListener(e->{
+//			Lbl_myset.setText(bt_cardset2.getText());
+//			client.setCardset(2);
+//		});
+//		bt_cardset3.addActionListener(e->{
+//			Lbl_myset.setText(bt_cardset3.getText());
+//			client.setCardset(3);
+//		});
 		bt_moneymod.addActionListener(e->{
-			PandonWindow pw = new PandonWindow(client);
+			PandonWindow pw = new PandonWindow(client, this);
 			pw.setVisible(true);
 		});
 		bt_nickch.addActionListener(e->{
@@ -587,6 +601,8 @@ public class Mainwindow extends JFrame {
 						System.out.println(client.getPandon());
 					} else if(makechat.getText().equals("/뽑아")) {
 						DrawCards2();
+					} else if(makechat.getText().equals("/최저")) {
+						System.out.println(client.getMinforbet());
 					}
 					else {
 						client.MakeChat(makechat.getText());
@@ -688,6 +704,8 @@ public class Mainwindow extends JFrame {
 			img_bt_half_on = new ImageIcon(ImageIO.read(new File("Images\\bt_half_on.png")));
 			img_bt_moneymod = new ImageIcon(ImageIO.read(new File("Images\\moneymod.png")));
 			img_bt_moneymod_on = new ImageIcon(ImageIO.read(new File("Images\\moneymod_on.png")));
+			img_bt_jokbo = new ImageIcon(ImageIO.read(new File("Images\\jokbo.png")));;
+			img_bt_jokbo_on = new ImageIcon(ImageIO.read(new File("Images\\jokbo_on.png")));;
 			img_win = new ImageIcon(ImageIO.read(new File("Images\\win.png")));
 			img_re = new ImageIcon(ImageIO.read(new File("Images\\re.png")));
 			img_ban = new ImageIcon(ImageIO.read(new File("Images\\BAN.png")));
@@ -699,6 +717,7 @@ public class Mainwindow extends JFrame {
 			cards[i].setIcon(cardimages[20]);
 			cards[i].setBounds(cardposori[0][i], cardposori[1][i], 100, 156);
 		}
+		return;
 	}
 	public void ReceiveMsg(String userid, String msg, String time) {
 		chatlog.append("["+time+"] <"+userid+"> "+msg+"\n");
@@ -745,6 +764,10 @@ public class Mainwindow extends JFrame {
 		mycard1.setLocation(cardpospl[0][0], cardpospl[1][0]);
 		mycard2.setLocation(cardpospl[0][1], cardpospl[1][1]);
 		Lbl_myset.setText("");
+		return;
+	}
+	public void nameset(String str) {
+		Lbl_myset.setText(str);
 		return;
 	}
 	public void Refresh() {
@@ -953,75 +976,15 @@ public class Mainwindow extends JFrame {
 		return;
 	}
 	public void Timer(int who, int time) {
-		players = client.getPlayers();
-		if(client.isInggame()==true) {
-			int me = client.getMe().getOrder();
-			if(who-me==0) {
-				Lbl_mytime.setText("남은 시간: "+(10-time/10)+"초");
-				Lbl_2p_time.setText("");
-				Lbl_3p_time.setText("");
-				Lbl_4p_time.setText("");
-				Lbl_myclock.setIcon(img_alarmclock);
-				Lbl_2p_clock.setIcon(null);
-				Lbl_3p_clock.setIcon(null);
-				Lbl_4p_clock.setIcon(null);
-				MyTurn();
+//		System.out.println("타이머 받고있음");
+		boolean isOver = false;
+		for(Player p : client.getPlayers()) {
+			if(p.getGameresult()==1||p.getGameresult()==2) {
+				isOver = true;
+				break;
 			}
-			else if(who-me==1 || who-me==-3) {
-				Lbl_2p_time.setText("남은 시간: "+(10-time/10)+"초");
-				Lbl_mytime.setText("");
-				Lbl_3p_time.setText("");
-				Lbl_4p_time.setText("");
-				Lbl_2p_clock.setIcon(img_alarmclock);
-				Lbl_myclock.setIcon(null);
-				Lbl_3p_clock.setIcon(null);
-				Lbl_4p_clock.setIcon(null);
-				NotMyTurn();
-			}
-			else if(who-me==2 || who-me==-2) {
-				Lbl_3p_time.setText("남은 시간: "+(10-time/10)+"초");
-				Lbl_mytime.setText("");
-				Lbl_2p_time.setText("");
-				Lbl_4p_time.setText("");
-				Lbl_3p_clock.setIcon(img_alarmclock);
-				Lbl_myclock.setIcon(null);
-				Lbl_2p_clock.setIcon(null);
-				Lbl_4p_clock.setIcon(null);
-				NotMyTurn();
-			}
-			else if(who-me==3 || who-me==-1) {
-				Lbl_4p_time.setText("남은 시간: "+(10-time/10)+"초");
-				Lbl_mytime.setText("");
-				Lbl_2p_time.setText("");
-				Lbl_3p_time.setText("");
-				Lbl_4p_clock.setIcon(img_alarmclock);
-				Lbl_myclock.setIcon(null);
-				Lbl_2p_clock.setIcon(null);
-				Lbl_3p_clock.setIcon(null);
-				NotMyTurn();
-			}
-			for(Player p : players) {
-				if(p.getGameresult()==1||p.getGameresult()==2) {
-					Lbl_mytime.setText("");
-					Lbl_2p_time.setText("");
-					Lbl_3p_time.setText("");
-					Lbl_4p_time.setText("");
-					Lbl_myclock.setIcon(null);
-					Lbl_2p_clock.setIcon(null);
-					Lbl_3p_clock.setIcon(null);
-					Lbl_4p_clock.setIcon(null);
-					bt_bet_call.setIcon(img_bt_call_no);
-					bt_bet_die.setIcon(img_bt_die_no);
-					bt_bet_check.setIcon(img_bt_check_no);
-					bt_bet_half.setIcon(img_bt_half_no);
-					bt_bet_call.setEnabled(false);
-					bt_bet_die.setEnabled(false);
-					bt_bet_check.setEnabled(false);
-					bt_bet_half.setEnabled(false);
-					break;
-				}
-			}
-		} else {
+		}
+		if (isOver==true) {
 			Lbl_mytime.setText("");
 			Lbl_2p_time.setText("");
 			Lbl_3p_time.setText("");
@@ -1038,20 +1001,81 @@ public class Mainwindow extends JFrame {
 			bt_bet_die.setEnabled(false);
 			bt_bet_check.setEnabled(false);
 			bt_bet_half.setEnabled(false);
+			Resultgame();
+			return;
+		} else {
+			Lbl_gamemoney.setText("총 베팅금: "+client.getMoneythisgame()+"전");
+			players = client.getPlayers();
+			if(client.isInggame()==true) {
+				int me = client.getMe().getOrder();
+				if(who-me==0) {
+					Lbl_mytime.setText("남은 시간: "+(10-time/10)+"초");
+					Lbl_2p_time.setText("");
+					Lbl_3p_time.setText("");
+					Lbl_4p_time.setText("");
+					Lbl_myclock.setIcon(img_alarmclock);
+					Lbl_2p_clock.setIcon(null);
+					Lbl_3p_clock.setIcon(null);
+					Lbl_4p_clock.setIcon(null);
+					MyTurn();
+				}
+				else if(who-me==1 || who-me==-3) {
+					Lbl_2p_time.setText("남은 시간: "+(10-time/10)+"초");
+					Lbl_mytime.setText("");
+					Lbl_3p_time.setText("");
+					Lbl_4p_time.setText("");
+					Lbl_2p_clock.setIcon(img_alarmclock);
+					Lbl_myclock.setIcon(null);
+					Lbl_3p_clock.setIcon(null);
+					Lbl_4p_clock.setIcon(null);
+					NotMyTurn();
+				}
+				else if(who-me==2 || who-me==-2) {
+					Lbl_3p_time.setText("남은 시간: "+(10-time/10)+"초");
+					Lbl_mytime.setText("");
+					Lbl_2p_time.setText("");
+					Lbl_4p_time.setText("");
+					Lbl_3p_clock.setIcon(img_alarmclock);
+					Lbl_myclock.setIcon(null);
+					Lbl_2p_clock.setIcon(null);
+					Lbl_4p_clock.setIcon(null);
+					NotMyTurn();
+				}
+				else if(who-me==3 || who-me==-1) {
+					Lbl_4p_time.setText("남은 시간: "+(10-time/10)+"초");
+					Lbl_mytime.setText("");
+					Lbl_2p_time.setText("");
+					Lbl_3p_time.setText("");
+					Lbl_4p_clock.setIcon(img_alarmclock);
+					Lbl_myclock.setIcon(null);
+					Lbl_2p_clock.setIcon(null);
+					Lbl_3p_clock.setIcon(null);
+					NotMyTurn();
+				}
+				
+			} else {
+				Lbl_mytime.setText("");
+				Lbl_2p_time.setText("");
+				Lbl_3p_time.setText("");
+				Lbl_4p_time.setText("");
+				Lbl_myclock.setIcon(null);
+				Lbl_2p_clock.setIcon(null);
+				Lbl_3p_clock.setIcon(null);
+				Lbl_4p_clock.setIcon(null);
+				bt_bet_call.setIcon(img_bt_call_no);
+				bt_bet_die.setIcon(img_bt_die_no);
+				bt_bet_check.setIcon(img_bt_check_no);
+				bt_bet_half.setIcon(img_bt_half_no);
+				bt_bet_call.setEnabled(false);
+				bt_bet_die.setEnabled(false);
+				bt_bet_check.setEnabled(false);
+				bt_bet_half.setEnabled(false);
+			}
 		}
 		return;
 //		System.out.println(client.isInggame());
 	}
 	public void MyTurn() {
-		if(client.getCardset()==4) {
-			bt_cardset1.setLocation(-100, -20);
-			bt_cardset2.setLocation(-100, -20);
-			bt_cardset3.setLocation(-100, -20);
-		} else if(client.getCardset()==0 && client.getMe().getBetbool()==0 && mycard3.getLocation().y==cardpospl[1][0]) {
-			bt_cardset1.setBounds(800, 740, 100, 20);
-			bt_cardset2.setBounds(800, 760, 100, 20);
-			bt_cardset3.setBounds(800, 780, 100, 20);
-		}
 		if(client.isBoolTrash()==false) {
 			bt_inv_card1.setLocation(mycard1.getLocation().x, mycard1.getLocation().y);
 			bt_inv_card2.setLocation(mycard2.getLocation().x, mycard2.getLocation().y);
@@ -1084,7 +1108,7 @@ public class Mainwindow extends JFrame {
 			bt_bet_call.setToolTipText("오픈할 패를 선택해야 베팅할 수 있습니다.");
 			bt_bet_half.setToolTipText("오픈할 패를 선택해야 베팅할 수 있습니다.");
 			bt_bet_check.setToolTipText("오픈할 패를 선택해야 베팅할 수 있습니다.");
-		} else if (client.getCardset()==0 && mycard3.getLocation().y==cardpospl[1][0]) {
+		} else if (client.getCardset()==0 && mycard3!=null && mycard3.getLocation().y==cardpospl[1][0]) {
 			bt_bet_call.setIcon(img_bt_call_no);
 			bt_bet_call.setRolloverIcon(img_bt_call_no);
 			bt_bet_call.setEnabled(false);
@@ -1099,15 +1123,22 @@ public class Mainwindow extends JFrame {
 			bt_bet_check.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
 		}
 		else {
-			if(client.getTurn()==1) {
-				bt_bet_check.setIcon(img_bt_check_ok);
-				bt_bet_check.setRolloverIcon(img_bt_check_on);
-				bt_bet_check.setToolTipText(null);
-				bt_bet_check.setEnabled(true);
+			if(client.isPhase2()==true) {
+				if(client.getTurn()==1) {
+					bt_bet_check.setIcon(img_bt_check_ok);
+					bt_bet_check.setRolloverIcon(img_bt_check_on);
+					bt_bet_check.setToolTipText(null);
+					bt_bet_check.setEnabled(true);
+				} else {
+					bt_bet_check.setIcon(img_bt_check_no);
+					bt_bet_check.setRolloverIcon(img_bt_check_no);
+					bt_bet_check.setToolTipText("선인 사람의 첫턴에만 가능합니다.");
+					bt_bet_check.setEnabled(false);
+				}
 			} else {
 				bt_bet_check.setIcon(img_bt_check_no);
 				bt_bet_check.setRolloverIcon(img_bt_check_no);
-				bt_bet_check.setToolTipText("선인 사람의 첫턴에만 가능합니다.");
+				bt_bet_check.setToolTipText("모든 패를 받은 후에 선인 사람의 첫턴에만 가능합니다.");
 				bt_bet_check.setEnabled(false);
 			}
 //			if(client.getMinforbet()==0) {
@@ -1151,6 +1182,22 @@ public class Mainwindow extends JFrame {
 				bt_bet_half.setEnabled(true);
 			}
 		}
+		if(client.getCardset()==4) {
+			bt_cardset1.setLocation(-100, -20);
+			bt_cardset2.setLocation(-100, -20);
+			bt_cardset3.setLocation(-100, -20);
+		} else if(client.getCardset()==0 && client.getMe().getBetbool()==0 && mycard3!=null && mycard3.getLocation().y==cardpospl[1][0]) {
+			if(nowsw==null) {
+				nowsw = new SetWindow(client, this, cardimages[client.getMe().getCard1()-1], cardimages[client.getMe().getCard2()-1], cardimages[client.getMe().getCard3()-1], Logic.lastName(client.getMe().getCardset()[0]), Logic.lastName(client.getMe().getCardset()[1]), Logic.lastName(client.getMe().getCardset()[2]));
+				nowsw.setVisible(true);
+			}
+			
+//			bt_cardset1.setBounds(800, 740, 100, 20);
+//			bt_cardset2.setBounds(800, 760, 100, 20);
+//			bt_cardset3.setBounds(800, 780, 100, 20);
+		}
+		
+		
 		return;
 	}
 	public void NotMyTurn() {
@@ -1201,6 +1248,14 @@ public class Mainwindow extends JFrame {
 		Lbl_2p_bet.setIcon(null);
 		Lbl_3p_bet.setIcon(null);
 		Lbl_4p_bet.setIcon(null);
+		Lbl_myclock.setIcon(null);
+		Lbl_mytime.setText("");
+		Lbl_2p_clock.setIcon(null);
+		Lbl_2p_time.setText("");
+		Lbl_3p_clock.setIcon(null);
+		Lbl_3p_time.setText("");
+		Lbl_4p_clock.setIcon(null);
+		Lbl_4p_time.setText("");
 		client.callRefresh();
 		return;
 	}
@@ -1212,37 +1267,37 @@ public class Mainwindow extends JFrame {
 				if(client.getMe().getOrder()==0 && players.get(1).getBetbool()>1) {
 					p2card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 					p2card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-					if(players.get(1).getTrash()!=0) p2card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+					if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 					Lbl_2p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 				} else if(client.getMe().getOrder()==1 && players.get(0).getBetbool()>1) {
 					p4card1.setIcon(cardimages[players.get(0).getCard1()-1]);
 					p4card2.setIcon(cardimages[players.get(0).getCard2()-1]);
-					if(players.get(0).getTrash()!=0) p4card3.setIcon(cardimages[players.get(0).getCard3()-1]);
+					if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(0).getCard3()-1]);
 					Lbl_4p_set.setText(Logic.lastName(players.get(0).getSelCardset()));
 				} else if(client.getMe().getOrder()==2) {
 					if(players.get(0).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(0).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(0).getCard2()-1]);
-						if(players.get(0).getTrash()!=0) p3card3.setIcon(cardimages[players.get(0).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(0).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(0).getSelCardset()));
 					}
 					if(players.get(1).getBetbool()>1) {
 						p4card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 						p4card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-						if(players.get(1).getTrash()!=0) p4card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+						if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 						Lbl_4p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 					}
 				} else if(client.getMe().getOrder()==3) {
 					if(players.get(0).getBetbool()>1) {
 						p2card1.setIcon(cardimages[players.get(0).getCard1()-1]);
 						p2card2.setIcon(cardimages[players.get(0).getCard2()-1]);
-						if(players.get(0).getTrash()!=0) p2card3.setIcon(cardimages[players.get(0).getCard3()-1]);
+						if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(0).getCard3()-1]);
 						Lbl_2p_set.setText(Logic.lastName(players.get(0).getSelCardset()));
 					}
 					if(players.get(1).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-						if(players.get(1).getTrash()!=0) p3card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 					}
 				}
@@ -1253,58 +1308,58 @@ public class Mainwindow extends JFrame {
 					if(players.get(1).getBetbool()>1) {
 						p2card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 						p2card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-						if(players.get(1).getTrash()!=0) p2card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+						if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 						Lbl_2p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 					}
 					if(players.get(2).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(2).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(2).getCard2()-1]);
-						if(players.get(2).getTrash()!=0) p3card3.setIcon(cardimages[players.get(2).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(2).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(2).getSelCardset()));
 					}
 				} else if(client.getMe().getOrder()==1) {
 					if(players.get(0).getBetbool()>1) {
 						p4card1.setIcon(cardimages[players.get(0).getCard1()-1]);
 						p4card2.setIcon(cardimages[players.get(0).getCard2()-1]);
-						if(players.get(0).getTrash()!=0) p4card3.setIcon(cardimages[players.get(0).getCard3()-1]);
+						if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(0).getCard3()-1]);
 						Lbl_4p_set.setText(Logic.lastName(players.get(0).getSelCardset()));
 					}
 					if(players.get(2).getBetbool()>1) {
 						p2card1.setIcon(cardimages[players.get(2).getCard1()-1]);
 						p2card2.setIcon(cardimages[players.get(2).getCard2()-1]);
-						if(players.get(2).getTrash()!=0) p2card3.setIcon(cardimages[players.get(2).getCard3()-1]);
+						if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(2).getCard3()-1]);
 						Lbl_2p_set.setText(Logic.lastName(players.get(2).getSelCardset()));
 					}
 				} else if(client.getMe().getOrder()==2) {
 					if(players.get(0).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(0).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(0).getCard2()-1]);
-						if(players.get(0).getTrash()!=0) p3card3.setIcon(cardimages[players.get(0).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(0).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(0).getSelCardset()));
 					}
 					if(players.get(1).getBetbool()>1) {
 						p4card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 						p4card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-						if(players.get(1).getTrash()!=0) p4card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+						if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 						Lbl_4p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 					}
 				} else if(client.getMe().getOrder()==3) {
 					if(players.get(0).getBetbool()>1) {
 						p2card1.setIcon(cardimages[players.get(0).getCard1()-1]);
 						p2card2.setIcon(cardimages[players.get(0).getCard2()-1]);
-						if(players.get(0).getTrash()!=0) p2card3.setIcon(cardimages[players.get(0).getCard3()-1]);
+						if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(0).getCard3()-1]);
 						Lbl_2p_set.setText(Logic.lastName(players.get(0).getSelCardset()));
 					}
 					if(players.get(1).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-						if(players.get(1).getTrash()!=0) p3card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 					}
 					if(players.get(2).getBetbool()>1) {
 						p4card1.setIcon(cardimages[players.get(2).getCard1()-1]);
 						p4card2.setIcon(cardimages[players.get(2).getCard2()-1]);
-						if(players.get(2).getTrash()!=0) p4card3.setIcon(cardimages[players.get(2).getCard3()-1]);
+						if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(2).getCard3()-1]);
 						Lbl_4p_set.setText(Logic.lastName(players.get(2).getSelCardset()));
 					}
 				}
@@ -1315,57 +1370,57 @@ public class Mainwindow extends JFrame {
 					if(players.get(1).getBetbool()>1) {
 						p2card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 						p2card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-						if(players.get(1).getTrash()!=0) p2card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+						if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 						Lbl_2p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 					}
 					if(players.get(2).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(2).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(2).getCard2()-1]);
-						if(players.get(2).getTrash()!=0) p3card3.setIcon(cardimages[players.get(2).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(2).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(2).getSelCardset()));
 					}
 					if(players.get(3).getBetbool()>1) {
 						p4card1.setIcon(cardimages[players.get(3).getCard1()-1]);
 						p4card2.setIcon(cardimages[players.get(3).getCard2()-1]);
-						if(players.get(3).getTrash()!=0) p4card3.setIcon(cardimages[players.get(3).getCard3()-1]);
+						if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(3).getCard3()-1]);
 						Lbl_4p_set.setText(Logic.lastName(players.get(3).getSelCardset()));
 					}
 				} else if(client.getMe().getOrder()==1) {
 					if(players.get(0).getBetbool()>1) {
 						p4card1.setIcon(cardimages[players.get(0).getCard1()-1]);
 						p4card2.setIcon(cardimages[players.get(0).getCard2()-1]);
-						if(players.get(0).getTrash()!=0) p4card3.setIcon(cardimages[players.get(0).getCard3()-1]);
+						if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(0).getCard3()-1]);
 						Lbl_4p_set.setText(Logic.lastName(players.get(0).getSelCardset()));
 					}
 					if(players.get(2).getBetbool()>1) {
 						p2card1.setIcon(cardimages[players.get(2).getCard1()-1]);
 						p2card2.setIcon(cardimages[players.get(2).getCard2()-1]);
-						if(players.get(2).getTrash()!=0) p2card3.setIcon(cardimages[players.get(2).getCard3()-1]);
+						if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(2).getCard3()-1]);
 						Lbl_2p_set.setText(Logic.lastName(players.get(2).getSelCardset()));
 					}
 					if(players.get(3).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(3).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(3).getCard2()-1]);
-						if(players.get(3).getTrash()!=0) p3card3.setIcon(cardimages[players.get(3).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(3).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(3).getSelCardset()));
 					}
 				} else if(client.getMe().getOrder()==2) {
 					if(players.get(1).getBetbool()>1) {
 						p4card1.setIcon(cardimages[players.get(1).getCard1()-1]);
 						p4card2.setIcon(cardimages[players.get(1).getCard2()-1]);
-						if(players.get(1).getTrash()!=0) p4card3.setIcon(cardimages[players.get(1).getCard3()-1]);
+						if(client.isPhase2()==true) p4card3.setIcon(cardimages[players.get(1).getCard3()-1]);
 						Lbl_4p_set.setText(Logic.lastName(players.get(1).getSelCardset()));
 					}
 					if(players.get(3).getBetbool()>1) {
 						p2card1.setIcon(cardimages[players.get(3).getCard1()-1]);
 						p2card2.setIcon(cardimages[players.get(3).getCard2()-1]);
-						if(players.get(3).getTrash()!=0) p2card3.setIcon(cardimages[players.get(3).getCard3()-1]);
+						if(client.isPhase2()==true) p2card3.setIcon(cardimages[players.get(3).getCard3()-1]);
 						Lbl_2p_set.setText(Logic.lastName(players.get(3).getSelCardset()));
 					}
 					if(players.get(4).getBetbool()>1) {
 						p3card1.setIcon(cardimages[players.get(4).getCard1()-1]);
 						p3card2.setIcon(cardimages[players.get(4).getCard2()-1]);
-						if(players.get(4).getTrash()!=0) p3card3.setIcon(cardimages[players.get(4).getCard3()-1]);
+						if(client.isPhase2()==true) p3card3.setIcon(cardimages[players.get(4).getCard3()-1]);
 						Lbl_3p_set.setText(Logic.lastName(players.get(4).getSelCardset()));
 					}
 				}
@@ -1375,6 +1430,9 @@ public class Mainwindow extends JFrame {
 		return;
 	}
 	public void Resultgame() {
+		for(Player p : players) {
+			if(p.getGameresult()==1) { client.setMinforbet(0); break; }
+		}
 		if(client.getMe().getTrash()==0) {
 			Lbl_myset.setText("");
 		}
@@ -1391,6 +1449,10 @@ public class Mainwindow extends JFrame {
 		Lbl_3p_time.setText("");
 		Lbl_4p_clock.setIcon(null);
 		Lbl_4p_time.setText("");
+		bt_bet_call.setIcon(img_bt_call_no);
+		bt_bet_die.setIcon(img_bt_die_no);
+		bt_bet_check.setIcon(img_bt_check_no);
+		bt_bet_half.setIcon(img_bt_half_no);
 		bt_bet_call.setEnabled(false);
 		bt_bet_die.setEnabled(false);
 		bt_bet_check.setEnabled(false);
@@ -1521,6 +1583,7 @@ public class Mainwindow extends JFrame {
 		} else {
 			to5sec();
 		}
+		System.out.println("리절트완료~");
 		return;
 	}
 	public void to5sec() {
@@ -1685,6 +1748,7 @@ public class Mainwindow extends JFrame {
 	}
 	
 	public void DrawCards() {
+		Lbl_gamemoney.setText("총 베팅금: "+client.getMoneythisgame()+"전");
 		players = client.getPlayers();
 		int temporder = client.getMe().getOrder();
 		switch(client.getThisplaynum()) {
@@ -1892,6 +1956,7 @@ public class Mainwindow extends JFrame {
 		
 	}
 	public void DrawCards2() {
+		System.out.println("2번째 카드뽑는다");
 		NotMyTurn();
 		Lbl_myclock.setIcon(null);
 		Lbl_2p_clock.setIcon(null);
@@ -2289,9 +2354,9 @@ public class Mainwindow extends JFrame {
 			bt_cardset1.setText(Logic.lastName(client.getMe().getCardset()[0]));
 			bt_cardset2.setText(Logic.lastName(client.getMe().getCardset()[1]));
 			bt_cardset3.setText(Logic.lastName(client.getMe().getCardset()[2]));
-			bt_cardset1.setBounds(800, 740, 100, 20);
-			bt_cardset2.setBounds(800, 760, 100, 20);
-			bt_cardset3.setBounds(800, 780, 100, 20);
+//			bt_cardset1.setBounds(800, 740, 100, 20);
+//			bt_cardset2.setBounds(800, 760, 100, 20);
+//			bt_cardset3.setBounds(800, 780, 100, 20);
 		}
 		
 		

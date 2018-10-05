@@ -10,17 +10,19 @@ import javax.swing.JButton;
 import Gameserver.Client;
 
 public class PandonWindow extends JDialog{
+	private Mainwindow parent;
 	private Client client;
 	public Client getClient() {
 		return client;
 	}
-	public PandonWindow(Client client) {
+	public PandonWindow(Client client, Mainwindow parent) {
 		this.client=client;
+		this.parent=parent;
 		getContentPane().setLayout(null);
 		this.setTitle("ÆÇµ·¼öÁ¤");
 		this.setSize(280, 140);
 		this.setResizable(false);
-		this.setLocationRelativeTo(this);
+		this.setLocationRelativeTo(parent);
 		this.setAlwaysOnTop(true);
 		this.setModal(true);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
