@@ -148,8 +148,8 @@ public class Mainwindow extends JFrame {
 				surrender();
 				mycard1.setLocation(mycard1.getLocation().x, mycard1.getLocation().y-30);
 				bt_inv_card1.setLocation(mycard1.getLocation().x, mycard1.getLocation().y);
-				client.setTrash(1);
-				Lbl_myset.setText("베팅을 마무리하세요.");
+				client.Open(1);
+				Lbl_myset.setText("오픈 패 선택완료");
 			}
 		}
 	};
@@ -159,8 +159,8 @@ public class Mainwindow extends JFrame {
 				surrender();
 				mycard2.setLocation(mycard2.getLocation().x, mycard2.getLocation().y-30);
 				bt_inv_card2.setLocation(mycard2.getLocation().x, mycard2.getLocation().y);
-				client.setTrash(2);
-				Lbl_myset.setText("베팅을 마무리하세요.");
+				client.Open(2);
+				Lbl_myset.setText("오픈 패 선택완료");
 			}
 		}
 	};
@@ -586,6 +586,12 @@ public class Mainwindow extends JFrame {
 			int result = JOptionPane.showConfirmDialog(this, "정말로 나가시겠습니까?", "나가기", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if(result==0) {
 				client.Leave();
+				try {
+					client.toStop();
+					client.getIn().close();
+					client.getOut().close();
+					client.getSocket().close();
+				} catch (IOException e1) { e1.printStackTrace(); }
 				this.dispose();
 			}
 		});
@@ -1014,8 +1020,7 @@ public class Mainwindow extends JFrame {
 			Lbl_gamemoney.setText("총 베팅금: "+client.getMoneythisgame()+"전");
 			players = client.getPlayers();
 			if(client.isInggame()==true) {
-				int me = client.getMe().getOrder();
-				if(who-me==0) {
+				if(who==4) {
 					if(time==70||time==80||time==90||time==100) {
 						Toolkit.getDefaultToolkit().beep();
 					}
@@ -1033,7 +1038,6 @@ public class Mainwindow extends JFrame {
 						Lbl_mytime.setForeground(Color.WHITE);
 					}
 					Lbl_mytime.setText("남은 시간: "+(10-time/10)+"초");
-					
 					Lbl_2p_time.setText("");
 					Lbl_3p_time.setText("");
 					Lbl_4p_time.setText("");
@@ -1041,81 +1045,156 @@ public class Mainwindow extends JFrame {
 					Lbl_2p_clock.setIcon(null);
 					Lbl_3p_clock.setIcon(null);
 					Lbl_4p_clock.setIcon(null);
-					MyTurn();
-				}
-				else if(who-me==1 || who-me==-3) {
-					if(time>95) {
-						Lbl_2p_time.setForeground(Color.YELLOW);
-					} else if(time>90) {
-						Lbl_2p_time.setForeground(Color.RED);
-					} else if(time>85) {
-						Lbl_2p_time.setForeground(Color.YELLOW);
-					} else if(time>80) {
-						Lbl_2p_time.setForeground(Color.RED);
-					} else if(time>50) {
-						Lbl_2p_time.setForeground(Color.YELLOW);
-					} else {
-						Lbl_2p_time.setForeground(Color.WHITE);
+					MyTurn(who);
+				} else if (who==5) {
+					if(time==70||time==80||time==90||time==100) {
+						Toolkit.getDefaultToolkit().beep();
 					}
-					Lbl_2p_time.setText("남은 시간: "+(10-time/10)+"초");
-					Lbl_mytime.setText("");
-					Lbl_3p_time.setText("");
-					Lbl_4p_time.setText("");
-					Lbl_2p_clock.setIcon(img_alarmclock);
-					Lbl_myclock.setIcon(null);
-					Lbl_3p_clock.setIcon(null);
-					Lbl_4p_clock.setIcon(null);
-					NotMyTurn();
-				}
-				else if(who-me==2 || who-me==-2) {
 					if(time>95) {
-						Lbl_3p_time.setForeground(Color.YELLOW);
+						Lbl_mytime.setForeground(Color.YELLOW);
 					} else if(time>90) {
-						Lbl_3p_time.setForeground(Color.RED);
+						Lbl_mytime.setForeground(Color.RED);
 					} else if(time>85) {
-						Lbl_3p_time.setForeground(Color.YELLOW);
+						Lbl_mytime.setForeground(Color.YELLOW);
 					} else if(time>80) {
-						Lbl_3p_time.setForeground(Color.RED);
+						Lbl_mytime.setForeground(Color.RED);
 					} else if(time>50) {
-						Lbl_3p_time.setForeground(Color.YELLOW);
+						Lbl_mytime.setForeground(Color.YELLOW);
 					} else {
-						Lbl_3p_time.setForeground(Color.WHITE);
+						Lbl_mytime.setForeground(Color.WHITE);
 					}
-					Lbl_3p_time.setText("남은 시간: "+(10-time/10)+"초");
-					Lbl_mytime.setText("");
-					Lbl_2p_time.setText("");
-					Lbl_4p_time.setText("");
-					Lbl_3p_clock.setIcon(img_alarmclock);
-					Lbl_myclock.setIcon(null);
-					Lbl_2p_clock.setIcon(null);
-					Lbl_4p_clock.setIcon(null);
-					NotMyTurn();
-				}
-				else if(who-me==3 || who-me==-1) {
-					if(time>95) {
-						Lbl_4p_time.setForeground(Color.YELLOW);
-					} else if(time>90) {
-						Lbl_4p_time.setForeground(Color.RED);
-					} else if(time>85) {
-						Lbl_4p_time.setForeground(Color.YELLOW);
-					} else if(time>80) {
-						Lbl_4p_time.setForeground(Color.RED);
-					} else if(time>50) {
-						Lbl_4p_time.setForeground(Color.YELLOW);
-					} else {
-						Lbl_4p_time.setForeground(Color.WHITE);
-					}
-					Lbl_4p_time.setText("남은 시간: "+(10-time/10)+"초");
-					Lbl_mytime.setText("");
+					Lbl_mytime.setText("남은 시간: "+(10-time/10)+"초");
 					Lbl_2p_time.setText("");
 					Lbl_3p_time.setText("");
-					Lbl_4p_clock.setIcon(img_alarmclock);
-					Lbl_myclock.setIcon(null);
+					Lbl_4p_time.setText("");
+					Lbl_myclock.setIcon(img_alarmclock);
 					Lbl_2p_clock.setIcon(null);
 					Lbl_3p_clock.setIcon(null);
-					NotMyTurn();
+					Lbl_4p_clock.setIcon(null);
+					Lbl_mybet.setIcon(null);
+					Lbl_2p_bet.setIcon(null);
+					Lbl_3p_bet.setIcon(null);
+					Lbl_4p_bet.setIcon(null);
+					if(client.getMe().getBetbool()!=1) {
+						if(nowsw==null && client.getCardset()==0) {
+							System.out.println("창띄우기");
+							nowsw = new SetWindow(client, this, cardimages[client.getMe().getCard1()-1], cardimages[client.getMe().getCard2()-1], cardimages[client.getMe().getCard3()-1], Logic.lastName(client.getMe().getCardset()[0]), Logic.lastName(client.getMe().getCardset()[1]), Logic.lastName(client.getMe().getCardset()[2]));
+							Thread th = new Thread() {
+								public void run() {
+									nowsw.setVisible(true);
+									return;
+								};
+							};
+							th.setDaemon(true);
+							th.start();
+						}
+					} else {
+						Lbl_myset.setText("생존자간 최종패 결정 중");
+					}
 				}
-				
+				else {
+					int me = client.getMe().getOrder();
+					if(who-me==0) {
+						if(time==70||time==80||time==90||time==100) {
+							Toolkit.getDefaultToolkit().beep();
+						}
+						if(time>95) {
+							Lbl_mytime.setForeground(Color.YELLOW);
+						} else if(time>90) {
+							Lbl_mytime.setForeground(Color.RED);
+						} else if(time>85) {
+							Lbl_mytime.setForeground(Color.YELLOW);
+						} else if(time>80) {
+							Lbl_mytime.setForeground(Color.RED);
+						} else if(time>50) {
+							Lbl_mytime.setForeground(Color.YELLOW);
+						} else {
+							Lbl_mytime.setForeground(Color.WHITE);
+						}
+						Lbl_mytime.setText("남은 시간: "+(10-time/10)+"초");
+						
+						Lbl_2p_time.setText("");
+						Lbl_3p_time.setText("");
+						Lbl_4p_time.setText("");
+						Lbl_myclock.setIcon(img_alarmclock);
+						Lbl_2p_clock.setIcon(null);
+						Lbl_3p_clock.setIcon(null);
+						Lbl_4p_clock.setIcon(null);
+						MyTurn(who);
+					}
+					else if(who-me==1 || who-me==-3) {
+						if(time>95) {
+							Lbl_2p_time.setForeground(Color.YELLOW);
+						} else if(time>90) {
+							Lbl_2p_time.setForeground(Color.RED);
+						} else if(time>85) {
+							Lbl_2p_time.setForeground(Color.YELLOW);
+						} else if(time>80) {
+							Lbl_2p_time.setForeground(Color.RED);
+						} else if(time>50) {
+							Lbl_2p_time.setForeground(Color.YELLOW);
+						} else {
+							Lbl_2p_time.setForeground(Color.WHITE);
+						}
+						Lbl_2p_time.setText("남은 시간: "+(10-time/10)+"초");
+						Lbl_mytime.setText("");
+						Lbl_3p_time.setText("");
+						Lbl_4p_time.setText("");
+						Lbl_2p_clock.setIcon(img_alarmclock);
+						Lbl_myclock.setIcon(null);
+						Lbl_3p_clock.setIcon(null);
+						Lbl_4p_clock.setIcon(null);
+						NotMyTurn();
+					}
+					else if(who-me==2 || who-me==-2) {
+						if(time>95) {
+							Lbl_3p_time.setForeground(Color.YELLOW);
+						} else if(time>90) {
+							Lbl_3p_time.setForeground(Color.RED);
+						} else if(time>85) {
+							Lbl_3p_time.setForeground(Color.YELLOW);
+						} else if(time>80) {
+							Lbl_3p_time.setForeground(Color.RED);
+						} else if(time>50) {
+							Lbl_3p_time.setForeground(Color.YELLOW);
+						} else {
+							Lbl_3p_time.setForeground(Color.WHITE);
+						}
+						Lbl_3p_time.setText("남은 시간: "+(10-time/10)+"초");
+						Lbl_mytime.setText("");
+						Lbl_2p_time.setText("");
+						Lbl_4p_time.setText("");
+						Lbl_3p_clock.setIcon(img_alarmclock);
+						Lbl_myclock.setIcon(null);
+						Lbl_2p_clock.setIcon(null);
+						Lbl_4p_clock.setIcon(null);
+						NotMyTurn();
+					}
+					else if(who-me==3 || who-me==-1) {
+						if(time>95) {
+							Lbl_4p_time.setForeground(Color.YELLOW);
+						} else if(time>90) {
+							Lbl_4p_time.setForeground(Color.RED);
+						} else if(time>85) {
+							Lbl_4p_time.setForeground(Color.YELLOW);
+						} else if(time>80) {
+							Lbl_4p_time.setForeground(Color.RED);
+						} else if(time>50) {
+							Lbl_4p_time.setForeground(Color.YELLOW);
+						} else {
+							Lbl_4p_time.setForeground(Color.WHITE);
+						}
+						Lbl_4p_time.setText("남은 시간: "+(10-time/10)+"초");
+						Lbl_mytime.setText("");
+						Lbl_2p_time.setText("");
+						Lbl_3p_time.setText("");
+						Lbl_4p_clock.setIcon(img_alarmclock);
+						Lbl_myclock.setIcon(null);
+						Lbl_2p_clock.setIcon(null);
+						Lbl_3p_clock.setIcon(null);
+						NotMyTurn();
+					}
+				}
 			} else {
 				Lbl_mytime.setText("");
 				Lbl_2p_time.setText("");
@@ -1138,136 +1217,126 @@ public class Mainwindow extends JFrame {
 		return;
 //		System.out.println(client.isInggame());
 	}
-	public void MyTurn() {
-		if(client.isBoolTrash()==false) {
+	public void MyTurn(int who) {
+		bt_inv_card1.setLocation(-100, -156);
+		bt_inv_card2.setLocation(-100, -156);
+//		if(client.getMe().getBetbool()==0 && client.isBoolTrash()==false) {
+//			
+//			if(mycard1.getLocation().y==cardpospl[1][0] && mycard2.getLocation().y==cardpospl[1][1]) {
+//				Lbl_myset.setText("오픈할 패를 선택해주세요.");
+//			} else {
+//				Lbl_myset.setText("오픈할 패를 선택해주세요.");
+//			}
+//		} else if(client.getMe().getBetbool()==1) {
+//			Lbl_myset.setText("");
+//		}
+		//-------------------------------------
+		if(who==4) {
+			if (!Lbl_myset.getText().equals("오픈 패 선택완료")) {
+				Lbl_myset.setText("오픈할 패를 선택해주세요.");
+			} else if(client.getMe().getBetbool()==1) {
+				Lbl_myset.setText("");
+			}
 			bt_inv_card1.setLocation(mycard1.getLocation().x, mycard1.getLocation().y);
 			bt_inv_card2.setLocation(mycard2.getLocation().x, mycard2.getLocation().y);
+			bt_bet_call.setIcon(img_bt_call_no);
+			bt_bet_call.setRolloverIcon(img_bt_call_no);
+			bt_bet_call.setEnabled(false);
+			bt_bet_half.setIcon(img_bt_half_no);
+			bt_bet_half.setRolloverIcon(img_bt_half_no);
+			bt_bet_half.setEnabled(false);
+			bt_bet_check.setIcon(img_bt_check_no);
+			bt_bet_check.setRolloverIcon(img_bt_check_no);
+			bt_bet_check.setEnabled(false);
+			bt_bet_die.setIcon(img_bt_die_no);
+			bt_bet_die.setRolloverIcon(img_bt_die_no);
+			bt_bet_die.setEnabled(false);
+			bt_bet_call.setToolTipText("오픈할 패를 선택하는 때입니다.");
+			bt_bet_half.setToolTipText("오픈할 패를 선택하는 때입니다.");
+			bt_bet_check.setToolTipText("오픈할 패를 선택하는 때입니다.");
+			bt_bet_die.setToolTipText("오픈할 패를 선택하는 때입니다.");
 		} else {
+			bt_bet_die.setIcon(img_bt_die_ok);
+			bt_bet_die.setRolloverIcon(img_bt_die_on);
+			bt_bet_die.setEnabled(true);
+			bt_bet_die.setToolTipText(null);
 			bt_inv_card1.setLocation(-100, -156);
 			bt_inv_card2.setLocation(-100, -156);
-		}
-		if(client.getMe().getBetbool()==0 && client.isBoolTrash()==false) {
-			if(mycard1.getLocation().y==cardpospl[1][0] && mycard2.getLocation().y==cardpospl[1][1]) {
-				Lbl_myset.setText("오픈할 패를 선택해주세요.");
-			} else {
-				Lbl_myset.setText("베팅을 마무리해주세요.");
-			}
-		} else if(client.getMe().getBetbool()==1) {
-			Lbl_myset.setText("");
-		}
-		bt_bet_die.setIcon(img_bt_die_ok);
-		bt_bet_die.setRolloverIcon(img_bt_die_on);
-		bt_bet_die.setEnabled(true);
-		if(client.getTrash()==0) {
-			bt_bet_call.setIcon(img_bt_call_no);
-			bt_bet_call.setRolloverIcon(img_bt_call_no);
-			bt_bet_call.setEnabled(false);
-			bt_bet_half.setIcon(img_bt_half_no);
-			bt_bet_half.setRolloverIcon(img_bt_half_no);
-			bt_bet_half.setEnabled(false);
-			bt_bet_check.setIcon(img_bt_check_no);
-			bt_bet_check.setRolloverIcon(img_bt_check_no);
-			bt_bet_check.setEnabled(false);
-			bt_bet_call.setToolTipText("오픈할 패를 선택해야 베팅할 수 있습니다.");
-			bt_bet_half.setToolTipText("오픈할 패를 선택해야 베팅할 수 있습니다.");
-			bt_bet_check.setToolTipText("오픈할 패를 선택해야 베팅할 수 있습니다.");
-		} else if (client.getCardset()==0 && mycard3!=null && mycard3.getLocation().y==cardpospl[1][0]) {
-			bt_bet_call.setIcon(img_bt_call_no);
-			bt_bet_call.setRolloverIcon(img_bt_call_no);
-			bt_bet_call.setEnabled(false);
-			bt_bet_half.setIcon(img_bt_half_no);
-			bt_bet_half.setRolloverIcon(img_bt_half_no);
-			bt_bet_half.setEnabled(false);
-			bt_bet_check.setIcon(img_bt_check_no);
-			bt_bet_check.setRolloverIcon(img_bt_check_no);
-			bt_bet_check.setEnabled(false);
-			bt_bet_call.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
-			bt_bet_half.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
-			bt_bet_check.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
-		}
-		else {
-			if(client.isPhase2()==true) {
-				if(client.getTurn()==1) {
-					bt_bet_check.setIcon(img_bt_check_ok);
-					bt_bet_check.setRolloverIcon(img_bt_check_on);
-					bt_bet_check.setToolTipText(null);
-					bt_bet_check.setEnabled(true);
+//			if (client.getCardset()==0 && mycard3!=null && mycard3.getLocation().y==cardpospl[1][0]) {
+//				bt_bet_call.setIcon(img_bt_call_no);
+//				bt_bet_call.setRolloverIcon(img_bt_call_no);
+//				bt_bet_call.setEnabled(false);
+//				bt_bet_half.setIcon(img_bt_half_no);
+//				bt_bet_half.setRolloverIcon(img_bt_half_no);
+//				bt_bet_half.setEnabled(false);
+//				bt_bet_check.setIcon(img_bt_check_no);
+//				bt_bet_check.setRolloverIcon(img_bt_check_no);
+//				bt_bet_check.setEnabled(false);
+//				bt_bet_call.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
+//				bt_bet_half.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
+//				bt_bet_check.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
+//			}
+//			else {
+				if(client.isPhase2()==true) {
+					if(client.getTurn()==1) {
+						bt_bet_check.setIcon(img_bt_check_ok);
+						bt_bet_check.setRolloverIcon(img_bt_check_on);
+						bt_bet_check.setToolTipText(null);
+						bt_bet_check.setEnabled(true);
+					} else {
+						bt_bet_check.setIcon(img_bt_check_no);
+						bt_bet_check.setRolloverIcon(img_bt_check_no);
+						bt_bet_check.setToolTipText("선인 사람의 첫턴에만 가능합니다.");
+						bt_bet_check.setEnabled(false);
+					}
 				} else {
 					bt_bet_check.setIcon(img_bt_check_no);
 					bt_bet_check.setRolloverIcon(img_bt_check_no);
-					bt_bet_check.setToolTipText("선인 사람의 첫턴에만 가능합니다.");
+					bt_bet_check.setToolTipText("모든 패를 받은 후에 선인 사람의 첫턴에만 가능합니다.");
 					bt_bet_check.setEnabled(false);
 				}
-			} else {
-				bt_bet_check.setIcon(img_bt_check_no);
-				bt_bet_check.setRolloverIcon(img_bt_check_no);
-				bt_bet_check.setToolTipText("모든 패를 받은 후에 선인 사람의 첫턴에만 가능합니다.");
-				bt_bet_check.setEnabled(false);
-			}
-//			if(client.getMinforbet()==0) {
-//				bt_bet_call.setIcon(img_bt_call_no);
-//				bt_bet_call.setRolloverIcon(img_bt_call_no);
-//				bt_bet_call.setToolTipText("첫 베팅은 하프로 이루어져야 합니다.");
-//				bt_bet_call.setEnabled(false);
-//			} else
-			if(client.getMinforbet()==0) {
-				bt_bet_call.setIcon(img_bt_call_no);
-				bt_bet_call.setRolloverIcon(img_bt_call_no);
-				bt_bet_call.setToolTipText("첫 베팅은 하프여야 합니다.");
-				bt_bet_call.setEnabled(false);
-			}
-			else if(client.getMe().getMoney()<client.getMinforbet()) {
-				bt_bet_call.setIcon(img_bt_call_no);
-				bt_bet_call.setRolloverIcon(img_bt_call_no);
-				bt_bet_call.setToolTipText(client.getMinforbet()+"전의 베팅금이 필요합니다.");
-				bt_bet_call.setEnabled(false);
-			} else {
-				bt_bet_call.setIcon(img_bt_call_ok);
-				bt_bet_call.setRolloverIcon(img_bt_call_on);
-				bt_bet_call.setToolTipText(client.getMinforbet()+"전 베팅");
-				bt_bet_call.setEnabled(true);
-			}
-			if(client.isCanthalf()==true) {
-				bt_bet_half.setIcon(img_bt_half_no);
-				bt_bet_half.setRolloverIcon(img_bt_half_no);
-				bt_bet_half.setToolTipText("콜이나 체크를 한 유저는 하프 베팅할 수 없습니다.");
-				bt_bet_half.setEnabled(false);
-			}
-			else if(client.getMe().getMoney()<client.getMoneythisgame()/2) {
-				bt_bet_half.setIcon(img_bt_half_no);
-				bt_bet_half.setRolloverIcon(img_bt_half_no);
-				bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전의 베팅금이 필요합니다.");
-				bt_bet_half.setEnabled(false);
-			} else {
-				bt_bet_half.setIcon(img_bt_half_ok);
-				bt_bet_half.setRolloverIcon(img_bt_half_on);
-				bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전 베팅");
-				bt_bet_half.setEnabled(true);
-			}
+	//			if(client.getMinforbet()==0) {
+	//				bt_bet_call.setIcon(img_bt_call_no);
+	//				bt_bet_call.setRolloverIcon(img_bt_call_no);
+	//				bt_bet_call.setToolTipText("첫 베팅은 하프로 이루어져야 합니다.");
+	//				bt_bet_call.setEnabled(false);
+	//			} else
+				if(client.getMinforbet()==0) {
+					bt_bet_call.setIcon(img_bt_call_no);
+					bt_bet_call.setRolloverIcon(img_bt_call_no);
+					bt_bet_call.setToolTipText("첫 베팅은 하프여야 합니다.");
+					bt_bet_call.setEnabled(false);
+				}
+				else if(client.getMe().getMoney()<client.getMinforbet()) {
+					bt_bet_call.setIcon(img_bt_call_no);
+					bt_bet_call.setRolloverIcon(img_bt_call_no);
+					bt_bet_call.setToolTipText(client.getMinforbet()+"전의 베팅금이 필요합니다.");
+					bt_bet_call.setEnabled(false);
+				} else {
+					bt_bet_call.setIcon(img_bt_call_ok);
+					bt_bet_call.setRolloverIcon(img_bt_call_on);
+					bt_bet_call.setToolTipText(client.getMinforbet()+"전 베팅");
+					bt_bet_call.setEnabled(true);
+				}
+				if(client.isCanthalf()==true) {
+					bt_bet_half.setIcon(img_bt_half_no);
+					bt_bet_half.setRolloverIcon(img_bt_half_no);
+					bt_bet_half.setToolTipText("콜이나 체크를 한 유저는 하프 베팅할 수 없습니다.");
+					bt_bet_half.setEnabled(false);
+				}
+				else if(client.getMe().getMoney()<client.getMoneythisgame()/2) {
+					bt_bet_half.setIcon(img_bt_half_no);
+					bt_bet_half.setRolloverIcon(img_bt_half_no);
+					bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전의 베팅금이 필요합니다.");
+					bt_bet_half.setEnabled(false);
+				} else {
+					bt_bet_half.setIcon(img_bt_half_ok);
+					bt_bet_half.setRolloverIcon(img_bt_half_on);
+					bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전 베팅");
+					bt_bet_half.setEnabled(true);
+				}
+//			}
 		}
-		if(client.getCardset()==4) {
-//			bt_cardset1.setLocation(-100, -20);
-//			bt_cardset2.setLocation(-100, -20);
-//			bt_cardset3.setLocation(-100, -20);
-		} else if(client.getCardset()==0 && client.getMe().getBetbool()==0 && mycard3!=null && mycard3.getLocation().y==cardpospl[1][0]) {
-			if(nowsw==null) {
-				nowsw = new SetWindow(client, this, cardimages[client.getMe().getCard1()-1], cardimages[client.getMe().getCard2()-1], cardimages[client.getMe().getCard3()-1], Logic.lastName(client.getMe().getCardset()[0]), Logic.lastName(client.getMe().getCardset()[1]), Logic.lastName(client.getMe().getCardset()[2]));
-				Thread th = new Thread() {
-					public void run() {
-						nowsw.setVisible(true);
-						return;
-					};
-				};
-				th.setDaemon(true);
-				th.start();
-			}
-			
-//			bt_cardset1.setBounds(800, 740, 100, 20);
-//			bt_cardset2.setBounds(800, 760, 100, 20);
-//			bt_cardset3.setBounds(800, 780, 100, 20);
-		}
-		
-		
 		return;
 	}
 	public void NotMyTurn() {
@@ -1513,6 +1582,9 @@ public class Mainwindow extends JFrame {
 		}
 		if(client.getMe().getBetbool()==1 && (Lbl_myset.getText().equals("베팅을 마무리해주세요.")||Lbl_myset.getText().equals("오픈할 패를 선택해주세요."))) {
 			Lbl_myset.setText("시간초과(다이)");
+		}
+		if(Lbl_myset.getText().equals("생존자간 최종패 결정 중")) {
+			Lbl_myset.setText("");
 		}
 		for(Player p : players) {
 			if(p.getGameresult()==1) { client.setMinforbet(0); break; }

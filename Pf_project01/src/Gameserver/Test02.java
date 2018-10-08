@@ -69,7 +69,7 @@ public class Test02 {
 //			if(frame.isVisible()==true) break;
 		}
 		while(true) {
-			if(frame.isBan()==true) {
+			if(frame.isBan()==true || a.isStop()==true) {
 				System.exit(0);
 				return;
 			}

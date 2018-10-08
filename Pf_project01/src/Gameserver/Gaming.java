@@ -1,10 +1,7 @@
 package Gameserver;
 
 import java.io.Serializable;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class Gaming implements Serializable {
 	/**
@@ -14,12 +11,15 @@ public class Gaming implements Serializable {
 	public static final int GAME_UNREADY = 1;
 	public static final int GAME_READY = 2;
 	public static final int GAME_START = 3;
+//	public static final int GAME_REMATCH = 33;
 	public static final int PANDON = 4;
 	public static final int MUCHPANDON = 5;
 	public static final int GAME_DIE = 10;
 	public static final int GAME_CALL = 11;
 	public static final int GAME_HALF = 12;
 	public static final int GAME_CHECK = 13;
+	public static final int GAME_OPEN = 14;
+	public static final int GAME_SELECTSET = 15;
 	public static final int TURN_REFRESH = 87;
 	public static final int RESETCARDS = 501;
 	public static final int GETCARD = 500;
@@ -41,10 +41,9 @@ public class Gaming implements Serializable {
 	public static final int MONEY_REFRESH = 89;
 	public static final int IDMATCH = 77;
 	
-	
+	private int what;
 	private int who;
 	private String userid;
-	private int what;
 	private ArrayList<Player> players;
 	
 	private String msg;
@@ -54,55 +53,34 @@ public class Gaming implements Serializable {
 	private int card2;
 	private int card3;
 	private int cardset;
+		
 	private int thisplaynum;
-	private int turn;
 	
+	private int turn;
 	private int time;
 	
 	private int moneythisgame;
 	private int minforbet;
 	private int pandon;
 	
-	
 	public Gaming() {}
 	
-	// 클라이언트에서 서버에 어떤 명령 요청시.
+	// 클라이언트에서 서버에 어떤 명령 요청시.(요청자나 부가정보 없이 명령종류만으로 가능한 명령)
 	public Gaming(int what) {
 		setWhat(what);
 	}
-	
-	
-	// 서버용 다음턴 누군지 뿌릴때ddddddddd
-	public Gaming(int what, int who) {
-		setWhat(what); setWho(who);
-	}
-	
-	// 서버용 타이머 뿌릴때, 돈 갱신ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
-	public Gaming(int what, int who, int time) {
-		setWhat(what); setWho(who); setTime(time);
-	}
-	
-	// 서버에서 클라이언트 새로고침요구ㅇㅇㅇㅇㅇ
-	public Gaming(int what, ArrayList<Player> players) {
-		setWhat(what); setPlayers(players);
-	}
-	
-	// 첫연결시 아이디 매칭때ㅇㅇㅇㅇㅇㅇ
-	public Gaming(int what, String id) {
-		setWhat(what); setMsg(id);
-	}
-	
-
-	
-	
-	
-	
 	// 서버에서 클라이언트들에게 게임시작하라고 할 때
 	public static Gaming Gamestart(int thisplaynum, int moneythisgame, int minforbet) {
 		Gaming g = new Gaming();
 		g.setWhat(Gaming.GAME_START); g.setThisplaynum(thisplaynum); g.setMoneythisgame(moneythisgame); g.setMinforbet(minforbet);
 		return g;
 	}
+//	// 서버에서 클라이언트들에게 재경기하라고 할 때
+//	public static Gaming GameRematch(int thisplaynum, int moneythisgame, int minforbet) {
+//		Gaming g = new Gaming();
+//		g.setWhat(Gaming.GAME_REMATCH); g.setThisplaynum(thisplaynum); g.setMoneythisgame(moneythisgame); g.setMinforbet(minforbet);
+//		return g;
+//	}
 	// 서버에서 클라이언트들에게 다음턴이 누군지 뿌려줄 때
 	public static Gaming Turn(int who) {
 		Gaming g = new Gaming();
@@ -133,40 +111,34 @@ public class Gaming implements Serializable {
 		g.setWhat(Gaming.DRAW2);
 		return g;
 	}
-	// 클라이언트에서 오픈하면서 콜할때
-	public static Gaming Call(int trash) {
+	// 클라이언트에서 오픈할 카드 정할 때
+		public static Gaming Open(int trash) {
+			Gaming g = new Gaming();
+			g.setWhat(Gaming.GAME_OPEN); g.setCard3(trash);
+			return g;
+		}
+	// 클라이언트에서 콜할때
+	public static Gaming Call() {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_CALL); g.setCard3(trash);
+		g.setWhat(Gaming.GAME_CALL);
 		return g;
 	}
-	// 클라이언트에서 오픈하면서 체크할때
-	public static Gaming Check(int trash) {
+	// 클라이언트에서 체크할때
+	public static Gaming Check() {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_CHECK); g.setCard3(trash);
+		g.setWhat(Gaming.GAME_CHECK);
 		return g;
 	}
-	// 클라이언트에서 오픈하면서 하프할때
-	public static Gaming Half(int trash) {
+	// 클라이언트에서 하프할때
+	public static Gaming Half() {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_HALF); g.setCard3(trash);
+		g.setWhat(Gaming.GAME_HALF);
 		return g;
 	}
 	// 클라이언트에서 마지막 정하면서 콜할때
-	public static Gaming SetNCall(int set) {
+	public static Gaming SelectSet(int set) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_CALL); g.setCardset(set);
-		return g;
-	}
-	// 클라이언트에서 마지막 정하면서 체크할때
-	public static Gaming SetNCheck(int set) {
-		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_CHECK); g.setCardset(set);
-		return g;
-	}
-	// 클라이언트에서 마지막 정하면서 하프할때
-	public static Gaming SetNHalf(int set) {
-		Gaming g = new Gaming();
-		g.setWhat(Gaming.GAME_HALF); g.setCardset(set);
+		g.setWhat(Gaming.GAME_SELECTSET); g.setCardset(set);
 		return g;
 	}
 	// 서버에서 게임시작시 카드 제자리위치하게 요구
@@ -304,154 +276,44 @@ public class Gaming implements Serializable {
 	
 	
 	
-
-//	public Gaming(Socket socket, int what, String msg) {
-//		setSocket(socket); setWhat(what); setMsg(msg);
-//	}
-	// 일반 채팅 송출ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
-	public Gaming(String userid, int what, String msg, String date) {
-		setUserid(userid); setWhat(what); setMsg(msg); setDate(date);
-	}
-	// 채팅 알림(입장, 퇴장) - 서버용 ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
-	public Gaming(String userid, int what, String date, ArrayList<Player> players) {
-		setUserid(userid); setWhat(what); setDate(date); setPlayers(players);
-	}
-	// 채팅 알림(닉변경) - 서버용 dddddddddddddddddddddddddddddddddddddddd
-	public Gaming(String userid, int what, String toNick, String date, ArrayList<Player> players) {
-		setUserid(userid); setWhat(what); setMsg(toNick); setDate(date); setPlayers(players);
-	}
-	// 채팅 알림(닉변경) - 클라용 ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
-	public Gaming(String userid, int what, String toNick) {
-		setUserid(userid); setWhat(what); setMsg(toNick);
-	}
-	// 일반 게임 명령, 서버용ddddddddddddddddddddddddd
-	public Gaming(String userid, int what, ArrayList<Player> players) {
-		setUserid(userid); setWhat(what); setPlayers(players);
-	}
-	// 일반 게임 명령, 채팅 알림(입장, 퇴장) - 클라용ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
-	public Gaming(String userid, int what) {
-		setUserid(userid); setWhat(what);
-	}
 	
+	public int getWhat() { return what; }
+	public void setWhat(int what) { this.what = what; }
+	public int getWho() { return who; }
+	public void setWho(int who) { this.who = who; }
+
+	public String getUserid() { return userid; }
+	public void setUserid(String userid) { this.userid = userid; }
+	public ArrayList<Player> getPlayers() { return players; }
+	public void setPlayers(ArrayList<Player> players) { this.players = players; }
+
+	public String getMsg() { return msg; }
+	public void setMsg(String msg) { this.msg = msg; }
+	public String getDate() { return date; }
+	public void setDate(String date) { this.date = date; }
+
+	public int getCard1() { return card1; }
+	public void setCard1(int card1) { this.card1 = card1; }
+	public int getCard2() { return card2; }
+	public void setCard2(int card2) { this.card2 = card2; }
+	public int getCard3() { return card3; }
+	public void setCard3(int card3) { this.card3 = card3; }
+	public int getCardset() { return cardset; }
+	public void setCardset(int cardset) { this.cardset = cardset; }
 	
-	// 카드 나눠받을 때ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ
-	public Gaming(int what, int card1, int card2, int card3) {
-		setWhat(what); this.setCard1(card1); this.setCard2(card2); this.setCard3(card3);
-	}
+	public int getThisplaynum() { return thisplaynum; }
+	public void setThisplaynum(int thisplaynum) { this.thisplaynum=thisplaynum; }
 	
-	public int getPandon() {
-		return pandon;
-	}
-	public void setPandon(int pandon) {
-		this.pandon = pandon;
-	}
+	public int getPandon() { return pandon; }
+	public void setPandon(int pandon) { this.pandon = pandon; }
 	
-	public int getWhat() {
-		return what;
-	}
-	public void setWhat(int what) {
-		this.what = what;
-	}
-	public int getWho() {
-		return who;
-	}
-	public void setWho(int who) {
-		this.who = who;
-	}
-	public String getMsg() {
-		return msg;
-	}
-	public void setMsg(String msg) {
-		this.msg = msg;
-	}
-	public String getDate() {
-		return date;
-	}
-	public void setDate(String date) {
-		this.date = date;
-	}
-	public String getUserid() {
-		return userid;
-	}
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
-
-	public int getCard1() {
-		return card1;
-	}
-
-	public void setCard1(int card1) {
-		this.card1 = card1;
-	}
-
-	public int getCard2() {
-		return card2;
-	}
-
-	public void setCard2(int card2) {
-		this.card2 = card2;
-	}
-
-	public int getCard3() {
-		return card3;
-	}
-
-	public void setCard3(int card3) {
-		this.card3 = card3;
-	}
+	public int getMoneythisgame() { return moneythisgame; }
+	public void setMoneythisgame(int moneythisgame) { this.moneythisgame = moneythisgame; }
+	public int getMinforbet() { return minforbet; }
+	public void setMinforbet(int minforbet) { this.minforbet = minforbet; }
 	
-	public int getCardset() {
-		return cardset;
-	}
-
-	public void setCardset(int cardset) {
-		this.cardset = cardset;
-	}
-	public int getThisplaynum() {
-		return thisplaynum;
-	}
-	public void setThisplaynum(int thisplaynum) {
-		this.thisplaynum=thisplaynum;
-	}
-	
-	
-	public ArrayList<Player> getPlayers() {
-		return players;
-	}
-
-	public void setPlayers(ArrayList<Player> players) {
-		this.players = players;
-	}
-	public int getTime() {
-		return time;
-	}
-	public void setTime(int time) {
-		this.time = time;
-	}
-
-	public int getMoneythisgame() {
-		return moneythisgame;
-	}
-
-	public void setMoneythisgame(int moneythisgame) {
-		this.moneythisgame = moneythisgame;
-	}
-
-	public int getMinforbet() {
-		return minforbet;
-	}
-
-	public void setMinforbet(int minforbet) {
-		this.minforbet = minforbet;
-	}
-
-	public int getTurn() {
-		return turn;
-	}
-
-	public void setTurn(int turn) {
-		this.turn = turn;
-	}
-
+	public int getTime() { return time; }
+	public void setTime(int time) { this.time = time; }
+	public int getTurn() { return turn; }
+	public void setTurn(int turn) { this.turn = turn; }
 }

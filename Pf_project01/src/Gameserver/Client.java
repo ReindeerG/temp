@@ -26,6 +26,26 @@ public class Client extends Thread {
 	private Mainwindow window=null;
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
+	public ObjectInputStream getIn() {
+		return in;
+	}
+	public void setIn(ObjectInputStream in) {
+		this.in = in;
+	}
+	public ObjectOutputStream getOut() {
+		return out;
+	}
+	public void setOut(ObjectOutputStream out) {
+		this.out = out;
+	}
+	private boolean stop=false;
+	public void toStop() {
+		this.stop=true;
+	}
+	public boolean isStop() {
+		return this.stop;
+	}
+	
 	private int pandon;
 	public int getPandon() {
 		return pandon;
@@ -177,7 +197,12 @@ public class Client extends Thread {
 
 	public void SelectSet(int n, String str) {
 		setCardset(n);
+		System.out.println(getCardset()+"선택했다야");
 		getWindow().nameset(str);
+		try {
+			out.writeObject(Gaming.SelectSet(n));
+			out.flush();
+		} catch(Exception e) {e.printStackTrace();}
 		return;
 	}
 	public void callRefresh() {
@@ -252,29 +277,19 @@ public class Client extends Thread {
 		}catch(Exception e) {e.printStackTrace();}
 		return;
 	}
+	public void Open(int trash) {
+		try {
+			out.writeObject(Gaming.Open(trash));
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
 	public void Bet_Call() {
 		setCanthalf(true);
-		if(isBoolTrash()==false) {
-			setBoolTrash(true);
-			try {
-				out.writeObject(Gaming.Call(getTrash()));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
-		} else {
-			if(getCardset()>0 && getCardset()<4) {
-				try {
-					out.writeObject(Gaming.SetNCall(getCardset()));
-					out.flush();
-				}catch(Exception e) {e.printStackTrace();}
-				setCardset(4);
-			}
-			else {
-				try {
-					out.writeObject(Gaming.Call(0));
-					out.flush();
-				}catch(Exception e) {e.printStackTrace();}
-			}
-		}
+		try {
+			out.writeObject(Gaming.Call());
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
 		return;
 	}
 	public void Bet_Die() {
@@ -288,52 +303,18 @@ public class Client extends Thread {
 		return;
 	}
 	public void Bet_Half() {
-		if(isBoolTrash()==false) {
-			setBoolTrash(true);
-			try {
-				out.writeObject(Gaming.Half(getTrash()));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
-		} else {
-			if(getCardset()>0 && getCardset()<4) {
-				try {
-					out.writeObject(Gaming.SetNHalf(getCardset()));
-					out.flush();
-				}catch(Exception e) {e.printStackTrace();}
-				setCardset(4);
-			}
-			else {
-				try {
-					out.writeObject(Gaming.Half(0));
-					out.flush();
-				}catch(Exception e) {e.printStackTrace();}
-			}
-		}
+		try {
+			out.writeObject(Gaming.Half());
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
 		return;
 	}
 	public void Bet_Check() {
 		setCanthalf(true);
-		if(isBoolTrash()==false) {
-			setBoolTrash(true);
-			try {
-				out.writeObject(Gaming.Check(getTrash()));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
-		} else {
-			if(getCardset()>0 && getCardset()<4) {
-				try {
-					out.writeObject(Gaming.SetNCheck(getCardset()));
-					out.flush();
-				}catch(Exception e) {e.printStackTrace();}
-				setCardset(4);
-			}
-			else {
-				try {
-					out.writeObject(Gaming.Check(0));
-					out.flush();
-				}catch(Exception e) {e.printStackTrace();}
-			}
-		}
+		try {
+			out.writeObject(Gaming.Check());
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
 		return;
 	}
 	public void Money_Refresh() {
@@ -385,207 +366,217 @@ public class Client extends Thread {
 //		try { in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream())); }
 //		catch(Exception e) { e.printStackTrace(); }
 		while(true) {
-			try {
-				in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-				Gaming gm = (Gaming)in.readObject();
-//				System.out.println(gm.getWhat()+"받음");
-				switch(gm.getWhat()) {
-				case Gaming.IDMATCH: {
-					out.writeObject(Gaming.SendID(getUserid()));
-//					out.writeObject(new Gaming(Gaming.IDMATCH, getUserid()));
-					out.flush();
-					break;
-				}
-				case Gaming.REFRESH: {
-					players=gm.getPlayers();
-					for(Player p : players) {
-						if(p.getUserid().equals(getUserid())) {
-							me=p;
-							break;
+			if(stop==true) { this.interrupt(); break; }
+			else {
+				try {
+					in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+					Gaming gm = (Gaming)in.readObject();
+	//				System.out.println(gm.getWhat()+"받음");
+					switch(gm.getWhat()) {
+					case Gaming.IDMATCH: {
+						out.writeObject(Gaming.SendID(getUserid()));
+	//					out.writeObject(new Gaming(Gaming.IDMATCH, getUserid()));
+						out.flush();
+						break;
+					}
+					case Gaming.REFRESH: {
+						players=gm.getPlayers();
+						for(Player p : players) {
+							if(p.getUserid().equals(getUserid())) {
+								me=p;
+								break;
+							}
 						}
-					}
-					while(true) {
-						if(getWindow()!=null) break;
-					}
-					getWindow().Refresh();
-					break;
-				}
-				case Gaming.MONEY_REFRESH: {
-					setMoneythisgame(gm.getMoneythisgame());
-					setMinforbet(gm.getMinforbet());
-					getWindow().MoneyRefresh();
-//					getWindow().Refresh();
-					break;
-				}
-				case Gaming.TURN_REFRESH: {
-					setTurn(gm.getWho());
-//					getWindow().Refresh();
-					break;
-				}
-				case Gaming.PANDON: {
-					setPandon(gm.getPandon());
-					break;
-				}
-				case Gaming.CHAT: {
-					getWindow().ReceiveMsg(gm.getUserid(), gm.getMsg(), gm.getDate());
-					break;
-				}
-				case Gaming.CHAT_JOIN: {
-					players=gm.getPlayers();
-					for(Player p : players) {
-//---------------------플레이어 많아지면 해제해서 테스트
-						if(p.getUserid().equals(userid)) {
-							me=p;
-							break;
+						while(true) {
+							if(getWindow()!=null) break;
 						}
+						getWindow().Refresh();
+						break;
 					}
-					getWindow().Refresh();
-					getWindow().ChatJoin(gm.getUserid(), gm.getDate());
-					MuchPandon();
-					break;
-				} 
-				case Gaming.CHAT_LEAVE: {
-					players=gm.getPlayers();
-					getWindow().ChatLeave(gm.getUserid(), gm.getDate());
-					getWindow().Refresh();
-//					callRefresh();
-					break;
-				}
-				case Gaming.BAN: {
-					players=gm.getPlayers();
-					getWindow().ChatBan(gm.getUserid(), gm.getDate());
-//					getWindow().Refresh();
-//					Thread.sleep(500);
-//					callRefresh();
-					break;
-				}
-				case Gaming.IMBANNED: {
-					getWindow().ImBanned();
-					break;
-				}
-				case Gaming.CHAT_NICKCHANGE: {
-					getWindow().NickChange(gm.getUserid(), gm.getMsg(), gm.getDate());
-					players=gm.getPlayers();
-					getWindow().Refresh();
-					break;
-				}
-				case Gaming.CHAT_WIN: {
-					getWindow().Winmsg(gm.getUserid(), gm.getDate());
-					break;
-				}
-				case Gaming.CHAT_RE: {
-					getWindow().Remsg(gm.getDate());
-					break;
-				}
-				case Gaming.GAME_WHOSTURN: {
-					setWhosturn(gm.getWho());
-//					getWindow().Clockicons();
-					break;
-				}
-				case Gaming.GETCARD: {
-					setPhase2(false);
-					getWindow().ResetCards();
-					setYetresult(false);
-					setBoolTrash(false);
-					setTrash(0);
-					setCardset(0);
-					players = gm.getPlayers();
-					for(Player p : players) {
-						if(p.getUserid().equals(getUserid())) {
-							me=p;
-							break;
+					case Gaming.MONEY_REFRESH: {
+						setMoneythisgame(gm.getMoneythisgame());
+						setMinforbet(gm.getMinforbet());
+						getWindow().MoneyRefresh();
+	//					getWindow().Refresh();
+						break;
+					}
+					case Gaming.TURN_REFRESH: {
+						setTurn(gm.getWho());
+	//					getWindow().Refresh();
+						break;
+					}
+					case Gaming.PANDON: {
+						setPandon(gm.getPandon());
+						break;
+					}
+					case Gaming.CHAT: {
+						getWindow().ReceiveMsg(gm.getUserid(), gm.getMsg(), gm.getDate());
+						break;
+					}
+					case Gaming.CHAT_JOIN: {
+						players=gm.getPlayers();
+						for(Player p : players) {
+	//---------------------플레이어 많아지면 해제해서 테스트
+							if(p.getUserid().equals(userid)) {
+								me=p;
+								break;
+							}
 						}
+						getWindow().Refresh();
+						getWindow().ChatJoin(gm.getUserid(), gm.getDate());
+						MuchPandon();
+						break;
+					} 
+					case Gaming.CHAT_LEAVE: {
+						players=gm.getPlayers();
+						getWindow().ChatLeave(gm.getUserid(), gm.getDate());
+						getWindow().Refresh();
+	//					callRefresh();
+						break;
 					}
-					
-					card1 = getMe().getCard1(); card2 = getMe().getCard2(); card3 = getMe().getCard3();
-//					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
-//					System.out.println(card1);
-					getWindow().DrawCards();
-//					System.out.println(card1+" "+card2+" "+card3);
-//					getWindow().DrawCards();
-//					getWindow().MycardOpen(card1, card2);
-					callRefresh();
-					break;
-				}
-				case Gaming.DRAW2: {
-					setOnceneglecttimer(true);
-					setPhase2(true);
-					setTurn(1);
-					for(Player p : players) {
-						if(p.getUserid().equals(getUserid())) {
-							me=p;
-							break;
-						}
+					case Gaming.BAN: {
+						players=gm.getPlayers();
+						getWindow().ChatBan(gm.getUserid(), gm.getDate());
+	//					getWindow().Refresh();
+	//					Thread.sleep(500);
+	//					callRefresh();
+						break;
 					}
-					getWindow().DrawCards2();
-					break;
-				}
-				case Gaming.RESETCARDS: {
-					getWindow().ResetCards();
-					break;
-				}
-				case Gaming.GAME_TIMER: {
-					if(isOnceneglecttimer()==false) {
-	//					System.out.println(gm.getWho()+"번째가 "+gm.getTime());
-						setTurn(gm.getTurn());
-	//					System.out.println("지금"+gm.getWho()+"/"+getTurn()+"턴~~~");
-						getWindow().Timer(gm.getWho(), gm.getTime());
-	//					getWindow().Clockicons();
-					} else {
-						setOnceneglecttimer(false);
+					case Gaming.IMBANNED: {
+						getWindow().ImBanned();
+						break;
 					}
-					break;
-				}
-				case Gaming.GAME_START: {
-					setOnceneglecttimer(false);
-					thisplaynum=gm.getThisplaynum();
-					setMoneythisgame(gm.getMoneythisgame());
-					setMinforbet(gm.getMinforbet());
-					inggame=true;
-					setPhase2(false);
-					canthalf=false;
-					turn=1;
-					getWindow().StartToButton();
-					break;
-				}
-				case Gaming.GAME_RESULT: {
-//					if(isYetresult()==false) {
-//						setYetresult(true);
+					case Gaming.CHAT_NICKCHANGE: {
+						getWindow().NickChange(gm.getUserid(), gm.getMsg(), gm.getDate());
 						players=gm.getPlayers();
 						getWindow().Refresh();
-//						boolean isRe = false;
-//						for(Player p : players) {
-//							if(p.getGameresult()==2) { isRe=true; break; }
-//						}
-//						if(isRe==false) setMinforbet(0);
+						break;
+					}
+					case Gaming.CHAT_WIN: {
+						getWindow().Winmsg(gm.getUserid(), gm.getDate());
+						break;
+					}
+					case Gaming.CHAT_RE: {
+						getWindow().Remsg(gm.getDate());
+						break;
+					}
+					case Gaming.GAME_WHOSTURN: {
+						setWhosturn(gm.getWho());
+	//					getWindow().Clockicons();
+						break;
+					}
+					case Gaming.GETCARD: {
+						setPhase2(false);
+						getWindow().ResetCards();
+						setYetresult(false);
+						setBoolTrash(false);
+						setTrash(0);
+						setCardset(0);
+						players = gm.getPlayers();
+						for(Player p : players) {
+							if(p.getUserid().equals(getUserid())) {
+								me=p;
+								break;
+							}
+						}
 						
-						
-						
-						getWindow().Resultgame();
-						whosturn=0;
-//						out.writeObject(new Gaming(Gaming.GAME_RESULT_OK));
-//						out.flush();
-//					}
-					break;
+						card1 = getMe().getCard1(); card2 = getMe().getCard2(); card3 = getMe().getCard3();
+	//					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
+	//					System.out.println(card1);
+						getWindow().DrawCards();
+	//					System.out.println(card1+" "+card2+" "+card3);
+	//					getWindow().DrawCards();
+	//					getWindow().MycardOpen(card1, card2);
+						callRefresh();
+						break;
+					}
+					case Gaming.DRAW2: {
+						setOnceneglecttimer(true);
+						setPhase2(true);
+						setTurn(1);
+						for(Player p : players) {
+							if(p.getUserid().equals(getUserid())) {
+								me=p;
+								break;
+							}
+						}
+						getWindow().DrawCards2();
+						break;
+					}
+					case Gaming.RESETCARDS: {
+						getWindow().ResetCards();
+						break;
+					}
+					case Gaming.GAME_TIMER: {
+						if(isOnceneglecttimer()==false) {
+							setTurn(gm.getTurn());
+							getWindow().Timer(gm.getWho(), gm.getTime());
+						} else {
+							setOnceneglecttimer(false);
+						}
+						break;
+					}
+					case Gaming.GAME_START: {
+						setOnceneglecttimer(false);
+						thisplaynum=gm.getThisplaynum();
+						setMoneythisgame(gm.getMoneythisgame());
+						setMinforbet(gm.getMinforbet());
+						inggame=true;
+						setPhase2(false);
+						canthalf=false;
+						turn=1;
+						getWindow().StartToButton();
+						break;
+					}
+	//				case Gaming.GAME_REMATCH: {
+	//					setOnceneglecttimer(false);
+	//					thisplaynum=gm.getThisplaynum();
+	//					setMoneythisgame(gm.getMoneythisgame());
+	//					setMinforbet(0);
+	//					inggame=true;
+	//					setPhase2(false);
+	//					canthalf=false;
+	//					turn=1;
+	//					getWindow().StartToButton();
+	//					break;
+	//				}
+					case Gaming.GAME_RESULT: {
+	//					if(isYetresult()==false) {
+	//						setYetresult(true);
+							players=gm.getPlayers();
+							getWindow().Refresh();
+	//						boolean isRe = false;
+	//						for(Player p : players) {
+	//							if(p.getGameresult()==2) { isRe=true; break; }
+	//						}
+	//						if(isRe==false) setMinforbet(0);
+							
+							
+							
+							getWindow().Resultgame();
+							whosturn=0;
+	//						out.writeObject(new Gaming(Gaming.GAME_RESULT_OK));
+	//						out.flush();
+	//					}
+						break;
+					}
+					case Gaming.BUTTON_OK: {
+						inggame=false;
+						getWindow().fornextgame();
+						break;
+					}
+					case Gaming.GAME_CALL:
+					case Gaming.GAME_DIE:
+					{
+						players=gm.getPlayers();
+						break;
+					}
+					default: break;
 				}
-				case Gaming.BUTTON_OK: {
-					inggame=false;
-					getWindow().fornextgame();
-					break;
-				}
-				case Gaming.GAME_CALL:
-				case Gaming.GAME_DIE:
-				{
-					players=gm.getPlayers();
-					break;
-				}
-				
-				
-				default: break;
+				} catch(Exception e) { /*e.printStackTrace();*/ }
 			}
-				
-			} catch(Exception e) {e.printStackTrace(); }
 		}
+		return;
 	}
 	
 	
