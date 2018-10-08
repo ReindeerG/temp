@@ -331,6 +331,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_CALL: {
 											p.setBetbool(2);
 											p.setMoney(p.getMoney()-serv.getMinforbet());
+											p.setThisbet(serv.getMinforbet());
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
 											serv.MoneyRefresh();
 											serv.nextTurn();
@@ -339,6 +340,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_HALF: {
 											p.setBetbool(3);
 											p.setMoney(p.getMoney()-serv.getMoneythisgame()/2);
+											p.setThisbet(serv.getMoneythisgame()/2);
 											serv.setMinforbet(serv.getMoneythisgame()/2);
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
 											serv.MoneyRefresh();
@@ -347,6 +349,8 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_CHECK: {
 											p.setBetbool(4);
+											serv.setMinforbet(0);
+											serv.MoneyRefresh();
 											serv.nextTurn();
 											break;
 										}
@@ -720,17 +724,28 @@ public class Server extends Thread {
 		 */
 		int alive=0;
 		int sumcall=0;
+		int sumhalf=0;
 		int ischecked=0;
 		int sumnone=0;
 		for(Player p : players) {
 			if(p.getBetbool()!=1) { alive++; }
 			if(p.getBetbool()==2) { sumcall++; }
+			if(p.getBetbool()==3) { sumhalf++; }
 			if(p.getBetbool()==4) { ischecked++; }
 			if(p.getBetbool()==0) { sumnone++; }
 		}
 		
-		
-		if(alive==1) {
+		// 아무도 오픈패 지정 안해서 다 죽음;;
+		if(alive==0) {
+			for(Player p : players) {
+				p.setGameresult(2);	// 모두 재경기 대상 처리.
+			}
+			toresult();					// 클라이언트들에게 게임종료화면 띄우게 함.
+			Message_Re();				// 클라이언트들에게 3초후 대상자끼리 재경기한다고 알림 메세지 송출.
+			try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
+			GameStart(thisplaynum, true);		// 이번판 인원 재경기 시작
+			return;
+		} else if(alive==1) {
 			// 살아있는사람이이김
 			for(Player p : players) {
 				if (p.getBetbool()!=1) {
@@ -756,13 +771,14 @@ public class Server extends Thread {
 					break;
 				}
 			}
+			return;
 		}
 		else {
 			if(sumnone>0) {
 				for(int i=1;i<players.size();i++) {
-					Player tempp = players.get((getWhosturn()+i)%players.size());
-					if(tempp.getBetbool()!=1) {
-						setWhosturn(tempp.getOrder());
+					Player p = players.get((getWhosturn()+i)%players.size());
+					if(p.getBetbool()!=1) {
+						setWhosturn(p.getOrder());
 						break;
 					}
 				}
@@ -775,35 +791,187 @@ public class Server extends Thread {
 					makeTimer();
 				}
 			} else {
-				if(isPhase2()==false) {
-					getNowtimer().setKill(true);
-					Draw2Phase();
-				} else {
-					if (alive==sumcall+ischecked) {
+				boolean allbetequal = true;
+				int bet = 0;
+				for(Player p : players) {
+					if(p.getBetbool()!=1) {
+						if(bet==0) {
+							bet=p.getThisbet();
+						} else {
+							if(p.getThisbet()!=bet) {
+								allbetequal = false;
+								break;
+							}
+						}
+					}
+				}
+				int firstalive=0;
+				for(Player p : players) {
+					if(p.getBetbool()!=1) {
+						firstalive = p.getOrder();
+						break;
+					}
+				}
+				int nextturn=0;
+				for(int i=1;i<players.size();i++) {
+					Player p = players.get((getWhosturn()+i)%players.size());
+					if(p.getBetbool()!=1) {
+						nextturn = p.getOrder();
+						break;
+					}
+				}
+				if(allbetequal==true && firstalive==nextturn) {
+					if(isPhase2()==false) {
+						getNowtimer().setKill(true);
+						Draw2Phase();
+					} else {
 						// 결판
 						ArrayList<Player> tmplist = new ArrayList<>();
 						for(Player p : players) {
 							if(p.getBetbool()!=1) tmplist.add(p);
 						}
 						makeSelSetTimer(tmplist);
-					} else {
-						for(int i=1;i<players.size();i++) {
-							Player tempp = players.get((getWhosturn()+i)%players.size());
-							if(tempp.getBetbool()!=1) {
-								setWhosturn(tempp.getOrder());
-								break;
-							}
-						}
-						WhosTurn();
-						if(isInggame()==true) {
-							players.get(getWhosturn()).setBetbool(0);
-							Refresh();
-							
-							setTurn(getTurn()+1);
-							makeTimer();
+					}
+				} else if(alive==ischecked+sumcall && firstalive==nextturn) {
+					// 결판
+					ArrayList<Player> tmplist = new ArrayList<>();
+					for(Player p : players) {
+						if(p.getBetbool()!=1) tmplist.add(p);
+					}
+					makeSelSetTimer(tmplist);
+				}
+				else {
+					for(int i=1;i<players.size();i++) {
+						Player p = players.get((getWhosturn()+i)%players.size());
+						if(p.getBetbool()!=1) {
+							setWhosturn(p.getOrder());
+							break;
 						}
 					}
+					WhosTurn();
+					if(isInggame()==true) {
+						players.get(getWhosturn()).setBetbool(0);
+						Refresh();
+						
+						setTurn(getTurn()+1);
+						makeTimer();
+					}
 				}
+				
+				
+				
+				
+				/*
+				if (alive==sumcall+sumhalf+ischecked) {
+					if(isPhase2()==false) {
+//						int firstalive=0;
+//						for(Player p : players) {
+//							if(p.getBetbool()!=1) {
+//								firstalive = p.getOrder();
+//								break;
+//							}
+//						}
+//						int nextturn=0;
+//						for(int i=1;i<players.size();i++) {
+//							Player p = players.get((getWhosturn()+i)%players.size());
+//							if(p.getBetbool()!=1) {
+//								nextturn = p.getOrder();
+//								break;
+//							}
+//						}
+						boolean allbetequal = true;
+						int bet = 0;
+						for(Player p : players) {
+							if(p.getBetbool()!=1) {
+								if(bet==0) {
+									bet=p.getThisgamebetsum();
+								} else {
+									if(p.getThisgamebetsum()!=bet) {
+										allbetequal = false;
+										break;
+									}
+								}
+							}
+						}
+//						if(firstalive==nextturn) {
+						if(allbetequal==true) {
+							getNowtimer().setKill(true);
+							Draw2Phase();
+						} else {
+							for(int i=1;i<players.size();i++) {
+								Player p = players.get((getWhosturn()+i)%players.size());
+								if(p.getBetbool()!=1) {
+									setWhosturn(p.getOrder());
+									break;
+								}
+							}
+							WhosTurn();
+							if(isInggame()==true) {
+								players.get(getWhosturn()).setBetbool(0);
+								Refresh();
+								
+								setTurn(getTurn()+1);
+								makeTimer();
+							}
+						}
+					} else {
+						// 결판
+						ArrayList<Player> tmplist = new ArrayList<>();
+						for(Player p : players) {
+							if(p.getBetbool()!=1) tmplist.add(p);
+						}
+						makeSelSetTimer(tmplist);
+					}
+					
+				} else {
+					for(int i=1;i<players.size();i++) {
+						Player p = players.get((getWhosturn()+i)%players.size());
+						if(p.getBetbool()!=1) {
+							setWhosturn(p.getOrder());
+							break;
+						}
+					}
+					WhosTurn();
+					if(isInggame()==true) {
+						players.get(getWhosturn()).setBetbool(0);
+						Refresh();
+						
+						setTurn(getTurn()+1);
+						makeTimer();
+					}
+				}
+				
+				
+				
+//				if(isPhase2()==false) {
+//					getNowtimer().setKill(true);
+//					Draw2Phase();
+//				} else {
+//					if (alive==sumcall+ischecked) {
+//						// 결판
+//						ArrayList<Player> tmplist = new ArrayList<>();
+//						for(Player p : players) {
+//							if(p.getBetbool()!=1) tmplist.add(p);
+//						}
+//						makeSelSetTimer(tmplist);
+//					} else {
+//						for(int i=1;i<players.size();i++) {
+//							Player tempp = players.get((getWhosturn()+i)%players.size());
+//							if(tempp.getBetbool()!=1) {
+//								setWhosturn(tempp.getOrder());
+//								break;
+//							}
+//						}
+//						WhosTurn();
+//						if(isInggame()==true) {
+//							players.get(getWhosturn()).setBetbool(0);
+//							Refresh();
+//							
+//							setTurn(getTurn()+1);
+//							makeTimer();
+//						}
+//					}
+//				}*/
 			}
 		}
 			
@@ -862,10 +1030,6 @@ public class Server extends Thread {
 			Message_Re();				// 클라이언트들에게 3초후 대상자끼리 재경기한다고 알림 메세지 송출.
 			try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
 			rebatch(result, true);		// 대상자끼리 앞으로 배치
-			for(Player q : players) {	// 게임 베팅상태 0으로 모두 초기화
-				q.setBetbool(0);
-			}
-			Refresh();							// 클라이언트들에게 플레이어 정보 최신화
 			GameStart(result.size(), true);		// 바로 대상자만 재경기 시작(나머지 플레이어는 진 상태로 패도 받지않은 채 구경만 하게될 것임)
 		}
 		return;
@@ -928,7 +1092,7 @@ public class Server extends Thread {
 	 */
 	public void timeToCardset() {
 		for(Player p : players) {
-			if(p.getTrash()!=0) {
+			if(p.getBetbool()!=1) {
 				p.setBetbool(0);
 				p.setCardset(Logic.ResultSet(p.getCard1(), p.getCard2(), p.getCard3()));
 			}
@@ -988,7 +1152,7 @@ public class Server extends Thread {
 		for(Player p : players) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.Message_Win(nick, f.format(d)));
+				out.writeObject(Gaming.Message_Win(nick, f.format(d), players));
 				out.flush();
 			}catch(Exception e) {e.printStackTrace();}
 		}
@@ -1132,10 +1296,12 @@ public class Server extends Thread {
 	 * @param rematch: 이 게임이 재경기 게임인지, 새로하는 경기인지
 	 */
 	public void GameStart(int num, boolean rematch) {
+		setThisplaynum(num);
 		setPhase2(false);
 		setInggame(true);
 		if(rematch==false) setMinforbet(0);		// 재경기가 아니라 아예 새게임이라면 최소판돈을 초기화 
 		for(Player p : players) {
+			p.setThisbet(0);
 			p.setTrash(0);
 			p.setGameresult(0);
 			p.setCardset(new int[4]);
@@ -1148,17 +1314,22 @@ public class Server extends Thread {
 		for(int i=0;i<num;i++) {
 			players.get(i).setBetbool(0);		// 재경기 대상자만 베팅정보를 초기화하여 경기에 참여시킴. (나머지는 다이베팅상태라 턴이 오지 않음.)
 		}
+		Refresh();
 		setTurn(1);
 		setWhosturn(0);
 		WhosTurn();
 		cardShuffle();
+		try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
 		if(rematch==true) {
-			try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
+			try { Thread.sleep(900); } catch (InterruptedException e) { e.printStackTrace(); }
+			sendStartSignal(num);
+		} else {
+			sendStartSignal(players.size());
 		}
-		sendStartSignal(players.size());
 		giveFirstCards();
 		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
 		makeOpenTimer();
+		return;
 	}
 	/**
 	 * 돌아가는 유저쓰레드 중, 정지시킨 쓰레드가 아닌데도 동작을 멈춘 쓰레드가 있는지 검사하고, 있다면 복구시킴.

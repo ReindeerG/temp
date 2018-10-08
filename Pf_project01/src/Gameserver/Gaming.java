@@ -172,9 +172,9 @@ public class Gaming implements Serializable {
 		return g;
 	}
 	// 서버에서 클라이언트들에게 누가 승리했는지 채팅알림으로도 뿌려줌
-	public static Gaming Message_Win(String userid, String date) {
+	public static Gaming Message_Win(String userid, String date, ArrayList<Player> players) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.CHAT_WIN); g.setUserid(userid); g.setDate(date);
+		g.setWhat(Gaming.CHAT_WIN); g.setUserid(userid); g.setDate(date); g.setPlayers(players);
 		return g;
 	}
 	// 서버에서 클라이언트들에게 재경기한다고 채팅알림으로도 뿌려줌

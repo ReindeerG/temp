@@ -286,6 +286,7 @@ public class Client extends Thread {
 	}
 	public void Bet_Call() {
 		setCanthalf(true);
+		getWindow().NotMyTurn();
 		try {
 			out.writeObject(Gaming.Call());
 			out.flush();
@@ -293,6 +294,7 @@ public class Client extends Thread {
 		return;
 	}
 	public void Bet_Die() {
+		getWindow().NotMyTurn();
 		if(isBoolTrash()==false) {
 			getWindow().surrender();
 		}
@@ -303,6 +305,7 @@ public class Client extends Thread {
 		return;
 	}
 	public void Bet_Half() {
+		getWindow().NotMyTurn();
 		try {
 			out.writeObject(Gaming.Half());
 			out.flush();
@@ -311,6 +314,7 @@ public class Client extends Thread {
 	}
 	public void Bet_Check() {
 		setCanthalf(true);
+		getWindow().NotMyTurn();
 		try {
 			out.writeObject(Gaming.Check());
 			out.flush();
@@ -454,6 +458,9 @@ public class Client extends Thread {
 					}
 					case Gaming.CHAT_WIN: {
 						getWindow().Winmsg(gm.getUserid(), gm.getDate());
+						players=gm.getPlayers();
+						getWindow().Resultgame();
+						whosturn=0;
 						break;
 					}
 					case Gaming.CHAT_RE: {
@@ -467,7 +474,10 @@ public class Client extends Thread {
 					}
 					case Gaming.GETCARD: {
 						setPhase2(false);
+						getWindow().setReseted(false);
 						getWindow().ResetCards();
+						while(getWindow().isReseted()==false) {
+						}
 						setYetresult(false);
 						setBoolTrash(false);
 						setTrash(0);
@@ -493,6 +503,7 @@ public class Client extends Thread {
 					case Gaming.DRAW2: {
 						setOnceneglecttimer(true);
 						setPhase2(true);
+						setCanthalf(false);
 						setTurn(1);
 						for(Player p : players) {
 							if(p.getUserid().equals(getUserid())) {
@@ -544,7 +555,6 @@ public class Client extends Thread {
 	//					if(isYetresult()==false) {
 	//						setYetresult(true);
 							players=gm.getPlayers();
-							getWindow().Refresh();
 	//						boolean isRe = false;
 	//						for(Player p : players) {
 	//							if(p.getGameresult()==2) { isRe=true; break; }

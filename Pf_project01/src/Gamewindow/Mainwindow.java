@@ -116,6 +116,14 @@ public class Mainwindow extends JFrame {
 	public void setBan(boolean ban) {
 		this.ban = ban;
 	}
+	private boolean reseted;
+	public boolean isReseted() {
+		return reseted;
+	}
+	public void setReseted(boolean reseted) {
+		this.reseted = reseted;
+	}
+
 	
 	private Card[] cards = null;	
 	public Card[] getCards() {
@@ -730,6 +738,7 @@ public class Mainwindow extends JFrame {
 			cards[i].setIcon(cardimages[20]);
 			cards[i].setBounds(cardposori[0][i], cardposori[1][i], 100, 156);
 		}
+		setReseted(true);
 		return;
 	}
 	public void ReceiveMsg(String userid, String msg, String time) {
@@ -998,6 +1007,7 @@ public class Mainwindow extends JFrame {
 			}
 		}
 		if (isOver==true) {
+//			System.out.println("마크-0");
 			Lbl_mytime.setText("");
 			Lbl_2p_time.setText("");
 			Lbl_3p_time.setText("");
@@ -1021,9 +1031,7 @@ public class Mainwindow extends JFrame {
 			players = client.getPlayers();
 			if(client.isInggame()==true) {
 				if(who==4) {
-					if(time==70||time==80||time==90||time==100) {
-						Toolkit.getDefaultToolkit().beep();
-					}
+//					System.out.println("마크-1");
 					if(time>95) {
 						Lbl_mytime.setForeground(Color.YELLOW);
 					} else if(time>90) {
@@ -1045,11 +1053,18 @@ public class Mainwindow extends JFrame {
 					Lbl_2p_clock.setIcon(null);
 					Lbl_3p_clock.setIcon(null);
 					Lbl_4p_clock.setIcon(null);
-					MyTurn(who);
-				} else if (who==5) {
-					if(time==70||time==80||time==90||time==100) {
-						Toolkit.getDefaultToolkit().beep();
+					if(client.getMe().getBetbool()!=1) {
+						if((!Lbl_myset.getText().equals("오픈 패 선택완료"))&&(time==70||time==80||time==90||time==100)) {
+							Toolkit.getDefaultToolkit().beep();
+						}
+						MyTurn(who);
+					} else {
+						Lbl_myset.setText("생존자간 오픈 패 결정 중");
+						NotMyTurn();
 					}
+					return;
+				} else if (who==5) {
+//					System.out.println("마크-2");
 					if(time>95) {
 						Lbl_mytime.setForeground(Color.YELLOW);
 					} else if(time>90) {
@@ -1075,9 +1090,25 @@ public class Mainwindow extends JFrame {
 					Lbl_2p_bet.setIcon(null);
 					Lbl_3p_bet.setIcon(null);
 					Lbl_4p_bet.setIcon(null);
+					bt_bet_call.setIcon(img_bt_call_no);
+					bt_bet_call.setRolloverIcon(img_bt_call_no);
+					bt_bet_die.setIcon(img_bt_die_no);
+					bt_bet_die.setRolloverIcon(img_bt_die_no);
+					bt_bet_check.setIcon(img_bt_check_no);
+					bt_bet_check.setRolloverIcon(img_bt_check_no);
+					bt_bet_half.setIcon(img_bt_half_no);
+					bt_bet_half.setRolloverIcon(img_bt_half_no);
+					bt_bet_call.setEnabled(false);
+					bt_bet_die.setEnabled(false);
+					bt_bet_check.setEnabled(false);
+					bt_bet_half.setEnabled(false);
+					bt_bet_call.setToolTipText(null);
+					bt_bet_half.setToolTipText(null);
 					if(client.getMe().getBetbool()!=1) {
+						if((!Lbl_myset.getText().equals(""))&&(time==70||time==80||time==90||time==100)) {
+							Toolkit.getDefaultToolkit().beep();
+						}
 						if(nowsw==null && client.getCardset()==0) {
-							System.out.println("창띄우기");
 							nowsw = new SetWindow(client, this, cardimages[client.getMe().getCard1()-1], cardimages[client.getMe().getCard2()-1], cardimages[client.getMe().getCard3()-1], Logic.lastName(client.getMe().getCardset()[0]), Logic.lastName(client.getMe().getCardset()[1]), Logic.lastName(client.getMe().getCardset()[2]));
 							Thread th = new Thread() {
 								public void run() {
@@ -1091,10 +1122,12 @@ public class Mainwindow extends JFrame {
 					} else {
 						Lbl_myset.setText("생존자간 최종패 결정 중");
 					}
-				}
-				else {
+					return;
+				} else {
+//					System.out.println("마크-3");
 					int me = client.getMe().getOrder();
 					if(who-me==0) {
+//						System.out.println("마크-4");
 						if(time==70||time==80||time==90||time==100) {
 							Toolkit.getDefaultToolkit().beep();
 						}
@@ -1123,6 +1156,7 @@ public class Mainwindow extends JFrame {
 						MyTurn(who);
 					}
 					else if(who-me==1 || who-me==-3) {
+//						System.out.println("마크-5");
 						if(time>95) {
 							Lbl_2p_time.setForeground(Color.YELLOW);
 						} else if(time>90) {
@@ -1147,6 +1181,7 @@ public class Mainwindow extends JFrame {
 						NotMyTurn();
 					}
 					else if(who-me==2 || who-me==-2) {
+//						System.out.println("마크-6");
 						if(time>95) {
 							Lbl_3p_time.setForeground(Color.YELLOW);
 						} else if(time>90) {
@@ -1171,6 +1206,7 @@ public class Mainwindow extends JFrame {
 						NotMyTurn();
 					}
 					else if(who-me==3 || who-me==-1) {
+//						System.out.println("마크-7");
 						if(time>95) {
 							Lbl_4p_time.setForeground(Color.YELLOW);
 						} else if(time>90) {
@@ -1196,6 +1232,7 @@ public class Mainwindow extends JFrame {
 					}
 				}
 			} else {
+//				System.out.println("마크-8");
 				Lbl_mytime.setText("");
 				Lbl_2p_time.setText("");
 				Lbl_3p_time.setText("");
@@ -1256,6 +1293,9 @@ public class Mainwindow extends JFrame {
 			bt_bet_check.setToolTipText("오픈할 패를 선택하는 때입니다.");
 			bt_bet_die.setToolTipText("오픈할 패를 선택하는 때입니다.");
 		} else {
+			if (Lbl_myset.getText().equals("오픈 패 선택완료")) {
+				Lbl_myset.setText("");
+			}
 			bt_bet_die.setIcon(img_bt_die_ok);
 			bt_bet_die.setRolloverIcon(img_bt_die_on);
 			bt_bet_die.setEnabled(true);
@@ -1301,13 +1341,17 @@ public class Mainwindow extends JFrame {
 	//				bt_bet_call.setToolTipText("첫 베팅은 하프로 이루어져야 합니다.");
 	//				bt_bet_call.setEnabled(false);
 	//			} else
-				if(client.getMinforbet()==0) {
+				if(client.getMinforbet()==0 && client.isPhase2()==false) {
 					bt_bet_call.setIcon(img_bt_call_no);
 					bt_bet_call.setRolloverIcon(img_bt_call_no);
 					bt_bet_call.setToolTipText("첫 베팅은 하프여야 합니다.");
 					bt_bet_call.setEnabled(false);
-				}
-				else if(client.getMe().getMoney()<client.getMinforbet()) {
+				} else if(client.getMinforbet()==0 && client.isPhase2()==true) {
+					bt_bet_call.setIcon(img_bt_call_ok);
+					bt_bet_call.setRolloverIcon(img_bt_call_on);
+					bt_bet_call.setToolTipText("체크 따라 판끝내기 동의");
+					bt_bet_call.setEnabled(true);
+				} else if(client.getMe().getMoney()<client.getMinforbet()) {
 					bt_bet_call.setIcon(img_bt_call_no);
 					bt_bet_call.setRolloverIcon(img_bt_call_no);
 					bt_bet_call.setToolTipText(client.getMinforbet()+"전의 베팅금이 필요합니다.");
@@ -1349,6 +1393,11 @@ public class Mainwindow extends JFrame {
 		}
 		bt_inv_card1.setLocation(-100, -156);
 		bt_inv_card2.setLocation(-100, -156);
+		if(client.getMe().getBetbool()==1 && mycard1.getLocation().y==cardpospl[1][0] && mycard2.getLocation().y==cardpospl[1][1]) {
+			mycard1.setLocation(mycard1.getLocation().x, mycard1.getLocation().y-30);
+		}
+		
+		
 //		bt_cardset1.setLocation(-100, -20);
 //		bt_cardset2.setLocation(-100, -20);
 //		bt_cardset3.setLocation(-100, -20);
@@ -1378,6 +1427,7 @@ public class Mainwindow extends JFrame {
 		bt_start.setIcon(img_bt_start_no);
 		bt_start.setEnabled(false);
 		bt_invite.setEnabled(false);
+		bt_moneymod.setEnabled(false);
 		return;
 	}
 	public void EndToButton() {
@@ -1402,6 +1452,22 @@ public class Mainwindow extends JFrame {
 		Lbl_3p_time.setText("");
 		Lbl_4p_clock.setIcon(null);
 		Lbl_4p_time.setText("");
+		bt_bet_call.setIcon(img_bt_call_no);
+		bt_bet_call.setRolloverIcon(img_bt_call_no);
+		bt_bet_die.setIcon(img_bt_die_no);
+		bt_bet_die.setRolloverIcon(img_bt_die_no);
+		bt_bet_check.setIcon(img_bt_check_no);
+		bt_bet_check.setRolloverIcon(img_bt_check_no);
+		bt_bet_half.setIcon(img_bt_half_no);
+		bt_bet_half.setRolloverIcon(img_bt_half_no);
+		bt_bet_call.setEnabled(false);
+		bt_bet_die.setEnabled(false);
+		bt_bet_check.setEnabled(false);
+		bt_bet_half.setEnabled(false);
+		bt_bet_call.setToolTipText(null);
+		bt_bet_half.setToolTipText(null);
+		bt_bet_check.setToolTipText(null);
+		bt_bet_die.setToolTipText(null);
 		client.callRefresh();
 		return;
 	}
@@ -1583,7 +1649,7 @@ public class Mainwindow extends JFrame {
 		if(client.getMe().getBetbool()==1 && (Lbl_myset.getText().equals("베팅을 마무리해주세요.")||Lbl_myset.getText().equals("오픈할 패를 선택해주세요."))) {
 			Lbl_myset.setText("시간초과(다이)");
 		}
-		if(Lbl_myset.getText().equals("생존자간 최종패 결정 중")) {
+		if(Lbl_myset.getText().equals("오픈 패 선택완료") || Lbl_myset.getText().equals("생존자간 최종패 결정 중")) {
 			Lbl_myset.setText("");
 		}
 		for(Player p : players) {
@@ -2107,12 +2173,14 @@ public class Mainwindow extends JFrame {
 				break;
 			}
 		}
-		mycard1.setIcon(cardimages[client.getCard1()-1]);
-		mycard2.setIcon(cardimages[client.getCard2()-1]);
+		if(client.getMe().getBetbool()!=1) {
+			mycard1.setIcon(cardimages[client.getCard1()-1]);
+			mycard2.setIcon(cardimages[client.getCard2()-1]);
+		}
 		client.setBoolTrash(false);
-		
 	}
 	public void DrawCards2() {
+		client.setPhase2(true);
 		NotMyTurn();
 		Lbl_myclock.setIcon(null);
 		Lbl_2p_clock.setIcon(null);
@@ -2131,7 +2199,6 @@ public class Mainwindow extends JFrame {
 		
 		
 		players = client.getPlayers();
-		int temporder = client.getMe().getOrder();
 		switch(client.getThisplaynum()) {
 			case 2: {
 				switch(client.getMe().getOrder()) {

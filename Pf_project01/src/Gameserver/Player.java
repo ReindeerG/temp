@@ -20,6 +20,7 @@ public class Player implements Serializable {
 	private String userid;
 	private String nickname;
 	private int money=8888;
+	private int thisbet;
 	private int card1;
 	private int card2;
 	private int card3;
@@ -143,6 +144,12 @@ public class Player implements Serializable {
 	}
 	public void setTrash(int trash) {
 		this.trash = trash;
+	}
+	public int getThisbet() {
+		return thisbet;
+	}
+	public void setThisbet(int thisbet) {
+		this.thisbet = thisbet;
 	}
 	
 	
