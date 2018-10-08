@@ -584,7 +584,7 @@ public class Client extends Thread {
 				default: break;
 			}
 				
-			} catch(Exception e) {e.printStackTrace(); System.exit(0); }
+			} catch(Exception e) {e.printStackTrace(); }
 		}
 	}
 	

@@ -44,7 +44,7 @@ public class SetWindow extends JDialog {
 		cardlbl21 = new JLabel(card1);
 		cardlbl23 = new JLabel(card3);
 		cardlbl32 = new JLabel(card2);
-		cardlbl33 = new JLabel(card1);
+		cardlbl33 = new JLabel(card3);
 		
 		cardlbl11.setBounds(10, 10, 100, 156);
 		cardlbl12.setBounds(10+100, 10, 100, 156);
@@ -75,16 +75,22 @@ public class SetWindow extends JDialog {
 		}
 		bt[0].addActionListener(e->{
 			client.SelectSet(1, set[0]);
+			while(client.getCardset()==0) {
+			}
 			client.getWindow().toemptysw();
 			dispose();
 		});
 		bt[1].addActionListener(e->{
 			client.SelectSet(2, set[1]);
+			while(client.getCardset()==0) {
+			}
 			client.getWindow().toemptysw();
 			dispose();
 		});
 		bt[2].addActionListener(e->{
 			client.SelectSet(3, set[2]);
+			while(client.getCardset()==0) {
+			}
 			client.getWindow().toemptysw();
 			dispose();
 		});
@@ -110,7 +116,7 @@ public class SetWindow extends JDialog {
 		this.setResizable(false);
 		this.setUndecorated(true);
 		this.setLocationRelativeTo(parent);
-		this.setAlwaysOnTop(true);
+//		this.setAlwaysOnTop(true);
 		this.setModal(true);
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 	}

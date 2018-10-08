@@ -55,7 +55,7 @@ class Timer extends Thread {
 				}
 //				System.out.println("타이머 계속 보내고 있단다");
 			}
-			i--;
+//			i--;
 		}
 		Player p = serv.getPlayers().get(serv.getWhosturn());
 		p.getUth().IncreaseTurn();
