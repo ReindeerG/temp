@@ -1168,7 +1168,6 @@ public class Server extends Thread {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
-		
 		for(int i=1;i<players.size();i++) {
 			Player tempp = players.get((getWhosturn()+i)%players.size());
 			if(tempp.getBetbool()!=1) {
@@ -1181,7 +1180,6 @@ public class Server extends Thread {
 		if(isInggame()==true) {
 			players.get(getWhosturn()).setBetbool(0);
 			Refresh();
-			
 			Timer t = new Timer(this, players.get(getWhosturn()), getTurn());
 			setNowtimer(t);
 			t.setDaemon(true);
@@ -1232,7 +1230,6 @@ public class Server extends Thread {
 			}
 			catch (Exception e) {e.printStackTrace();}
 		}
-		System.out.println("스타트보냄");
 		for(Player p : players) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
@@ -1241,10 +1238,10 @@ public class Server extends Thread {
 			}
 			catch (Exception e) {e.printStackTrace();}
 		}
-		System.out.println("재경기시작하긴하니");
 //		while(true) {
 //			if(1==2) break;
 //		}
+		try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
 		Timer t = new Timer(this, players.get(getWhosturn()), getTurn());
 		setNowtimer(t);
 		t.setDaemon(true);
@@ -1309,7 +1306,7 @@ public class Server extends Thread {
 			}
 			catch (Exception e) {e.printStackTrace();}
 		}
-		
+		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
 		Timer t = new Timer(this, players.get(getWhosturn()), getTurn());
 		setNowtimer(t);
 		t.setDaemon(true);
