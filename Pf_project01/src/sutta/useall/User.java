@@ -8,6 +8,19 @@ public class User implements Serializable{
 	private final String id;
 	private String pw;
 	private int money;
+	private boolean isLogin;
+
+	
+	@Override
+	public String toString() {
+		return "User [nickname=" + nickname + ", id=" + id + ", money=" + money + ", isLogin=" + isLogin + "]";
+	}
+	public boolean isLogin() {
+		return isLogin;
+	}
+	public void setLogin(boolean isLogin) {
+		this.isLogin = isLogin;
+	}
 	public String getPw() {
 		return pw;
 	}

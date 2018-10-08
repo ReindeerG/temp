@@ -1,22 +1,36 @@
 package sutta.useall;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Room implements Serializable{
-	@Override
-	public String toString() {
-		return "Room [name=" + name + ", cnt=" + cnt + ", ing=" + ing + ", user=" + Arrays.toString(user) + "]";
-	}
+	
 	private String name;
 	private int cnt;
 	private boolean ing;
-	private User[] user = new User[4];
+	private List<User> user = new ArrayList<>();
+	private int port;
 	
-	public Room(String name) {
+	public String getIng(){
+		return ing? "진행중":"대기중";
+	}
+	
+	
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public Room(String name, int port) {
 		this.name = name;
 		this.cnt = 0;
 		this.ing = false;
+		this.port = port;
 	}
 	
 	public String getName() {
@@ -48,14 +62,10 @@ public class Room implements Serializable{
 		}
 	}
 	public void addUser(User user) {
-		if(cnt<4 || cnt >0) {
-			for(int i = 0; i< this.user.length; i++) {
-				if(this.user[i] == null) {
-					this.user[i] = user;
-					break;
-				}
-			}
-		}
+		this.user.add(user);
+	}
+	public void removeUser(User user) {
+		this.user.remove(user);
 	}
 	
 	

@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import Gameserver.Server;
+import sutta.gameserver.Server;
 import sutta.useall.Room;
 import sutta.useall.Signal;
 import sutta.useall.User;
@@ -51,9 +51,11 @@ public class MainServer extends Thread{
 		f = new File("UserFile","user.txt");
 		if(f.exists()) {
 			user_list = BackUpManager.getUserInfo(f);
+			System.out.println("user_list = "+user_list);
 		}
 		else {
 			user_list = new ArrayList<>();
+			System.out.println("user_list = "+user_list);
 		}
 		
 		try {
@@ -81,20 +83,21 @@ public class MainServer extends Thread{
 	/**
 	 * 방 목록을 접속자 전체에게 뿌려주는 메소드
 	 * @throws IOException
+	 *
 	 */
 	public void broadCast(){
 		try {
 			roomList2.clear();
 			for(int i = 0; i<roomList.size(); i++) {
 				Room t = roomList.get(i);
-				String[] str = {(i+1)+"번방",t.getName(),t.getCnt()+"/4"};
+				String[] str = {(i+1)+"번방",t.getName(),t.getIng(),t.getCnt()+"/4"};
 				roomList2.add(str);
 			}
 			for(int i=0; i<paint.size();i++) {
 				paint.get(i).send();
 			}
 		}catch(Exception e) {
-			e.getMessage();
+			e.printStackTrace();
 		}
 	}
 	
@@ -117,9 +120,10 @@ public class MainServer extends Thread{
 			while(true) {
 				try {
 					broadCast();
-					//2초에 한 번 씩 - 추후 변경 가능 
-					Thread.sleep(2000);
+					//1초에 한 번 씩 - 추후 변경 가능 
+					Thread.sleep(1000);
 				} catch (Exception e) {
+					
 					e.printStackTrace();
 				}
 			}
@@ -166,15 +170,11 @@ public class MainServer extends Thread{
 			try {
 				if(on == true) {
 					ArrayList<String[]> target = (ArrayList<String[]>) roomList2.clone();
-//					for(int i = 0 ; i < target.size();i++) {
-//						System.out.println("target.get("+i+").cnt = "+target.get(i).getCnt());
-//					}
-//					System.out.println("send = "+target.hashCode()+" / "+target);
 					out.writeObject(target);
 					out.flush();	
 				}				
 			}catch(Exception e) {
-				e.getMessage();
+				e.printStackTrace();
 			}
 		}
 		
@@ -184,8 +184,9 @@ public class MainServer extends Thread{
 		public void loginProc(){
 			try {
 				boolean isMember = false;
+				boolean isIng = true;
 				//로그인이 완료될 때 까지 실행 
-				while(!isMember) {
+				while(!(isMember&&!isIng)) {
 					//어떤 버튼을 누르느냐에 따라 다르다
 					//0  회원 가입
 					//1 로그인
@@ -218,6 +219,7 @@ public class MainServer extends Thread{
 						}
 						else {
 							//회원이 없을때 가입
+							u1.setMoney(10000);
 							user_list.add(u1);
 							BackUpManager.backUpUserInfo(f, user_list);
 							out.writeBoolean(true);
@@ -227,27 +229,38 @@ public class MainServer extends Thread{
 					case Signal.LOGIN:
 						//로그인
 						User u2 = (User)in.readObject();
-						
 						//회원 목록에서 일치하는 것을 받아와 로그인 진행
 						for(int i = 0; i<user_list.size(); i++) {
 							User user = user_list.get(i);
 							if(user.getId().equals(u2.getId()) && user.getPw().equals(u2.getPw())) {
 								isMember = true;
-								u2 = user_list.get(i);
+								if(!user.isLogin()) {
+									u2 = user_list.get(i);	
+									isIng = false;
+								}
+								else {
+									isIng = true;
+								}
 								break;
 							}
 						}
-						//회원일 때 실행 시킨다  
-						if(isMember) {
+						
+						//회원이면서 지금 실행중이지 않은 회원만 로그인 가능
+						if(isMember && !isIng) {
 							user = u2;
+							user.setLogin(true);
 						}
-						out.writeBoolean(isMember);
+						System.out.println("전송");
+						out.writeBoolean(isMember && !isIng);
 						out.flush();
+						System.out.println(isMember && !isIng);
 						break;
 					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+//				e.printStackTrace();
+				list.remove(this);
+//				System.out.println("로그인 창 종료해서 클라이언트 삭제");
 			}
 			
 		}
@@ -256,12 +269,16 @@ public class MainServer extends Thread{
 		public void run() {
 			try {
 				loginProc();
-				//방 목록을 1회(시작시 뿌려준다)
 				on = true;
+				//로그인 하면 저장된 정보를 사용자에게 보내준다 
 				out.writeObject(user);
 				out.flush();
 				Process p  = new Process(this, roomList,roomPort, serverList);
 				p.process();
+				System.out.println("로그아웃");
+				list.remove(this);
+				System.out.println("list.size = "+list.size());
+				this.interrupt();
 			}catch(Exception e) {}
 		}
 	}

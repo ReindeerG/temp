@@ -1,7 +1,11 @@
 package sutta.mainclient6;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -28,8 +32,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
-import Gameserver.Client_Ex;
-import Gamewindow.Mainwindow;
+import sutta.gameserver.Client_Ex;
+import sutta.gamewindow.Mainwindow;
 import sutta.useall.Room;
 import sutta.useall.Signal;
 import sutta.useall.User;
@@ -49,7 +53,7 @@ public class MainWindow extends JFrame implements Runnable{
 //	ÄÄÆ÷³ÍÆ® ¹èÄ¡¿ë °ø°£
 	private ArrayList<String[]> room_list;
 	private Container con = this.getContentPane();
-	private String[] names = {"¹æ ¹øÈ£","¹æ ÀÌ¸§","Âü°¡ÀÚ¼ö"};
+	private String[] names = {"¹æ ¹øÈ£","¹æ ÀÌ¸§","ÁøÇà »óÅÂ","Âü°¡ÀÚ ¼ö"};
 	private DefaultTableModel model1 =new DefaultTableModel(names,0) {
 		@Override
 		public boolean isCellEditable(int row, int column) {
@@ -72,6 +76,13 @@ public class MainWindow extends JFrame implements Runnable{
 	private JPanel panel = new JPanel();
 	private JLabel nickname = new JLabel();
 	private JLabel money = new JLabel();
+	private Image moon = Toolkit.getDefaultToolkit().getImage("Moon\\moon.jpg");
+	private JPanel imagePanel = new JPanel() {
+		@Override
+		protected void paintComponent(Graphics g) {
+			g.drawImage(moon, 0, 0, 467, 385, null);
+		}
+	};
 	
 	private User user;
 	
@@ -90,6 +101,9 @@ public class MainWindow extends JFrame implements Runnable{
 		con.add(panel);
 		con.add(nickname);
 		con.add(money);
+		con.setBackground(Color.black);
+		con.add(imagePanel);
+		con.setForeground(Color.WHITE);
 		
 		
 		room.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -104,6 +118,12 @@ public class MainWindow extends JFrame implements Runnable{
 		join.setBounds(825, 38, 141, 36);
 		addRoom.setBounds(825, 84, 141, 36);
 		quick.setBounds(825, 130, 141, 36);
+		nickname.setBounds(825, 300, 200, 25);
+		money.setBounds(825, 330, 200, 25);
+		nickname.setText("´Ð³×ÀÓ : "+user.getNickname());
+		money.setText("°¡Áø µ· : "+user.getMoney()+"Àü");
+		imagePanel.setBounds(517, 366, 467, 385);
+		
 		
 
 		
@@ -126,23 +146,29 @@ public class MainWindow extends JFrame implements Runnable{
 					out.flush();
 					JOptionPane.showMessageDialog(this, "Âü¿©ÇÒ ¹æÀ» ¼±ÅÃÇØ ÁÖ¼¼¿ä");
 				}
-				else if(room_list.get(index)[2].equals("4/4")) {
+				else if(room_list.get(index)[2].equals("ÁøÇàÁß")) {
 					out.writeInt(-1);
 					out.flush();
-					JOptionPane.showMessageDialog(this, "ÀÌ¹Ì ²Ë Âù ¹æÀÔ´Ï´Ù");
+					JOptionPane.showMessageDialog(this, "ÀÌ¹Ì ÁøÇàÁßÀÎ ¹æÀÔ´Ï´Ù");
 					}
 				else {
 					out.writeInt(room.getSelectedRow());
 					out.flush();
 					Room r = (Room)in.readObject();
 					System.out.println(r.getName()+"¹æ¿¡ Âü°¡");
-					//¹æ Á¤º¸¸¦ ¹Þ¾Æ¿Í ±× ¼­¹ö¿¡ Á¢¼Ó½ÃÄÑÁØ´Ù
-					Client_Ex client = new Client_Ex(r.getPort(), user.getNickname());
-					client.setDaemon(true);
-					client.start();
-					this.hide();
-					Mainwindow mw = new Mainwindow(client);
-					client.setWindow(mw);
+					if(r!=null) {
+						//¹æ Á¤º¸¸¦ ¹Þ¾Æ¿Í ±× ¼­¹ö¿¡ Á¢¼Ó½ÃÄÑÁØ´Ù
+						Client_Ex client = new Client_Ex(r.getPort(), user);
+						client.setDaemon(true);
+						client.start();
+						Mainwindow mw = new Mainwindow(client, out, this);
+						client.setWindow(mw);
+						mw.setVisible(true);
+						this.setVisible(false);						
+					}
+					else {
+						JOptionPane.showMessageDialog(this, "°ÔÀÓÀÌ ÁøÇàÁßÀÎ ¹æÀÔ´Ï´Ù", "", JOptionPane.PLAIN_MESSAGE);
+					}
 				}										
 			}
 			else {
@@ -164,7 +190,15 @@ public class MainWindow extends JFrame implements Runnable{
 
 		WindowListener proc = new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-//				socket.close();
+				try {
+					out.writeInt(5);
+					out.flush();
+					socket.close();
+					w_socket.close();
+				} catch (Exception e1) {
+					System.out.println("Å¬¶óÀÌ¾ðÆ®ÂÊ ¼ÒÄÏ ¿¡·¯");
+					e1.printStackTrace();
+				}
 				System.exit(0);
 			}
 		};
@@ -181,7 +215,7 @@ public class MainWindow extends JFrame implements Runnable{
 				String name = JOptionPane.showInputDialog(this, "¹æ Á¦¸ñ ÀÔ·Â(ÇÑ,¿µ,¼ýÀÚ 1~8)", "¹æ ¸¸µé±â", JOptionPane.PLAIN_MESSAGE);
 				boolean isRoomName = true;
 				if(name != null) {
-					isRoomName = Pattern.matches("^[\\d¤¡-¤¾¤¿-¤Ó°¡-ÆR]{1,8}$", name);					
+					isRoomName = Pattern.matches("^[\\da-zA-Z¤¡-¤¾¤¿-¤Ó°¡-ÆR]{1,8}$", name);					
 				}
 				if(!isRoomName) {
 					name = null;
@@ -190,17 +224,21 @@ public class MainWindow extends JFrame implements Runnable{
 				out.writeObject(name);
 				out.flush();
 				
-//				System.out.println(in.readObject());
-				Room r = (Room)in.readObject();
-				System.out.println(r.getName()+"¹æÀ» »ý¼º");
-				//¹æ Á¤º¸¸¦ ¹Þ¾Æ¿Í ±× ¼­¹ö¿¡ Á¢¼Ó½ÃÄÑÁØ´Ù
-				Client_Ex client = new Client_Ex(r.getPort(), user.getNickname());
-				client.setDaemon(true);
-				client.start();
-				this.hide();
-				Mainwindow mw = new Mainwindow(client);
-				client.setWindow(mw);
-				System.out.println(r.getPort()+"Æ÷Æ® ¹æ ¸¸µé°í ÀÔÀå");
+				System.out.println("name = "+name);
+				if(name!= null) {
+					Room r = (Room)in.readObject();
+					System.out.println(r.getName()+"¹æÀ» »ý¼º");
+					//¹æ Á¤º¸¸¦ ¹Þ¾Æ¿Í ±× ¼­¹ö¿¡ Á¢¼Ó½ÃÄÑÁØ´Ù
+					Client_Ex client = new Client_Ex(r.getPort(), user);
+					client.setDaemon(true);
+					client.start();
+					Mainwindow mw = new Mainwindow(client, out, this);
+					System.out.println("Mainwindow mw »ý¼º ¹× ½ÃÀÛ");
+					client.setWindow(mw);
+					mw.setVisible(true);
+					this.setVisible(false);
+				}
+				
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -209,14 +247,16 @@ public class MainWindow extends JFrame implements Runnable{
 			try {
 				out.writeInt(Signal.QUICKJOIN);
 				out.flush();
+				System.out.println(in.readObject());
 				Room r = (Room)in.readObject();
 				System.out.println(r.getName()+"¹æ¿¡ ºü¸¥ Âü°¡");
-				Client_Ex client = new Client_Ex(r.getPort(), user.getNickname());
+				Client_Ex client = new Client_Ex(r.getPort(), user);
 				client.setDaemon(true);
 				client.start();
-				this.hide();
-				Mainwindow mw = new Mainwindow(client);
+				Mainwindow mw = new Mainwindow(client, out, this);
 				client.setWindow(mw);
+				mw.setVisible(true);
+				this.setVisible(false);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -254,11 +294,12 @@ public class MainWindow extends JFrame implements Runnable{
 	 */
 	private ObjectOutputStream w_out;
 	private ObjectInputStream w_in;
+	private Socket w_socket;
 	public MainWindow(Socket socket, ObjectOutputStream out, ObjectInputStream in) {
 		try {
 			g_inet = InetAddress.getByName("192.168.0.9");
 			w_inet = InetAddress.getByName("192.168.0.9");
-			Socket w_socket = new Socket(w_inet, 54891);
+			w_socket = new Socket(w_inet, 54891);
 			w_out = new ObjectOutputStream(w_socket.getOutputStream());
 			w_in = new ObjectInputStream(w_socket.getInputStream());
 			
@@ -274,6 +315,7 @@ public class MainWindow extends JFrame implements Runnable{
 		}
 		try {
 			this.user = (User) in.readObject();
+			System.out.println("user = "+user);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -296,30 +338,24 @@ public class MainWindow extends JFrame implements Runnable{
 		try {
 			while(true) {
 				ArrayList<String[]> list;
-				try {
-					list = (ArrayList<String[]>)w_in.readObject();
-//					System.out.println("receive = "+list.hashCode()+" / "+list);
-					if(list!=null && list.size() != 0) {
-						room_list = list;
-						model1.setNumRows(0);
-						for(int i = 0 ; i < list.size(); i++) {
-							model1.addRow(list.get(i));
-						}
-						tg = model2;
-						model2 = model1;
-						model1 = tg;
-						room.repaint();
-//						room.setModel(model2);
+				list = (ArrayList<String[]>)w_in.readObject();
+//				System.out.println("receive = "+list.hashCode()+" / "+list);
+				if(list!=null && list.size() != 0) {
+					room_list = list;
+					model1.setNumRows(0);
+					for(int i = 0 ; i < list.size(); i++) {
+						model1.addRow(list.get(i));
 					}
-				} catch (Exception e1) {
-					e1.printStackTrace();
+					tg = model2;
+					model2 = model1;
+					model1 = tg;
+					room.repaint();
+//					room.setModel(model2);
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.exit(0);
 		}
 	}
-	
-	
 }
 

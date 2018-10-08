@@ -3,6 +3,9 @@ package sutta.mainclient6;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -67,7 +70,13 @@ public class Login extends JDialog {
 	}
 
 	private void event() {
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		WindowListener exit = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		};
+		this.addWindowListener(exit);
 		ok.addActionListener(e->{
 			try {
 				out.writeInt(1);
@@ -79,10 +88,8 @@ public class Login extends JDialog {
 				out.writeObject(u);
 				out.flush();
 				
-				Boolean read = in.readBoolean();
-				if(read!=null) {
-					login = read;
-				}
+//				System.out.println(in.readBoolean());
+				login = in.readBoolean();
 				
 				if(login) {
 					this.dispose();
