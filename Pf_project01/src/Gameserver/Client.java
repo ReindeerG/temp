@@ -2,19 +2,12 @@ package Gameserver;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import javax.swing.JOptionPane;
-
-
-import Chatserver.Message;
 import Gamewindow.Mainwindow;
 
 public class Client extends Thread {
@@ -26,178 +19,79 @@ public class Client extends Thread {
 	private Mainwindow window=null;
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
-	public ObjectInputStream getIn() {
-		return in;
-	}
-	public void setIn(ObjectInputStream in) {
-		this.in = in;
-	}
-	public ObjectOutputStream getOut() {
-		return out;
-	}
-	public void setOut(ObjectOutputStream out) {
-		this.out = out;
-	}
+	public ObjectInputStream getIn() { return in; }
+	public void setIn(ObjectInputStream in) { this.in = in; }
+	public ObjectOutputStream getOut() { return out; }
+	public void setOut(ObjectOutputStream out) { this.out = out; }
 	private boolean stop=false;
-	public void toStop() {
-		this.stop=true;
-	}
-	public boolean isStop() {
-		return this.stop;
-	}
+	public void toStop() { this.stop=true; }
+	public boolean isStop() { return this.stop; }
 	
 	private int pandon;
-	public int getPandon() {
-		return pandon;
-	}
-	public void setPandon(int pandon) {
-		this.pandon = pandon;
-	}
-	public String getUserid() {
-		return userid;
-	}
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
+	public int getPandon() { return pandon; }
+	public void setPandon(int pandon) { this.pandon = pandon; }
+	public String getUserid() { return userid; }
+	public void setUserid(String userid) { this.userid = userid; }
 	private int whosturn;
-	public int getWhosturn() {
-		return whosturn;
-	}
-	public void setWhosturn(int whosturn) {
-		this.whosturn = whosturn;
-	}
+	public int getWhosturn() { return whosturn; }
+	public void setWhosturn(int whosturn) { this.whosturn = whosturn; }
 	private boolean inggame=false;
-	public boolean isInggame() {
-		return inggame;
-	}
-	public void setInggame(boolean inggame) {
-		this.inggame = inggame;
-	}
+	public boolean isInggame() { return inggame; }
+	public void setInggame(boolean inggame) { this.inggame = inggame; }
 	private int moneythisgame=0;
 	private int minforbet=0;
-	public int getMoneythisgame() {
-		return moneythisgame;
-	}
-	public void setMoneythisgame(int moneythisgame) {
-		this.moneythisgame = moneythisgame;
-	}
-	public int getMinforbet() {
-		return minforbet;
-	}
-	public void setMinforbet(int minforbet) {
-		this.minforbet = minforbet;
-	}
+	public int getMoneythisgame() { return moneythisgame; }
+	public void setMoneythisgame(int moneythisgame) { this.moneythisgame = moneythisgame; }
+	public int getMinforbet() { return minforbet; }
+	public void setMinforbet(int minforbet) { this.minforbet = minforbet; }
 	private int turn;
-	public int getTurn() {
-		return turn;
-	}
-	public void setTurn(int turn) {
-		this.turn = turn;
-	}
-	public void increaseTurn() {
-		this.turn++;
-	}
+	public int getTurn() { return turn; }
+	public void setTurn(int turn) { this.turn = turn; }
+	public void increaseTurn() { this.turn++; }
 	private int card1;
 	private int card2;
 	private int card3;
 	private int cardset;
-	public int getCard1() {
-		return card1;
-	}
-	public void setCard1(int card1) {
-		this.card1 = card1;
-	}
-	public int getCard2() {
-		return card2;
-	}
-	public void setCard2(int card2) {
-		this.card2 = card2;
-	}
-	public int getCard3() {
-		return card3;
-	}
-	public void setCard3(int card3) {
-		this.card3 = card3;
-	}
-	public int getCardset() {
-		return cardset;
-	}
-	public void setCardset(int cardset) {
-		this.cardset = cardset;
-	}
+	public int getCard1() { return card1; }
+	public void setCard1(int card1) { this.card1 = card1; }
+	public int getCard2() { return card2; }
+	public void setCard2(int card2) { this.card2 = card2; }
+	public int getCard3() { return card3; }
+	public void setCard3(int card3) { this.card3 = card3; }
+	public int getCardset() { return cardset; }
+	public void setCardset(int cardset) { this.cardset = cardset; }
 	private int thisplaynum;
-	public int getThisplaynum() {
-		return thisplaynum;
-	}
-	public void setThisplaynum(int thisplaynum) {
-		this.thisplaynum=thisplaynum;
-	}
+	public int getThisplaynum() { return thisplaynum; }
+	public void setThisplaynum(int thisplaynum) { this.thisplaynum=thisplaynum; }
 	
 	private boolean canthalf=false;
-	public boolean isCanthalf() {
-		return canthalf;
-	}
-	public void setCanthalf(boolean canthalf) {
-		this.canthalf = canthalf;
-	}
+	public boolean isCanthalf() { return canthalf; }
+	public void setCanthalf(boolean canthalf) { this.canthalf = canthalf; }
 	private boolean boolTrash;
-	public boolean isBoolTrash() {
-		return boolTrash;
-	}
-	public void setBoolTrash(boolean boolTrash) {
-		this.boolTrash = boolTrash;
-	}
+	public boolean isBoolTrash() { return boolTrash; }
+	public void setBoolTrash(boolean boolTrash) { this.boolTrash = boolTrash; }
 	private int trash;
-	public int getTrash() {
-		return trash;
-	}
-	public void setTrash(int trash) {
-		this.trash = trash;
-	}
+	public int getTrash() { return trash; }
+	public void setTrash(int trash) { this.trash = trash; }
 	
-	public void setWindow(Mainwindow window) {
-		this.window = window;
-	}
-	public Mainwindow getWindow() {
-		return window;
-	}
-	public Player getMe() {
-		return me;
-	}
-	public void setMe(Player me) {
-		this.me = me;
-	}
-	public ArrayList<Player> getPlayers() {
-		return players;
-	}
-	public Socket getSocket() {
-		return socket;
-	}
+	public void setWindow(Mainwindow window) { this.window = window; }
+	public Mainwindow getWindow() { return window; }
+	public Player getMe() { return me; }
+	public void setMe(Player me) { this.me = me; }
+	public ArrayList<Player> getPlayers() { return players; }
+	public Socket getSocket() { return socket; }
 	private boolean yetresult;
-	public boolean isYetresult() {
-		return yetresult;
-	}
-	public void setYetresult(boolean yetresult) {
-		this.yetresult = yetresult;
-	}
+	public boolean isYetresult() { return yetresult; }
+	public void setYetresult(boolean yetresult) { this.yetresult = yetresult; }
 	private boolean phase2;
-	public boolean isPhase2() {
-		return phase2;
-	}
-	public void setPhase2(boolean phase2) {
-		this.phase2 = phase2;
-	}
+	public boolean isPhase2() { return phase2; }
+	public void setPhase2(boolean phase2) { this.phase2 = phase2; }
 	private boolean onceneglecttimer;
-	public boolean isOnceneglecttimer() {
-		return onceneglecttimer;
-	}
-	public void setOnceneglecttimer(boolean onceneglecttimer) {
-		this.onceneglecttimer = onceneglecttimer;
-	}
+	public boolean isOnceneglecttimer() { return onceneglecttimer; }
+	public void setOnceneglecttimer(boolean onceneglecttimer) { this.onceneglecttimer = onceneglecttimer; }
 
 	public void SelectSet(int n, String str) {
 		setCardset(n);
-		System.out.println(getCardset()+"선택했다야");
 		getWindow().nameset(str);
 		try {
 			out.writeObject(Gaming.SelectSet(n));
@@ -208,10 +102,9 @@ public class Client extends Thread {
 	public void callRefresh() {
 		try {
 			out.writeObject(Gaming.PlzRefresh());
-//			out.writeObject(new Gaming(Gaming.REFRESH));
 			out.flush();
 		} catch(Exception e) {e.printStackTrace();}
-		return;
+		return; 
 	}
 	public void callWhosturn() {
 		try {
@@ -227,7 +120,6 @@ public class Client extends Thread {
 		}
 		try {
 			out.writeObject(Gaming.ImIn(getMe().getUserid()));
-//			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT_JOIN));
 			out.flush();
 		} catch(Exception e) {e.printStackTrace();}
 		return;
@@ -235,7 +127,6 @@ public class Client extends Thread {
 	public void ChangeNick(String nick) {
 		try {
 			out.writeObject(Gaming.NickChange(getMe().getUserid(), nick));
-//			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT_NICKCHANGE, nick));
 			out.flush();
 		} catch(Exception e) {e.printStackTrace();}
 		return;
@@ -243,7 +134,6 @@ public class Client extends Thread {
 	public void MakeChat(String msg) {
 		try {
 			out.writeObject(Gaming.Chat(getMe().getUserid(), msg, null));
-//			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT, msg, ""));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
 		return;
@@ -251,7 +141,6 @@ public class Client extends Thread {
 	public void Leave() {
 		try {
 			out.writeObject(Gaming.ImOut(getMe().getUserid()));
-//			out.writeObject(new Gaming(getMe().getUserid(), Gaming.CHAT_LEAVE));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
 		return;
@@ -375,11 +264,9 @@ public class Client extends Thread {
 				try {
 					in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 					Gaming gm = (Gaming)in.readObject();
-	//				System.out.println(gm.getWhat()+"받음");
 					switch(gm.getWhat()) {
 					case Gaming.IDMATCH: {
 						out.writeObject(Gaming.SendID(getUserid()));
-	//					out.writeObject(new Gaming(Gaming.IDMATCH, getUserid()));
 						out.flush();
 						break;
 					}
@@ -401,12 +288,10 @@ public class Client extends Thread {
 						setMoneythisgame(gm.getMoneythisgame());
 						setMinforbet(gm.getMinforbet());
 						getWindow().MoneyRefresh();
-	//					getWindow().Refresh();
 						break;
 					}
 					case Gaming.TURN_REFRESH: {
 						setTurn(gm.getWho());
-	//					getWindow().Refresh();
 						break;
 					}
 					case Gaming.PANDON: {
@@ -420,7 +305,6 @@ public class Client extends Thread {
 					case Gaming.CHAT_JOIN: {
 						players=gm.getPlayers();
 						for(Player p : players) {
-	//---------------------플레이어 많아지면 해제해서 테스트
 							if(p.getUserid().equals(userid)) {
 								me=p;
 								break;
@@ -435,15 +319,11 @@ public class Client extends Thread {
 						players=gm.getPlayers();
 						getWindow().ChatLeave(gm.getUserid(), gm.getDate());
 						getWindow().Refresh();
-	//					callRefresh();
 						break;
 					}
 					case Gaming.BAN: {
 						players=gm.getPlayers();
 						getWindow().ChatBan(gm.getUserid(), gm.getDate());
-	//					getWindow().Refresh();
-	//					Thread.sleep(500);
-	//					callRefresh();
 						break;
 					}
 					case Gaming.IMBANNED: {
@@ -469,7 +349,6 @@ public class Client extends Thread {
 					}
 					case Gaming.GAME_WHOSTURN: {
 						setWhosturn(gm.getWho());
-	//					getWindow().Clockicons();
 						break;
 					}
 					case Gaming.GETCARD: {
@@ -491,12 +370,7 @@ public class Client extends Thread {
 						}
 						
 						card1 = getMe().getCard1(); card2 = getMe().getCard2(); card3 = getMe().getCard3();
-	//					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
-	//					System.out.println(card1);
 						getWindow().DrawCards();
-	//					System.out.println(card1+" "+card2+" "+card3);
-	//					getWindow().DrawCards();
-	//					getWindow().MycardOpen(card1, card2);
 						callRefresh();
 						break;
 					}
@@ -539,35 +413,10 @@ public class Client extends Thread {
 						getWindow().StartToButton();
 						break;
 					}
-	//				case Gaming.GAME_REMATCH: {
-	//					setOnceneglecttimer(false);
-	//					thisplaynum=gm.getThisplaynum();
-	//					setMoneythisgame(gm.getMoneythisgame());
-	//					setMinforbet(0);
-	//					inggame=true;
-	//					setPhase2(false);
-	//					canthalf=false;
-	//					turn=1;
-	//					getWindow().StartToButton();
-	//					break;
-	//				}
 					case Gaming.GAME_RESULT: {
-	//					if(isYetresult()==false) {
-	//						setYetresult(true);
-							players=gm.getPlayers();
-	//						boolean isRe = false;
-	//						for(Player p : players) {
-	//							if(p.getGameresult()==2) { isRe=true; break; }
-	//						}
-	//						if(isRe==false) setMinforbet(0);
-							
-							
-							
-							getWindow().Resultgame();
-							whosturn=0;
-	//						out.writeObject(new Gaming(Gaming.GAME_RESULT_OK));
-	//						out.flush();
-	//					}
+						players=gm.getPlayers();
+						getWindow().Resultgame();
+						whosturn=0;
 						break;
 					}
 					case Gaming.BUTTON_OK: {
@@ -588,9 +437,4 @@ public class Client extends Thread {
 		}
 		return;
 	}
-	
-	
-	
-	
-
 }

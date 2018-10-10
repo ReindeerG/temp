@@ -12,28 +12,17 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
-import javax.swing.text.DefaultEditorKit.BeepAction;
 
 import Gameserver.Client;
-import Gameserver.Gaming;
 import Gameserver.Player;
 
 import javax.swing.JPanel;
@@ -43,13 +32,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 
 import Logic.Logic;
 
+/**
+ * 게임 배경(녹색 체크무늬) 
+ */
 class BG extends JPanel {
 	BufferedImage image;
-	
 	public BG() {
 		this.setLayout(null);
 		try {
@@ -66,6 +56,9 @@ class BG extends JPanel {
 	}
 }
 
+/**
+ * 20장의 화투패
+ */
 class Card extends JLabel {
 	public Card() {
 		this.setLayout(null);
@@ -76,6 +69,9 @@ class Card extends JLabel {
 	}
 }
 
+/**
+ * 타이틀바
+ */
 class Titlebar extends JLabel {
 	public Titlebar() {
 		this.setLayout(null);
@@ -86,6 +82,9 @@ class Titlebar extends JLabel {
 	}
 }
 
+/**
+ * 타이틀바를 쥐고 창을 움직일 수 있게 해주는 리스너 
+ */
 class Movewin implements MouseMotionListener {
 	private Mainwindow frame;
 	private int initx = 0;
@@ -146,6 +145,11 @@ public class Mainwindow extends JFrame {
 	private SetWindow nowsw=null;
 	public void toemptysw() {
 		nowsw=null;
+		return;
+	}
+	private JokboWindow nowjw=null;
+	public void toemptyjw() {
+		nowjw=null;
 		return;
 	}
 
@@ -269,10 +273,6 @@ public class Mainwindow extends JFrame {
 	private JLabel Lbl_4p_bet = new JLabel();
 	private JButton bt_4p_ban = new JButton();
 	
-//	private JButton bt_cardset1 = new JButton("");
-//	private JButton bt_cardset2 = new JButton("");
-//	private JButton bt_cardset3 = new JButton("");
-	
 	private String name_2p=null;
 	private String name_3p=null;
 	private String name_4p=null;
@@ -290,7 +290,6 @@ public class Mainwindow extends JFrame {
 		chatlog.setEditable(false);
 		scroll = new JScrollPane(chatlog);
 		scroll.setBounds(0, 580, 450, 200);
-//		con.add(chatlog);
 		con.add(scroll);
 		makechat.setBounds(0, 780, 450, 20);
 		con.add(makechat);
@@ -376,18 +375,6 @@ public class Mainwindow extends JFrame {
 		con.add(Lbl_myclock);
 		Lbl_mybet.setBounds(820-40, 595, 80, 40);
 		con.add(Lbl_mybet);
-		
-//		bt_cardset1.setText("삼팔광땡");
-//		bt_cardset2.setText("삼팔광땡");
-//		bt_cardset3.setText("삼팔광땡");
-//		
-//		bt_cardset1.setBounds(-100, -20, 100, 20);
-//		con.add(bt_cardset1);
-//		bt_cardset2.setBounds(-100, -20, 100, 20);
-//		con.add(bt_cardset2);
-//		bt_cardset3.setBounds(-100, -20, 100, 20);
-//		con.add(bt_cardset3);
-		
 		
 		Lbl_gamemoney.setBounds(550, 500, 200, 14);
 		Lbl_gamemoney.setFont(new Font(null, Font.BOLD, 14));
@@ -544,18 +531,12 @@ public class Mainwindow extends JFrame {
 			}
 			client.Bet_Half();
 		});
-//		bt_cardset1.addActionListener(e->{
-//			Lbl_myset.setText(bt_cardset1.getText());
-//			client.setCardset(1);
-//		});
-//		bt_cardset2.addActionListener(e->{
-//			Lbl_myset.setText(bt_cardset2.getText());
-//			client.setCardset(2);
-//		});
-//		bt_cardset3.addActionListener(e->{
-//			Lbl_myset.setText(bt_cardset3.getText());
-//			client.setCardset(3);
-//		});
+		bt_jokbo.addActionListener(e->{
+			if(nowjw==null) {
+				nowjw = new JokboWindow(this);
+				nowjw.setVisible(true);
+			}
+		});
 		bt_moneymod.addActionListener(e->{
 			PandonWindow pw = new PandonWindow(client, this);
 			pw.setVisible(true);
@@ -645,8 +626,6 @@ public class Mainwindow extends JFrame {
 		Movewin mw = new Movewin(this);
 		titlebar.addMouseMotionListener(mw);
 	}
-	private void menu() {
-	}
 	private void CreateCards() {
 		cardposori = new int[2][20];
 		for(int i=0;i<20;i++) {
@@ -687,6 +666,9 @@ public class Mainwindow extends JFrame {
 			con.add(cards[i]);
 		}
 	}
+	/**
+	 * 화투패와 버튼 등에 필요한 이미지를 맨처음 한꺼번에 로드해줌.
+	 */
 	private void LoadImages() {
 		try {
 			cardimages = new ImageIcon[21];
@@ -694,7 +676,6 @@ public class Mainwindow extends JFrame {
 				cardimages[i] = new ImageIcon(ImageIO.read(new File("Cardimages\\Red\\"+(i+1)+".png")));
 			}
 			cardimages[20] = new ImageIcon(ImageIO.read(new File("Cardimages\\Red\\bk.png")));
-			
 			img_bt_ready_no = new ImageIcon(ImageIO.read(new File("Images\\ready_no.png")));
 			img_bt_ready_yes = new ImageIcon(ImageIO.read(new File("Images\\ready_yes.png")));
 			img_bt_ready_no_roll = new ImageIcon(ImageIO.read(new File("Images\\ready_no_roll.png")));
@@ -733,6 +714,9 @@ public class Mainwindow extends JFrame {
 			icon = Toolkit.getDefaultToolkit().getImage("Images\\ico.png");
 		} catch(Exception e) {e.printStackTrace();}
 	}
+	/**
+	 * GUI상 모든 화투패를 정중앙에 이동시켜줌.
+	 */
 	public void ResetCards() {
 		for(int i=0;i<cards.length;i++) {
 			cards[i].setIcon(cardimages[20]);
@@ -792,6 +776,9 @@ public class Mainwindow extends JFrame {
 		Lbl_myset.setText(str);
 		return;
 	}
+	/**
+	 * 클라이언트 화면을 새로고침. 유저의 접속/퇴장/순서나 카드패 등 거의 모든 GUI 정보를 새로고침
+	 */
 	public void Refresh() {
 		players = client.getPlayers();
 		int allready=0;
@@ -992,13 +979,21 @@ public class Mainwindow extends JFrame {
 				}
 			}
 		}
+		return;
 	}
+	/**
+	 * 서버로부터 명령받았을 때 총베팅금을 새로고침시켜줌.
+	 */
 	public void MoneyRefresh() {
 		Lbl_gamemoney.setText("총 베팅금: "+client.getMoneythisgame()+"전");
 		return;
 	}
+	/**
+	 * 서버로부터 어떤 타이머를 받게될 때 동작
+	 * @param who: 몇번째 유저(0~3)의 턴인지, 혹은 전체가 오픈할 패를 선택하는 턴(4)인지, 생존자가 최종패를 선택하는 턴(5)인지.
+	 * @param time: 서버로부터 0~100의 숫자를 0.1초 간격으로 받음. 즉, 총 10초가 됨.
+	 */
 	public void Timer(int who, int time) {
-//		System.out.println("타이머 받고있음");
 		boolean isOver = false;
 		for(Player p : client.getPlayers()) {
 			if(p.getGameresult()==1||p.getGameresult()==2) {
@@ -1007,7 +1002,6 @@ public class Mainwindow extends JFrame {
 			}
 		}
 		if (isOver==true) {
-//			System.out.println("마크-0");
 			Lbl_mytime.setText("");
 			Lbl_2p_time.setText("");
 			Lbl_3p_time.setText("");
@@ -1031,7 +1025,6 @@ public class Mainwindow extends JFrame {
 			players = client.getPlayers();
 			if(client.isInggame()==true) {
 				if(who==4) {
-//					System.out.println("마크-1");
 					if(time>95) {
 						Lbl_mytime.setForeground(Color.YELLOW);
 					} else if(time>90) {
@@ -1064,7 +1057,6 @@ public class Mainwindow extends JFrame {
 					}
 					return;
 				} else if (who==5) {
-//					System.out.println("마크-2");
 					if(time>95) {
 						Lbl_mytime.setForeground(Color.YELLOW);
 					} else if(time>90) {
@@ -1124,10 +1116,8 @@ public class Mainwindow extends JFrame {
 					}
 					return;
 				} else {
-//					System.out.println("마크-3");
 					int me = client.getMe().getOrder();
 					if(who-me==0) {
-//						System.out.println("마크-4");
 						if(time==70||time==80||time==90||time==100) {
 							Toolkit.getDefaultToolkit().beep();
 						}
@@ -1156,7 +1146,6 @@ public class Mainwindow extends JFrame {
 						MyTurn(who);
 					}
 					else if(who-me==1 || who-me==-3) {
-//						System.out.println("마크-5");
 						if(time>95) {
 							Lbl_2p_time.setForeground(Color.YELLOW);
 						} else if(time>90) {
@@ -1181,7 +1170,6 @@ public class Mainwindow extends JFrame {
 						NotMyTurn();
 					}
 					else if(who-me==2 || who-me==-2) {
-//						System.out.println("마크-6");
 						if(time>95) {
 							Lbl_3p_time.setForeground(Color.YELLOW);
 						} else if(time>90) {
@@ -1206,7 +1194,6 @@ public class Mainwindow extends JFrame {
 						NotMyTurn();
 					}
 					else if(who-me==3 || who-me==-1) {
-//						System.out.println("마크-7");
 						if(time>95) {
 							Lbl_4p_time.setForeground(Color.YELLOW);
 						} else if(time>90) {
@@ -1232,7 +1219,6 @@ public class Mainwindow extends JFrame {
 					}
 				}
 			} else {
-//				System.out.println("마크-8");
 				Lbl_mytime.setText("");
 				Lbl_2p_time.setText("");
 				Lbl_3p_time.setText("");
@@ -1252,22 +1238,14 @@ public class Mainwindow extends JFrame {
 			}
 		}
 		return;
-//		System.out.println(client.isInggame());
 	}
+	/**
+	 * MyTurn(): 자신의 턴에 조건에 따라 베팅버튼의 활성화/비활성화가 결정되고 알림메시지가 정해짐.
+	 * @param who: Timer로 부터 받는 누구의 Turn인지의 값.(0~3이라면 플레이어의 턴이지만, 4라면 처음 오픈할 패를 선택하는 전체의 턴, 5라면 마지막 생존자간 최종패를 선택하는 전체의 턴임.)
+	 */
 	public void MyTurn(int who) {
 		bt_inv_card1.setLocation(-100, -156);
 		bt_inv_card2.setLocation(-100, -156);
-//		if(client.getMe().getBetbool()==0 && client.isBoolTrash()==false) {
-//			
-//			if(mycard1.getLocation().y==cardpospl[1][0] && mycard2.getLocation().y==cardpospl[1][1]) {
-//				Lbl_myset.setText("오픈할 패를 선택해주세요.");
-//			} else {
-//				Lbl_myset.setText("오픈할 패를 선택해주세요.");
-//			}
-//		} else if(client.getMe().getBetbool()==1) {
-//			Lbl_myset.setText("");
-//		}
-		//-------------------------------------
 		if(who==4) {
 			if (!Lbl_myset.getText().equals("오픈 패 선택완료")) {
 				Lbl_myset.setText("오픈할 패를 선택해주세요.");
@@ -1302,87 +1280,68 @@ public class Mainwindow extends JFrame {
 			bt_bet_die.setToolTipText(null);
 			bt_inv_card1.setLocation(-100, -156);
 			bt_inv_card2.setLocation(-100, -156);
-//			if (client.getCardset()==0 && mycard3!=null && mycard3.getLocation().y==cardpospl[1][0]) {
-//				bt_bet_call.setIcon(img_bt_call_no);
-//				bt_bet_call.setRolloverIcon(img_bt_call_no);
-//				bt_bet_call.setEnabled(false);
-//				bt_bet_half.setIcon(img_bt_half_no);
-//				bt_bet_half.setRolloverIcon(img_bt_half_no);
-//				bt_bet_half.setEnabled(false);
-//				bt_bet_check.setIcon(img_bt_check_no);
-//				bt_bet_check.setRolloverIcon(img_bt_check_no);
-//				bt_bet_check.setEnabled(false);
-//				bt_bet_call.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
-//				bt_bet_half.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
-//				bt_bet_check.setToolTipText("최종 패를 선택해야 베팅할 수 있습니다.");
-//			}
-//			else {
-				if(client.isPhase2()==true) {
-					if(client.getTurn()==1) {
-						bt_bet_check.setIcon(img_bt_check_ok);
-						bt_bet_check.setRolloverIcon(img_bt_check_on);
-						bt_bet_check.setToolTipText(null);
-						bt_bet_check.setEnabled(true);
-					} else {
-						bt_bet_check.setIcon(img_bt_check_no);
-						bt_bet_check.setRolloverIcon(img_bt_check_no);
-						bt_bet_check.setToolTipText("선인 사람의 첫턴에만 가능합니다.");
-						bt_bet_check.setEnabled(false);
-					}
+			if(client.isPhase2()==true) {
+				if(client.getTurn()==1) {
+					bt_bet_check.setIcon(img_bt_check_ok);
+					bt_bet_check.setRolloverIcon(img_bt_check_on);
+					bt_bet_check.setToolTipText(null);
+					bt_bet_check.setEnabled(true);
 				} else {
 					bt_bet_check.setIcon(img_bt_check_no);
 					bt_bet_check.setRolloverIcon(img_bt_check_no);
-					bt_bet_check.setToolTipText("모든 패를 받은 후에 선인 사람의 첫턴에만 가능합니다.");
+					bt_bet_check.setToolTipText("선인 사람의 첫턴에만 가능합니다.");
 					bt_bet_check.setEnabled(false);
 				}
-	//			if(client.getMinforbet()==0) {
-	//				bt_bet_call.setIcon(img_bt_call_no);
-	//				bt_bet_call.setRolloverIcon(img_bt_call_no);
-	//				bt_bet_call.setToolTipText("첫 베팅은 하프로 이루어져야 합니다.");
-	//				bt_bet_call.setEnabled(false);
-	//			} else
-				if(client.getMinforbet()==0 && client.isPhase2()==false) {
-					bt_bet_call.setIcon(img_bt_call_no);
-					bt_bet_call.setRolloverIcon(img_bt_call_no);
-					bt_bet_call.setToolTipText("첫 베팅은 하프여야 합니다.");
-					bt_bet_call.setEnabled(false);
-				} else if(client.getMinforbet()==0 && client.isPhase2()==true) {
-					bt_bet_call.setIcon(img_bt_call_ok);
-					bt_bet_call.setRolloverIcon(img_bt_call_on);
-					bt_bet_call.setToolTipText("체크 따라 판끝내기 동의");
-					bt_bet_call.setEnabled(true);
-				} else if(client.getMe().getMoney()<client.getMinforbet()) {
-					bt_bet_call.setIcon(img_bt_call_no);
-					bt_bet_call.setRolloverIcon(img_bt_call_no);
-					bt_bet_call.setToolTipText(client.getMinforbet()+"전의 베팅금이 필요합니다.");
-					bt_bet_call.setEnabled(false);
-				} else {
-					bt_bet_call.setIcon(img_bt_call_ok);
-					bt_bet_call.setRolloverIcon(img_bt_call_on);
-					bt_bet_call.setToolTipText(client.getMinforbet()+"전 베팅");
-					bt_bet_call.setEnabled(true);
-				}
-				if(client.isCanthalf()==true) {
-					bt_bet_half.setIcon(img_bt_half_no);
-					bt_bet_half.setRolloverIcon(img_bt_half_no);
-					bt_bet_half.setToolTipText("콜이나 체크를 한 유저는 하프 베팅할 수 없습니다.");
-					bt_bet_half.setEnabled(false);
-				}
-				else if(client.getMe().getMoney()<client.getMoneythisgame()/2) {
-					bt_bet_half.setIcon(img_bt_half_no);
-					bt_bet_half.setRolloverIcon(img_bt_half_no);
-					bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전의 베팅금이 필요합니다.");
-					bt_bet_half.setEnabled(false);
-				} else {
-					bt_bet_half.setIcon(img_bt_half_ok);
-					bt_bet_half.setRolloverIcon(img_bt_half_on);
-					bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전 베팅");
-					bt_bet_half.setEnabled(true);
-				}
-//			}
+			} else {
+				bt_bet_check.setIcon(img_bt_check_no);
+				bt_bet_check.setRolloverIcon(img_bt_check_no);
+				bt_bet_check.setToolTipText("모든 패를 받은 후에 선인 사람의 첫턴에만 가능합니다.");
+				bt_bet_check.setEnabled(false);
+			}
+			if(client.getMinforbet()==0 && client.isPhase2()==false) {
+				bt_bet_call.setIcon(img_bt_call_no);
+				bt_bet_call.setRolloverIcon(img_bt_call_no);
+				bt_bet_call.setToolTipText("첫 베팅은 하프여야 합니다.");
+				bt_bet_call.setEnabled(false);
+			} else if(client.getMinforbet()==0 && client.isPhase2()==true) {
+				bt_bet_call.setIcon(img_bt_call_ok);
+				bt_bet_call.setRolloverIcon(img_bt_call_on);
+				bt_bet_call.setToolTipText("체크 따라 판끝내기 동의");
+				bt_bet_call.setEnabled(true);
+			} else if(client.getMe().getMoney()<client.getMinforbet()) {
+				bt_bet_call.setIcon(img_bt_call_no);
+				bt_bet_call.setRolloverIcon(img_bt_call_no);
+				bt_bet_call.setToolTipText(client.getMinforbet()+"전의 베팅금이 필요합니다.");
+				bt_bet_call.setEnabled(false);
+			} else {
+				bt_bet_call.setIcon(img_bt_call_ok);
+				bt_bet_call.setRolloverIcon(img_bt_call_on);
+				bt_bet_call.setToolTipText(client.getMinforbet()+"전 베팅");
+				bt_bet_call.setEnabled(true);
+			}
+			if(client.isCanthalf()==true) {
+				bt_bet_half.setIcon(img_bt_half_no);
+				bt_bet_half.setRolloverIcon(img_bt_half_no);
+				bt_bet_half.setToolTipText("콜이나 체크를 한 유저는 하프 베팅할 수 없습니다.");
+				bt_bet_half.setEnabled(false);
+			}
+			else if(client.getMe().getMoney()<client.getMoneythisgame()/2) {
+				bt_bet_half.setIcon(img_bt_half_no);
+				bt_bet_half.setRolloverIcon(img_bt_half_no);
+				bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전의 베팅금이 필요합니다.");
+				bt_bet_half.setEnabled(false);
+			} else {
+				bt_bet_half.setIcon(img_bt_half_ok);
+				bt_bet_half.setRolloverIcon(img_bt_half_on);
+				bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전 베팅");
+				bt_bet_half.setEnabled(true);
+			}
 		}
 		return;
 	}
+	/**
+	 * 자신의 턴이 아닐 경우 베팅 버튼들의 위치와 알림메세지 표현
+	 */
 	public void NotMyTurn() {
 		if(nowsw!=null) {
 			nowsw.dispose();
@@ -1396,12 +1355,6 @@ public class Mainwindow extends JFrame {
 		if(client.getMe().getBetbool()==1 && mycard1.getLocation().y==cardpospl[1][0] && mycard2.getLocation().y==cardpospl[1][1]) {
 			mycard1.setLocation(mycard1.getLocation().x, mycard1.getLocation().y-30);
 		}
-		
-		
-//		bt_cardset1.setLocation(-100, -20);
-//		bt_cardset2.setLocation(-100, -20);
-//		bt_cardset3.setLocation(-100, -20);
-		
 		if(client.isBoolTrash()==false) {
 			Lbl_myset.setText("");
 		}
@@ -1420,6 +1373,9 @@ public class Mainwindow extends JFrame {
 		bt_bet_call.setToolTipText(null);
 		bt_bet_half.setToolTipText(null);
 	}
+	/**
+	 * 게임 시작시 여러 버튼 등을 비활성화 시켜주는 메서드
+	 */
 	public void StartToButton() {
 		bt_ready.setIcon(img_bt_ready_no);
 		bt_ready.setEnabled(false);
@@ -1430,6 +1386,9 @@ public class Mainwindow extends JFrame {
 		bt_moneymod.setEnabled(false);
 		return;
 	}
+	/**
+	 * 비활성화 되어있던 버튼들이 게임이 종료되어 다시 활성화되게 해주는 메서드
+	 */
 	public void EndToButton() {
 		bt_ready.setIcon(img_bt_ready_no);
 		bt_ready.setRolloverIcon(img_bt_ready_no_roll);
@@ -1471,6 +1430,9 @@ public class Mainwindow extends JFrame {
 		client.callRefresh();
 		return;
 	}
+	/**
+	 * 게임이 종료되어 모든 패를 뒤집어 보여주는 액션을 담당하는 메서드. 죽은 사람이면 패는 보여지지 않지만, 살아남은 유저의 패는 보이도록 계산분기 설정.
+	 */
 	public void allOpen() {
 		players = client.getPlayers();
 		int playnum = client.getThisplaynum();
@@ -1641,6 +1603,9 @@ public class Mainwindow extends JFrame {
 		}
 		return;
 	}
+	/**
+	 * 이번 판이 종료되면 결과화면을 표시해주기 위한 메서드
+	 */
 	public void Resultgame() {
 		if(nowsw!=null) {
 			nowsw.dispose();
@@ -1658,9 +1623,6 @@ public class Mainwindow extends JFrame {
 		if(client.getMe().getTrash()==0) {
 			Lbl_myset.setText("");
 		}
-//		bt_cardset1.setLocation(-100, -20);
-//		bt_cardset2.setLocation(-100, -20);
-//		bt_cardset3.setLocation(-100, -20);
 		bt_inv_card1.setLocation(-100, -156);
 		bt_inv_card2.setLocation(-100, -156);
 		Lbl_myclock.setIcon(null);
@@ -1807,22 +1769,28 @@ public class Mainwindow extends JFrame {
 		}
 		return;
 	}
+	/**
+	 * 게임 결과에 따라 총베팅금 위치에 게임이 끝났는지 재경기인지 나옴.
+	 */
 	public void to5sec() {
 		Lbl_gamemoney.setText("게임종료");
 		return;
 	}
 	public void to3secre() {
 		Lbl_gamemoney.setText("3초 후 재경기");
-//		if(client.getMe().getGameresult()!=2) {
-//			bt_exit.setEnabled(true);
-//		}
 		return;
 	}
+	/**
+	 * 경기가 모두 끝나서 나가기 버튼 등이 활성화 됨.
+	 */
 	public void fornextgame() {
 		Lbl_gamemoney.setText("");
 		EndToButton();
 		return;
 	}
+	/**
+	 * 아래  Draw_**_*() 메서드들은 지정된 카드가 지정된 위치로 0.2초씩 이동하는 액션을 담당함.
+	 */
 	public void Draw_my_1() {
 		int index=0;
 		for(Card c : cards) {
@@ -1967,7 +1935,9 @@ public class Mainwindow extends JFrame {
 		}
 		return;
 	}
-	
+	/**
+	 * DrawCards(): 첫 카드 2장씩을 받는 액션. 자기가 순서가 몇번째이고, 경기에 참여하는지 아닌지, 총 몇명인지에 따라 계산분기가 있음.
+	 */
 	public void DrawCards() {
 		if(nowsw!=null) nowsw.dispose();
 		toemptysw();
@@ -2178,7 +2148,12 @@ public class Mainwindow extends JFrame {
 			mycard2.setIcon(cardimages[client.getCard2()-1]);
 		}
 		client.setBoolTrash(false);
+		return;
 	}
+	/**
+	 * 3장째 카드를 나눠받을 때의 GUI액션.
+	 * 죽은 플레이어는 카드를 받으면 안되고, 시각적으로 보이는 가장 위에 놓여진 패가 순서에 맞게 나눠지게 되서 계산분기가 많음..
+	 */
 	public void DrawCards2() {
 		client.setPhase2(true);
 		NotMyTurn();
@@ -2194,9 +2169,6 @@ public class Mainwindow extends JFrame {
 		Lbl_2p_bet.setIcon(null);
 		Lbl_3p_bet.setIcon(null);
 		Lbl_4p_bet.setIcon(null);
-		
-		
-		
 		
 		players = client.getPlayers();
 		switch(client.getThisplaynum()) {
@@ -2572,25 +2544,13 @@ public class Mainwindow extends JFrame {
 				break;
 			}
 		}
+		
 		if(client.getMe().getBetbool()!=1) {
 			mycard3.setIcon(cardimages[client.getMe().getCard3()-1]);
-//			bt_cardset1.setText(Logic.lastName(client.getMe().getCardset()[0]));
-//			bt_cardset2.setText(Logic.lastName(client.getMe().getCardset()[1]));
-//			bt_cardset3.setText(Logic.lastName(client.getMe().getCardset()[2]));
-//			bt_cardset1.setBounds(800, 740, 100, 20);
-//			bt_cardset2.setBounds(800, 760, 100, 20);
-//			bt_cardset3.setBounds(800, 780, 100, 20);
 		}
-		
-		
-		
+		return;
 	}
 	
-	
-//	public void MycardOpen(int card1, int card2) {
-//		cards[0].setIcon(cardimages[card1-1]);
-//		cards[4].setIcon(cardimages[card2-1]);
-//	}
 	public Mainwindow(Client client) {
 		this.client=client;
 		titlebar = new Titlebar();
@@ -2600,14 +2560,12 @@ public class Mainwindow extends JFrame {
 		this.LoadImages();
 		this.display();
 		this.event();
-		this.menu();
 		this.setTitle("섯다");
 		this.setIconImage(icon);
 		this.setSize(1200, 800);
 		this.setLocationRelativeTo(this);
 		this.setUndecorated(true);
 		this.setResizable(false);
-//		client.callRefresh();
 		client.StartMyJoin();
 	}
 }

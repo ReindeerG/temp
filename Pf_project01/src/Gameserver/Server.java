@@ -14,8 +14,6 @@ import java.util.Collections;
 import java.util.Date;
 import Logic.Logic;
 
-
-
 /**
  * 어떤 플레이어의 턴에 돌아가게 될 타이머쓰레드
  */
@@ -31,7 +29,7 @@ class Timer extends Thread {
 	private boolean kill=false;
 	public boolean isKill() { return kill; }
 	public void setKill(boolean kill) { this.kill = kill; }
-	public Timer() {};		// 오픈 타이머가 상속받을거라서
+	public Timer() {};		// 오픈 타이머, 최종패 타이머가 상속받을거라서
 	public Timer(Server serv, Player p, int turn) { this.serv=serv; this.p=p; this.turn=turn; }
 	public void run() {
 		for(int i=0;i<100;i++) {
@@ -176,6 +174,11 @@ class SelSetTimer extends Timer {
 	}
 }
 
+/**
+ * 유저가 스스로 나갔을 때 해당 유저쓰레드에서 서버쓰레드로 요청시 실행될 쓰레드.
+ * 유저쓰레드에 해당 유저의 나간다는 신호가 들어왔어도, 유저쓰레드를 종료시키고 절차를 밟을 수 없으니(해당절차의 return이 될 때까지 쓰레드가 대기상태가 되서)
+ * 절차 호출을 쓰레드로 호출하고 유저쓰레드가 먼저 종료될 수 있게 하기 위함.
+ */
 class SelfOutTh extends Thread {
 	private Player p;
 	private String nick;
@@ -188,7 +191,11 @@ class SelfOutTh extends Thread {
 		return;
 	}
 }
-
+/**
+ * 유저가 튕겼을 때 해당 유저쓰레드에서 서버쓰레드로 요청시 실행될 쓰레드.
+ * 유저쓰레드에 해당 유저의 튕겼다는 예외가 들어왔어도, 유저쓰레드를 종료시키고 절차를 밟을 수 없으니(해당절차의 return이 될 때까지 쓰레드가 대기상태가 되서)
+ * 절차 호출을 쓰레드로 호출하고 유저쓰레드가 먼저 종료될 수 있게 하기 위함.
+ */
 class HesClosedTh extends Thread {
 	private Server serv;
 	public HesClosedTh(Server serv) {
@@ -199,7 +206,11 @@ class HesClosedTh extends Thread {
 		return;
 	}
 }
-
+/**
+ * 강퇴를 서버쓰레드로 요청시 실행될 쓰레드.
+ * 강퇴신호를 받아도 해당 유저쓰레드는 여전히 in 대기 중이고, 유저쓰레드를 종료시키고 절차를 밟을 수 없으니(해당절차의 return이 될 때까지 쓰레드가 대기상태가 되서)
+ * 절차 호출을 쓰레드로 호출하고 유저쓰레드가 먼저 종료될 수 있게 하기 위함.
+ */
 class BanTh extends Thread {
 	private Player p;
 	private Server serv;
@@ -211,7 +222,6 @@ class BanTh extends Thread {
 		return;
 	}
 }
-
 class UserThread extends Thread {
 	/**
 	 * 서버에 연결된 유저 1명당 UserThread가 생성됨.
@@ -234,14 +244,12 @@ class UserThread extends Thread {
 	private ObjectInputStream in;
 	
 	public UserThread(Socket socket, Server serv) { stop=false; this.socket=socket; this.serv=serv; this.in=null; }
-//	public UserThread(Socket socket, Server serv, ObjectInputStream in) { stop=false; this.socket=socket; this.serv=serv; this.in=in; }
 
 	public Socket getSocket() { return socket; }
 	public boolean isStop() { return stop; }
 	public void toStop() { stop=true; return; }
 	public void reserStop() { stop=false; return; }
 	public ObjectInputStream getIn() { return in; }
-	
 	/**
 	 * MatchId()
 	 * 현재 독립된 서버로 만들어져 쓰레드가 만들어질 때, userid정보를 클라이언트에서 받아오게됨.. 메인서버와 연결하게되면 사라질 녀석
@@ -431,10 +439,6 @@ class UserThread extends Thread {
 											}
 											break;
 										}
-										case Gaming.GAME_RESULT_OK: {
-											serv.setResultbacksig(serv.getResultbacksig()-1);
-											break;
-										}
 										default: break;
 									}
 								}
@@ -458,10 +462,6 @@ class UserThread extends Thread {
 		}
 		catch(Exception e) { e.printStackTrace(); }
 		return;
-		
-		
-		
-		
 	}
 }
 
@@ -687,7 +687,7 @@ public class Server extends Thread {
 		return;
 	}
 	/**
-	 * ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	 * 클라이언트들에게 현재 누구(0~3)의 턴인지 뿌려줌.
 	 */
 	public void WhosTurn() {
 		for(Player p : players) {
@@ -700,7 +700,7 @@ public class Server extends Thread {
 		return;
 	}
 	/**
-	 * 
+	 * 현재 턴 수를 셈. 의미없지만 체크가능한지 알 수 있음. 시작시 1턴, 카드 새로받을시 1턴이라, 1턴이면서 3번째카드를 받았다면 체크가 가능함.
 	 */
 	public void IncreaseTurn() {
 		increaseTurn();
@@ -712,6 +712,13 @@ public class Server extends Thread {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 	}
+	/**
+	 * 다음턴 계산을 함.
+	 * 1명만 남았다면 그 사람이 무조건 우승하거나,
+	 * 아직 아무것도 안한 플레이어가 있다면 계산할 필요없이 턴이 넘어가고,
+	 * 아직 3번째 카드를 받지 않은 상태에서 + 2명이상 살아있는데 + 최근 베팅금액까지 모두 같으면 3번째 카드를 받게되고,
+	 * 3번째 카드도 받았는데 + 2명이상 살아있고 + 
+	 */
 	public void nextTurn() {
 		getNowtimer().setKill(true);
 		while(!getNowtimer().isAlive()) {
@@ -724,13 +731,11 @@ public class Server extends Thread {
 		 */
 		int alive=0;
 		int sumcall=0;
-		int sumhalf=0;
 		int ischecked=0;
 		int sumnone=0;
 		for(Player p : players) {
 			if(p.getBetbool()!=1) { alive++; }
 			if(p.getBetbool()==2) { sumcall++; }
-			if(p.getBetbool()==3) { sumhalf++; }
 			if(p.getBetbool()==4) { ischecked++; }
 			if(p.getBetbool()==0) { sumnone++; }
 		}
@@ -791,6 +796,7 @@ public class Server extends Thread {
 					makeTimer();
 				}
 			} else {
+				// 플레이어들의 최근 베팅금액이 동일한지 판별
 				boolean allbetequal = true;
 				int bet = 0;
 				for(Player p : players) {
@@ -805,22 +811,14 @@ public class Server extends Thread {
 						}
 					}
 				}
-				int firstalive=0;
-				for(Player p : players) {
-					if(p.getBetbool()!=1) {
-						firstalive = p.getOrder();
-						break;
+				if(alive==ischecked+sumcall && isPhase2()==true) {
+					// 결판
+					ArrayList<Player> tmplist = new ArrayList<>();
+					for(Player p : players) {
+						if(p.getBetbool()!=1) tmplist.add(p);
 					}
-				}
-				int nextturn=0;
-				for(int i=1;i<players.size();i++) {
-					Player p = players.get((getWhosturn()+i)%players.size());
-					if(p.getBetbool()!=1) {
-						nextturn = p.getOrder();
-						break;
-					}
-				}
-				if(allbetequal==true && firstalive==nextturn) {
+					makeSelSetTimer(tmplist);
+				} else if(allbetequal==true) {
 					if(isPhase2()==false) {
 						getNowtimer().setKill(true);
 						Draw2Phase();
@@ -832,98 +830,8 @@ public class Server extends Thread {
 						}
 						makeSelSetTimer(tmplist);
 					}
-				} else if(alive==ischecked+sumcall && firstalive==nextturn) {
-					// 결판
-					ArrayList<Player> tmplist = new ArrayList<>();
-					for(Player p : players) {
-						if(p.getBetbool()!=1) tmplist.add(p);
-					}
-					makeSelSetTimer(tmplist);
-				}
-				else {
-					for(int i=1;i<players.size();i++) {
-						Player p = players.get((getWhosturn()+i)%players.size());
-						if(p.getBetbool()!=1) {
-							setWhosturn(p.getOrder());
-							break;
-						}
-					}
-					WhosTurn();
-					if(isInggame()==true) {
-						players.get(getWhosturn()).setBetbool(0);
-						Refresh();
-						
-						setTurn(getTurn()+1);
-						makeTimer();
-					}
-				}
-				
-				
-				
-				
-				/*
-				if (alive==sumcall+sumhalf+ischecked) {
-					if(isPhase2()==false) {
-//						int firstalive=0;
-//						for(Player p : players) {
-//							if(p.getBetbool()!=1) {
-//								firstalive = p.getOrder();
-//								break;
-//							}
-//						}
-//						int nextturn=0;
-//						for(int i=1;i<players.size();i++) {
-//							Player p = players.get((getWhosturn()+i)%players.size());
-//							if(p.getBetbool()!=1) {
-//								nextturn = p.getOrder();
-//								break;
-//							}
-//						}
-						boolean allbetequal = true;
-						int bet = 0;
-						for(Player p : players) {
-							if(p.getBetbool()!=1) {
-								if(bet==0) {
-									bet=p.getThisgamebetsum();
-								} else {
-									if(p.getThisgamebetsum()!=bet) {
-										allbetequal = false;
-										break;
-									}
-								}
-							}
-						}
-//						if(firstalive==nextturn) {
-						if(allbetequal==true) {
-							getNowtimer().setKill(true);
-							Draw2Phase();
-						} else {
-							for(int i=1;i<players.size();i++) {
-								Player p = players.get((getWhosturn()+i)%players.size());
-								if(p.getBetbool()!=1) {
-									setWhosturn(p.getOrder());
-									break;
-								}
-							}
-							WhosTurn();
-							if(isInggame()==true) {
-								players.get(getWhosturn()).setBetbool(0);
-								Refresh();
-								
-								setTurn(getTurn()+1);
-								makeTimer();
-							}
-						}
-					} else {
-						// 결판
-						ArrayList<Player> tmplist = new ArrayList<>();
-						for(Player p : players) {
-							if(p.getBetbool()!=1) tmplist.add(p);
-						}
-						makeSelSetTimer(tmplist);
-					}
-					
 				} else {
+					// 턴 넘기기
 					for(int i=1;i<players.size();i++) {
 						Player p = players.get((getWhosturn()+i)%players.size());
 						if(p.getBetbool()!=1) {
@@ -940,42 +848,8 @@ public class Server extends Thread {
 						makeTimer();
 					}
 				}
-				
-				
-				
-//				if(isPhase2()==false) {
-//					getNowtimer().setKill(true);
-//					Draw2Phase();
-//				} else {
-//					if (alive==sumcall+ischecked) {
-//						// 결판
-//						ArrayList<Player> tmplist = new ArrayList<>();
-//						for(Player p : players) {
-//							if(p.getBetbool()!=1) tmplist.add(p);
-//						}
-//						makeSelSetTimer(tmplist);
-//					} else {
-//						for(int i=1;i<players.size();i++) {
-//							Player tempp = players.get((getWhosturn()+i)%players.size());
-//							if(tempp.getBetbool()!=1) {
-//								setWhosturn(tempp.getOrder());
-//								break;
-//							}
-//						}
-//						WhosTurn();
-//						if(isInggame()==true) {
-//							players.get(getWhosturn()).setBetbool(0);
-//							Refresh();
-//							
-//							setTurn(getTurn()+1);
-//							makeTimer();
-//						}
-//					}
-//				}*/
 			}
 		}
-			
-
 		return;
 	}
 	/**
@@ -1034,9 +908,6 @@ public class Server extends Thread {
 		}
 		return;
 	}
-	private int resultbacksig;
-	public int getResultbacksig() { return resultbacksig; }
-	public void setResultbacksig(int resultbacksig) { this.resultbacksig = resultbacksig; }
 	/**
 	 * 클라이언트들에게 게임 결과화면을 띄우라고 신호 보냄
 	 */
@@ -1197,10 +1068,10 @@ public class Server extends Thread {
 			}catch(Exception e) {e.printStackTrace();}
 		}
 		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }		// 카드 액션 기다리고
-		for(int i=1;i<players.size();i++) {		// 생존자 대상 다음턴으로 넘겨진 후 재개
-			Player tempp = players.get((getWhosturn()+i)%players.size());
-			if(tempp.getBetbool()!=1) {
-				setWhosturn(tempp.getOrder());
+		// 3번째 카드 받되, 순서는 원래 선으로 돌아감(선이 죽었으면 그 다음부터 살아있는 플레이어로부터)
+		for(Player p : players) {
+			if(p.getBetbool()!=1) {
+				setWhosturn(p.getOrder());
 				break;
 			}
 		}

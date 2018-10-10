@@ -17,6 +17,7 @@ public class Player implements Serializable {
 	 */
 	private int order;
 	private transient Socket socket;
+//	private User user;
 	private String userid;
 	private String nickname;
 	private int money=8888;
@@ -30,51 +31,20 @@ public class Player implements Serializable {
 	private int ready;
 	private int gameresult;
 	private transient UserThread uth;
-	public int getOrder() {
-		return order;
-	}
-	public void setOrder(int order) {
-		this.order = order;
-	}
-	public Socket getSocket() {
-		return socket;
-	}
-//	public void setSocket(Socket socket) {
-//		this.socket = socket;
-//	}
-	public String getNickname() {
-		return nickname;
-	}
-	public void setNickname(String nickname) {
-		this.nickname = nickname;
-	}
-	public int getCard1() {
-		return card1;
-	}
-	public void setCard1(int card1) {
-		this.card1 = card1;
-	}
-	public int getCard2() {
-		return card2;
-	}
-	public void setCard2(int card2) {
-		this.card2 = card2;
-	}
-	public int getCard3() {
-		return card3;
-	}
-	public void setCard3(int card3) {
-		this.card3 = card3;
-	}
-	public int[] getCardset() {
-		return cardset;
-	}
-	public void setCardset(int[] cardset) {
-		this.cardset = cardset;
-	}
-	public int getSelCardset() {
-		return cardset[3];
-	}
+	public int getOrder() { return order; }
+	public void setOrder(int order) { this.order = order; }
+	public Socket getSocket() { return socket; }
+	public String getNickname() { return nickname; }
+	public void setNickname(String nickname) { this.nickname = nickname; }
+	public int getCard1() { return card1; }
+	public void setCard1(int card1) { this.card1 = card1; }
+	public int getCard2() { return card2; }
+	public void setCard2(int card2) { this.card2 = card2; }
+	public int getCard3() { return card3; }
+	public void setCard3(int card3) { this.card3 = card3; }
+	public int[] getCardset() { return cardset; }
+	public void setCardset(int[] cardset) { this.cardset = cardset; }
+	public int getSelCardset() { return cardset[3]; }
 	public void SelectSet(int num) {
 		int[] tmp = getCardset();
 		switch(num) {
@@ -94,65 +64,22 @@ public class Player implements Serializable {
 		setCardset(tmp);
 		return;
 	}
-	public int getBetbool() {
-		return betbool;
-	}
-	public void setBetbool(int betbool) {
-		this.betbool = betbool;
-	}
-	public Player(int order, Socket socket, UserThread uth) {
-		this.order=order; this.socket=socket; this.setUth(uth); setReady(0);
-	}
-//	public Socket getSocket() {
-//		return socket;
-//	}
-//	public String getNickname() {
-//		return nickname;
-//	}
-	public int getReady() {
-		return ready;
-	}
-	public void setReady(int ready) {
-		this.ready = ready;
-	}
-	public UserThread getUth() {
-		return uth;
-	}
-	public void setUth(UserThread uth) {
-		this.uth = uth;
-	}
-	public String getUserid() {
-		return userid;
-	}
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
-	public int getMoney() {
-		return money;
-	}
-	public void setMoney(int money) {
-		this.money = money;
-	}
-	public int getGameresult() {
-		return gameresult;
-	}
-	public void setGameresult(int gameresult) {
-		this.gameresult = gameresult;
-	}
-	public int getTrash() {
-		return trash;
-	}
-	public void setTrash(int trash) {
-		this.trash = trash;
-	}
-	public int getThisbet() {
-		return thisbet;
-	}
-	public void setThisbet(int thisbet) {
-		this.thisbet = thisbet;
-	}
-	
-	
-	
+	public int getBetbool() { return betbool; }
+	public void setBetbool(int betbool) { this.betbool = betbool; }
+	public Player(int order, Socket socket, UserThread uth) { this.order=order; this.socket=socket; this.setUth(uth); setReady(0); }
+	public int getReady() { return ready; }
+	public void setReady(int ready) { this.ready = ready; }
+	public UserThread getUth() { return uth; }
+	public void setUth(UserThread uth) { this.uth = uth; }
+	public String getUserid() { return userid; }
+	public void setUserid(String userid) { this.userid = userid; }
+	public int getMoney() { return money; }
+	public void setMoney(int money) { this.money = money; }
+	public int getGameresult() { return gameresult; }
+	public void setGameresult(int gameresult) { this.gameresult = gameresult; }
+	public int getTrash() { return trash; }
+	public void setTrash(int trash) { this.trash = trash; }
+	public int getThisbet() { return thisbet; }
+	public void setThisbet(int thisbet) { this.thisbet = thisbet; }
 	
 }
