@@ -316,7 +316,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_UNREADY: {
 											p.setReady(0);
 											p.getUser().setMoney(p.getUser().getMoney()+serv.getPandon());
-//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()+serv.getPandon());
+											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()+serv.getPandon());
 											serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
 											serv.MoneyRefresh();
 											serv.Refresh();
@@ -325,7 +325,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_READY: {
 											p.setReady(1);
 											p.getUser().setMoney(p.getUser().getMoney()-serv.getPandon());
-//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()-serv.getPandon());
+											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getPandon());
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getPandon());
 											serv.MoneyRefresh();
 											serv.Refresh();
@@ -350,7 +350,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_CALL: {
 											p.setBetbool(2);
 											p.getUser().setMoney(p.getUser().getMoney()-serv.getMinforbet());
-//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()-serv.getMinforbet());
+											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMinforbet());
 											p.setThisbet(serv.getMinforbet());
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
 											serv.MoneyRefresh();
@@ -360,7 +360,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_HALF: {
 											p.setBetbool(3);
 											p.getUser().setMoney(p.getUser().getMoney()-serv.getMoneythisgame()/2);
-//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()-serv.getMoneythisgame()/2);
+											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMoneythisgame()/2);
 											p.setThisbet(serv.getMoneythisgame()/2);
 											serv.setMinforbet(serv.getMoneythisgame()/2);
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
@@ -418,7 +418,7 @@ class UserThread extends Thread {
 												if(pl.getUser().getId().equals(target)) {
 													if(pl.getReady()==1) {
 														pl.getUser().setMoney(q.getUser().getMoney()+serv.getPandon());
-//														serv.getMain().불라불라(q.getUser().getId(), q.getUser().getMoney()+serv.getPandon());
+														serv.getMain().setMoney(q.getUser().getId(), q.getUser().getMoney()+serv.getPandon());
 														serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
 														pl.setReady(0);
 														serv.MoneyRefresh();
@@ -846,6 +846,7 @@ public class Server extends Thread {
 					makeTimer();
 				}
 			} else {
+				// 플레이어들의 최근 베팅금액이 동일한지 판별
 				boolean allbetequal = true;
 				int bet = 0;
 				for(Player p : players) {
@@ -897,20 +898,8 @@ public class Server extends Thread {
 						makeTimer();
 					}
 				}
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
 			}
 		}
-			
-
 		return;
 	}
 	/**
@@ -1071,7 +1060,7 @@ public class Server extends Thread {
 	 */
 	public void calc(Player p) {
 		p.getUser().setMoney(p.getUser().getMoney()+moneythisgame);
-//		serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()+moneythisgame);
+		serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()+moneythisgame);
 		setMoneythisgame(0);
 		for(Player q : players) {
 			q.setGameresult(0);
@@ -1140,18 +1129,6 @@ public class Server extends Thread {
 				break;
 			}
 		}
-		WhosTurn();
-		
-		
-		
-//		for(int i=1;i<players.size();i++) {		// 생존자 대상 다음턴으로 넘겨진 후 재개
-//			Player tempp = players.get((getWhosturn()+i)%players.size());
-//			if(tempp.getBetbool()!=1) {
-//				setWhosturn(tempp.getOrder());
-//				break;
-//			}
-//		}
-		WhosTurn();
 		setTurn(1);
 		if(isInggame()==true) {
 			players.get(getWhosturn()).setBetbool(0);
@@ -1198,7 +1175,7 @@ public class Server extends Thread {
 		return;
 	}
 	/**
-	 * 오픈 패 정할 첫 타이머 스레드를 만듦. 매 경기의 맨 처음에 쓰는 오픈타이머에만 이 쓰레드를 호출.
+	 * 최종 패 정할 마지막 타이머 스레드를 만듦. 매 경기의 맨 마지막에 쓰는 최종패타이머에만 이 쓰레드를 호출.
 	 */
 	public void makeSelSetTimer(ArrayList<Player> pl) {
 		Timer t = new SelSetTimer(this, pl);
