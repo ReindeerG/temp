@@ -17,11 +17,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import sutta.useall.Signal;
 import sutta.useall.User;
 
 
 
-public class Login extends JDialog {
+public class Login extends JDialog  implements Signal{
 //	컴포넌트 배치용 공간
 	private Container con = this.getContentPane();
 	private JTextField id = new JTextField();
@@ -79,7 +80,7 @@ public class Login extends JDialog {
 		this.addWindowListener(exit);
 		ok.addActionListener(e->{
 			try {
-				out.writeInt(1);
+				out.writeInt(LOGINPROC);
 				out.flush();
 				
 				User u = new User(id.getText());
@@ -92,16 +93,16 @@ public class Login extends JDialog {
 				login = in.readInt();
 				
 				//로그인 되었을 때
-				if(login == 2) {
+				if(login == SUCCESSLOGIN) {
 					this.dispose();
 				}
 				//회원정보가 일치하지 않을 때
-				else if(login == 0) {
+				else if(login == NOTMEMBER) {
 					JOptionPane.showMessageDialog(this, "올바르지 않은 아이디 혹은 비밀번호 입니다", "", JOptionPane.PLAIN_MESSAGE);
 					id.setText("");
 					pw.setText("");
 				}
-				else if(login == 1) {
+				else if(login == PLAYINGMEMBER) {
 					JOptionPane.showMessageDialog(this, "이미 접속중입니다", "", JOptionPane.PLAIN_MESSAGE);
 				}
 				
@@ -117,10 +118,6 @@ public class Login extends JDialog {
 			signup.setVisible(true);
 		});
 	}
-
-	private void menu() {
-		
-	}
 	
 	private void setDialogLocation() {
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
@@ -134,7 +131,6 @@ public class Login extends JDialog {
 		this.in = in;
 		this.display();
 		this.event();
-		this.menu();
 		this.setTitle("로그인");
 		this.setSize(300, 230);
 		this.setResizable(false);

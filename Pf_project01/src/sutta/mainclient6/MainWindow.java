@@ -15,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -41,7 +42,7 @@ import sutta.useall.User;
 /**
  * 메인 화면 창(임시)
  */
-public class MainWindow extends JFrame implements Runnable{
+public class MainWindow extends JFrame implements Runnable, Signal{
 	/**
 	 * 화면 창 구현시 통로 생성, 연결
 	 */
@@ -68,7 +69,6 @@ public class MainWindow extends JFrame implements Runnable{
 	};
 	private DefaultTableModel tg;
 	private JTable room = new JTable(model2);
-	private JButton join = new JButton("방참가");
 	private JButton addRoom = new JButton("방 만들기");
 	private JButton quick = new JButton("빠른 플레이");
 	private JLabel label = new JLabel("방 목록 ");
@@ -76,18 +76,11 @@ public class MainWindow extends JFrame implements Runnable{
 	private JPanel panel = new JPanel();
 	private JLabel nickname = new JLabel();
 	private JLabel money = new JLabel();
-	private Image moon = Toolkit.getDefaultToolkit().getImage("Moon\\moon.jpg");
-	private JPanel imagePanel = new JPanel() {
-		@Override
-		protected void paintComponent(Graphics g) {
-			g.drawImage(moon, 0, 0, 467, 385, null);
-		}
-	};
 	
 	private User user;
 	
 	
-	
+	//게임 끝나고 클라이언트의 바뀐 돈을 재설정
 	public void moneyst(int num) {
 		System.out.println("돈바꿈실행됨 : "+num);
 		money.setText("가진 돈 : "+num+"전");
@@ -98,17 +91,12 @@ public class MainWindow extends JFrame implements Runnable{
 	
 	private void display() {
 		con.setLayout(null);
-//		con.add(pane);
-		con.add(join);
 		con.add(addRoom);
 		con.add(quick);
 		con.add(label);
 		con.add(panel);
 		con.add(nickname);
 		con.add(money);
-//		con.setBackground(Color.black);
-//		con.add(imagePanel);
-//		con.setForeground(Color.WHITE);
 		
 		
 		room.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -117,21 +105,25 @@ public class MainWindow extends JFrame implements Runnable{
 		panel.add(pane, BorderLayout.CENTER);
 		room.setToolTipText("더블 클릭하여 방에 참가");
 		
-		
 		label.setBounds(12, 0, 800, 25);
 		panel.setBounds(12, 27, 800, 678);
-		join.setBounds(825, 38, 141, 36);
-		addRoom.setBounds(825, 84, 141, 36);
-		quick.setBounds(825, 130, 141, 36);
-		nickname.setBounds(825, 300, 200, 25);
-		money.setBounds(825, 330, 200, 25);
+		addRoom.setBounds(825, 38, 141, 36);
+		quick.setBounds(825, 84, 141, 36);
+		nickname.setBounds(825, 583, 200, 25);
+		money.setBounds(825, 611, 200, 25);
 		nickname.setText("닉네임 : "+user.getNickname());
 		money.setText("가진 돈 : "+user.getMoney()+"전");
-		imagePanel.setBounds(517, 366, 467, 385);
-		
-		
 
-		
+	}
+
+	private void showGameRoom(Room r){
+		Client_Ex client = new Client_Ex(r.getPort(), user);
+		client.setDaemon(true);
+		client.start();
+		Mainwindow mw = new Mainwindow(client, out, this);
+		client.setWindow(mw);
+		mw.setVisible(true);
+		this.setVisible(false);
 	}
 	
 	/**
@@ -139,37 +131,30 @@ public class MainWindow extends JFrame implements Runnable{
 	 */
 	private void joinRoom() {
 		try {
-			out.writeInt(Signal.JOIN);
+			out.writeInt(JOIN);
 			out.flush();
 			
 			//리스트에서 선택 된 방의 인덱스를 얻어와 그 방의 인덱스를 전송해준다 
 			int index = room.getSelectedRow();
 			
 			if(room_list != null) {
-				if(index == -1) {
+				if(index == -1) {	//선택된 방이 없을 때
 					out.writeInt(-1);
 					out.flush();
 					JOptionPane.showMessageDialog(this, "참여할 방을 선택해 주세요");
 				}
-				else if(room_list.get(index)[2].equals("진행중")) {
+				else if(room_list.get(index)[2].equals("진행중")) {	//방이 진행중일 때
 					out.writeInt(-1);
 					out.flush();
 					JOptionPane.showMessageDialog(this, "이미 진행중인 방입니다");
 					}
-				else {
+				else {	//방에 참가 
 					out.writeInt(room.getSelectedRow());
 					out.flush();
 					Room r = (Room)in.readObject();
-					System.out.println(r.getName()+"방에 참가");
 					if(r!=null) {
 						//방 정보를 받아와 그 서버에 접속시켜준다
-						Client_Ex client = new Client_Ex(r.getPort(), user);
-						client.setDaemon(true);
-						client.start();
-						Mainwindow mw = new Mainwindow(client, out, this);
-						client.setWindow(mw);
-						mw.setVisible(true);
-						this.setVisible(false);						
+						showGameRoom(r);						
 					}
 					else {
 						JOptionPane.showMessageDialog(this, "게임이 진행중인 방입니다", "", JOptionPane.PLAIN_MESSAGE);
@@ -196,24 +181,21 @@ public class MainWindow extends JFrame implements Runnable{
 		WindowListener proc = new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				try {
-					out.writeInt(6);
+					out.writeInt(LOGOUT);
 					out.flush();
 					socket.close();
 					w_socket.close();
 				} catch (Exception e1) {
-					System.out.println("클라이언트쪽 소켓 에러");
 					e1.printStackTrace();
 				}
 				System.exit(0);
 			}
 		};
 		this.addWindowListener(proc);
-		join.addActionListener(e->{
-			joinRoom();
-		});
+		
 		addRoom.addActionListener(e->{
 			try {
-				out.writeInt(Signal.ADDROOM);
+				out.writeInt(ADDROOM);
 				out.flush();
 				//방 정보 전송
 				
@@ -229,20 +211,10 @@ public class MainWindow extends JFrame implements Runnable{
 				out.writeObject(name);
 				out.flush();
 				
-				System.out.println("name = "+name);
 				if(name!= null) {
 					Room r = (Room)in.readObject();
-					System.out.println(r.getName()+"방을 생성");
 					//방 정보를 받아와 그 서버에 접속시켜준다
-					Client_Ex client = new Client_Ex(r.getPort(), user);
-					client.setDaemon(true);
-					client.start();
-					System.out.println("Client_Ex 생성");
-					Mainwindow mw = new Mainwindow(client, out, this);
-					System.out.println("Mainwindow mw 생성 및 시작");
-					client.setWindow(mw);
-					mw.setVisible(true);
-					this.setVisible(false);
+					showGameRoom(r);
 				}
 				
 			} catch (Exception e1) {
@@ -251,17 +223,10 @@ public class MainWindow extends JFrame implements Runnable{
 		});
 		quick.addActionListener(e->{
 			try {
-				out.writeInt(Signal.QUICKJOIN);
+				out.writeInt(QUICKJOIN);
 				out.flush();
 				Room r = (Room)in.readObject();
-				System.out.println(r.getName()+"방에 빠른 참가");
-				Client_Ex client = new Client_Ex(r.getPort(), user);
-				client.setDaemon(true);
-				client.start();
-				Mainwindow mw = new Mainwindow(client, out, this);
-				client.setWindow(mw);
-				mw.setVisible(true);
-				this.setVisible(false);
+				showGameRoom(r);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -269,7 +234,7 @@ public class MainWindow extends JFrame implements Runnable{
 		
 		MouseListener m = new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() ==2) {
+				if(e.getClickCount() ==2) {	//더블클릭시 방에 참가 
 					joinRoom();
 				}
 			}
@@ -316,7 +281,6 @@ public class MainWindow extends JFrame implements Runnable{
 		}
 		try {
 			this.user = (User) in.readObject();
-			System.out.println("user = "+user);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -339,7 +303,6 @@ public class MainWindow extends JFrame implements Runnable{
 			while(true) {
 				ArrayList<String[]> list;
 				list = (ArrayList<String[]>)w_in.readObject();
-//				System.out.println("receive = "+list.hashCode()+" / "+list);
 				if(list!=null ) {
 					room_list = list;
 					model1.setNumRows(0);
@@ -351,8 +314,6 @@ public class MainWindow extends JFrame implements Runnable{
 					model1 = tg;
 					room.repaint();
 					money.repaint();
-					
-//					room.setModel(model2);
 				}
 			}
 		} catch (Exception e) {

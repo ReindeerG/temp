@@ -13,9 +13,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import sutta.useall.Signal;
 import sutta.useall.User;
 
-class SignUp extends JDialog{
+class SignUp extends JDialog implements Signal{
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 	
@@ -59,7 +60,7 @@ class SignUp extends JDialog{
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);		
 		ok.addActionListener(e->{
 			try {
-				out.writeInt(0);
+				out.writeInt(NEWMEMBERPROC);
 				out.flush();
 				
 				User u = new User(id.getText(), nickname.getText());

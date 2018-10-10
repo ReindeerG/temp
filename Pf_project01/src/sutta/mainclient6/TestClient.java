@@ -5,6 +5,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import sutta.useall.Signal;
+
 /**
  * 클라이언트 창
  * 
@@ -29,12 +31,11 @@ public class TestClient {
 			Login login  = new Login(out,in);
 		 	login.setVisible(true);
 			
-			while(login.isLogin() != 2) {}
+			while(login.isLogin() != Signal.SUCCESSLOGIN) {}
 			MainWindow m = new MainWindow(socket, out, in);
 			m.setVisible(true);
 				
 			
-//			socket.close();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

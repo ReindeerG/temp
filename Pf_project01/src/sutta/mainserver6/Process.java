@@ -12,7 +12,11 @@ import sutta.useall.Room;
 import sutta.useall.Signal;
 import sutta.useall.User;
 
-public class Process {
+/**
+ * 각각 클라이언트의 행동에 대한 신호를 받아와
+ * 그에 맞게 처리해주는 클래스
+ */
+public class Process implements Signal{
 	private Client c;
 	private ArrayList<Room> roomList;
 	private List<Integer> roomPort;
@@ -21,6 +25,7 @@ public class Process {
 	private Server server;
 	private ArrayList<User> userList;
 	private MainServer main;
+	private boolean isPlay = true;
 	
 	
 	
@@ -34,6 +39,7 @@ public class Process {
 		this.main = main;
 	}
 	
+	//방에서 나올 때 메소드
 	public void exitRoom(){
 		r.minusCnt();
 		System.out.println(c.user.getNickname()+"의 남은 돈 = "+c.user.getMoney());
@@ -48,6 +54,7 @@ public class Process {
 		r = null;
 	}
 	
+	//방에 참가할 때 메소드
 	public void joinRoom(int index) {
 		r = roomList.get(index);
 		server = serverList.get(index);
@@ -73,6 +80,7 @@ public class Process {
 		
 	}
 	
+	//새로운 방을 만들때 메소드
 	public void newRoom(String name) throws ClassNotFoundException, IOException {
 		r = new Room(name, roomPort.get(0));
 		roomPort.remove(0);
@@ -88,15 +96,23 @@ public class Process {
 		//새 방 접속
 		joinRoom(roomList.indexOf(r));
 	}
+	//게임이 시작했는지 설정
+	public void setIng(boolean ing) {
+		r.setIng(true);
+		server.setInggame(true);
+	}
+	//게임이 끝났을 때 끝났음을 알림
+	public void logout() {
+		c.user.setLogin(false);
+		isPlay = false;
+	}
 	
 	public void process(){
-		boolean isPlay = true;
 		try {
-			while(isPlay) {
+			while(isPlay) {	//종료 하기 전까지 반복
 				int choose = c.in.readInt();
-//			System.out.println("choose = "+choose);
 				switch(choose) {
-				case Signal.JOIN:
+				case JOIN:
 					//해당 방 게임 서버, 채팅 서버에 접속
 					int index = c.in.readInt();
 					if(index != -1) {
@@ -104,7 +120,7 @@ public class Process {
 					}
 					break;
 					
-				case Signal.ADDROOM:
+				case ADDROOM:
 					//새로운 방 만들기
 					String roomName = (String)c.in.readObject();
 					if(roomName!=null) {
@@ -112,8 +128,8 @@ public class Process {
 					}
 					break;
 					
-				case Signal.QUICKJOIN:
-//				System.out.println("빠른 시작할 수 있는 방 참가");
+				case QUICKJOIN:
+					//빠른 방 참여 
 					Room target2 = null;
 					for(Room r2 : roomList) {
 						if(r2.getCnt() < 4) {
@@ -128,38 +144,31 @@ public class Process {
 						newRoom("빠겜");
 					}
 					break;
-				case 3:
-					//방 접속 종료 포트를 받아서 그 포트에 해당하는 서버 설정(cnt를)을 해준다
-					//포트를 다시 roomPort리스트에 저장해준다 
-					System.out.println("방 나가기");
+				case EXITROOM:
+					//방 접속 종료
 					exitRoom();
 					break;
-				case 4:
-					//방 시작
-					r.setIng(true);
-					server.setInggame(true);
+				case GAMESTART:
+					//게임 시작
+					setIng(true);
 					break;
-				case 5:
+				case GAMEEND:
 					//게임 종료
-					r.setIng(false);
-					server.setInggame(false);
+					setIng(false);
 					break;
-				case 6:
+				case LOGOUT:
 					//로그아웃
-					c.user.setLogin(false);
-					isPlay = false;
+					logout();
 					break;
 				}
 				
 			}
 			
 		}catch(Exception e) {
-			e.printStackTrace();
 			if(r!=null) {
 				exitRoom();
 			}
-			c.user.setLogin(false);
-			isPlay = false;
+			logout();
 		}
 	}
 	
