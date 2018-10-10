@@ -241,6 +241,7 @@ public class MainWindow extends JFrame implements Runnable{
 					Mainwindow mw = new Mainwindow(client, out, this);
 					System.out.println("Mainwindow mw »ý¼º ¹× ½ÃÀÛ");
 					client.setWindow(mw);
+					System.out.println("¿©²¨ÁøµÅ?0");
 					mw.setVisible(true);
 					this.setVisible(false);
 				}

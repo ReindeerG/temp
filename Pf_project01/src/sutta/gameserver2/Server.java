@@ -315,8 +315,8 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_UNREADY: {
 											p.setReady(0);
-											p.getUser().setMoney(p.getUser().getMoney()+serv.getPandon());
 											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()+serv.getPandon());
+											p.getUser().setMoney(p.getUser().getMoney()+serv.getPandon());
 											serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
 											serv.MoneyRefresh();
 											serv.Refresh();
@@ -324,8 +324,8 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_READY: {
 											p.setReady(1);
-											p.getUser().setMoney(p.getUser().getMoney()-serv.getPandon());
 											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getPandon());
+											p.getUser().setMoney(p.getUser().getMoney()-serv.getPandon());
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getPandon());
 											serv.MoneyRefresh();
 											serv.Refresh();
@@ -349,8 +349,8 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_CALL: {
 											p.setBetbool(2);
-											p.getUser().setMoney(p.getUser().getMoney()-serv.getMinforbet());
 											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMinforbet());
+											p.getUser().setMoney(p.getUser().getMoney()-serv.getMinforbet());
 											p.setThisbet(serv.getMinforbet());
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
 											serv.MoneyRefresh();
@@ -359,8 +359,8 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_HALF: {
 											p.setBetbool(3);
-											p.getUser().setMoney(p.getUser().getMoney()-serv.getMoneythisgame()/2);
 											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMoneythisgame()/2);
+											p.getUser().setMoney(p.getUser().getMoney()-serv.getMoneythisgame()/2);
 											p.setThisbet(serv.getMoneythisgame()/2);
 											serv.setMinforbet(serv.getMoneythisgame()/2);
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
@@ -417,8 +417,8 @@ class UserThread extends Thread {
 											for(Player pl : players) {
 												if(pl.getUser().getId().equals(target)) {
 													if(pl.getReady()==1) {
-														pl.getUser().setMoney(q.getUser().getMoney()+serv.getPandon());
 														serv.getMain().setMoney(q.getUser().getId(), q.getUser().getMoney()+serv.getPandon());
+														pl.getUser().setMoney(q.getUser().getMoney()+serv.getPandon());
 														serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
 														pl.setReady(0);
 														serv.MoneyRefresh();
@@ -1060,8 +1060,8 @@ public class Server extends Thread {
 	 * @param p: 우승한 플레이어.
 	 */
 	public void calc(Player p) {
-		p.getUser().setMoney(p.getUser().getMoney()+moneythisgame);
 		getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()+moneythisgame);
+		p.getUser().setMoney(p.getUser().getMoney()+moneythisgame);
 		setMoneythisgame(0);
 		for(Player q : players) {
 			q.setGameresult(0);
@@ -1114,11 +1114,11 @@ public class Server extends Thread {
 		getNowtimer().setKill(true);	// 돌고 있던 타이머 멈춤(클라이언트에게 전송되던 타이머 정보 모두 정지.)
 		setPhase2(true);				// 3번째 카드 나눠주게 되는 상황이라고 표시
 		timeToCardset();				// 생존자 대상으로 카드 3장으로 만들 수 있는 최종패에 대한 3가지 경우의 수를 담아둠.
-		Refresh();						// 플레이어들은 최종패 3가지 경우의 수를 받게됨.
+//		Refresh();						// 플레이어들은 최종패 3가지 경우의 수를 받게됨.
 		for(Player p : players) {		// 플레이어들은 아래 신호를 받아 GUI상으로 카드를 받는 액션을 보게됨.
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.Draw2Phase());
+				out.writeObject(Gaming.Draw2Phase(players));
 				out.flush();
 			}catch(Exception e) {e.printStackTrace();}
 		}
