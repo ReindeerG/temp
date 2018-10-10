@@ -20,21 +20,18 @@ public class Process {
 	private Room r;
 	private Server server;
 	private ArrayList<User> userList;
+	private MainServer main;
 	
-	public void setMoney(String id, int money) {
-		c.user.setMoney(money);
-		System.out.println("userList"+userList);
-		File f =  new File("UserFile\\user.txt");
-		BackUpManager.backUpUserInfo(f, userList);
-	}
 	
-	public Process(Client c, ArrayList<Room> roomList,List<Integer> roomPort, List<Server> serverList, ArrayList<User> userList) {
+	
+	public Process(Client c, ArrayList<Room> roomList,List<Integer> roomPort, List<Server> serverList, ArrayList<User> userList, MainServer main) {
 		this.c = c;
 		this.roomList = roomList;
 		Collections.sort(roomPort);
 		this.roomPort = roomPort;
 		this.serverList = serverList;
 		this.userList = userList;
+		this.main = main;
 	}
 	
 	public void exitRoom(){
@@ -81,7 +78,7 @@ public class Process {
 		roomPort.remove(0);
 		//방 정보 받아서 port부여
 		int port = r.getPort();
-		Server sv = new Server(port, r.getUserList());
+		Server sv = new Server(port, r.getUserList(), main);
 		server =sv;
 		sv.setDaemon(true);
 		sv.start();
@@ -146,7 +143,6 @@ public class Process {
 					//게임 종료
 					r.setIng(false);
 					server.setInggame(false);
-					setMoney("", 3000);
 					break;
 				case 6:
 					//로그아웃

@@ -136,7 +136,11 @@ public class Mainwindow extends JFrame {
 		nowsw=null;
 		return;
 	}
-
+	private JokboWindow nowjw=null;
+	public void toemptyjw() {
+		nowjw=null;
+		return;
+	}
 	
 	private ActionListener alcard1 = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
@@ -176,8 +180,8 @@ public class Mainwindow extends JFrame {
 	private ImageIcon img_bt_start_no;
 	private ImageIcon img_bt_start_yes;
 	private ImageIcon img_bt_start_on;
-	private ImageIcon img_bt_invite;
-	private ImageIcon img_bt_invite_on;
+//	private ImageIcon img_bt_invite;
+//	private ImageIcon img_bt_invite_on;
 	private ImageIcon img_bt_leave_ok;
 	private ImageIcon img_bt_leave_on;
 	private ImageIcon img_alarmclock;
@@ -209,11 +213,11 @@ public class Mainwindow extends JFrame {
 	private JTextArea chatlog = new JTextArea();
 	private JScrollPane scroll;
 	private JTextField makechat = new JTextField();
-	private JButton bt_nickch = new JButton("닉네임 변경");
+//	private JButton bt_nickch = new JButton("닉네임 변경");
 	
 	private JButton bt_ready = new JButton();
 	private JButton bt_start = new JButton();
-	private JButton bt_invite = new JButton();
+//	private JButton bt_invite = new JButton();
 	private JButton bt_exit = new JButton();
 	private JButton bt_moneymod = new JButton();
 	private JButton bt_jokbo = new JButton();
@@ -283,8 +287,8 @@ public class Mainwindow extends JFrame {
 		makechat.setBounds(0, 780, 450, 20);
 		con.add(makechat);
 		makechat.setColumns(10);
-		bt_nickch.setBounds(0, 560, 100, 20);
-		con.add(bt_nickch);
+//		bt_nickch.setBounds(0, 560, 100, 20);
+//		con.add(bt_nickch);
 		
 		bt_ready.setBounds(1000, 720, 100, 40);
 		bt_ready.setIcon(img_bt_ready_no);
@@ -294,15 +298,15 @@ public class Mainwindow extends JFrame {
 		bt_start.setIcon(img_bt_start_no);
 		bt_start.setEnabled(false);
 		con.add(bt_start);
-		bt_invite.setBounds(1000, 760, 100, 40);
-		bt_invite.setIcon(img_bt_invite);
-		bt_invite.setRolloverIcon(img_bt_invite_on);
-		con.add(bt_invite);
+//		bt_invite.setBounds(1000, 760, 100, 40);
+//		bt_invite.setIcon(img_bt_invite);
+//		bt_invite.setRolloverIcon(img_bt_invite_on);
+//		con.add(bt_invite);
 		bt_exit.setBounds(1100, 760, 100, 40);
 		bt_exit.setIcon(img_bt_leave_ok);
 		bt_exit.setRolloverIcon(img_bt_leave_on);
 		con.add(bt_exit);
-		bt_jokbo.setBounds(1000, 680, 100, 40);
+		bt_jokbo.setBounds(1000, 760, 100, 40);
 		bt_jokbo.setIcon(img_bt_jokbo);
 		bt_jokbo.setRolloverIcon(img_bt_jokbo_on); 
 		con.add(bt_jokbo);
@@ -532,6 +536,12 @@ public class Mainwindow extends JFrame {
 			}
 			client.Bet_Half();
 		});
+		bt_jokbo.addActionListener(e->{
+			if(nowjw==null) {
+				nowjw = new JokboWindow(this);
+				nowjw.setVisible(true);
+			}
+		});
 //		bt_cardset1.addActionListener(e->{
 //			Lbl_myset.setText(bt_cardset1.getText());
 //			client.setCardset(1);
@@ -548,20 +558,20 @@ public class Mainwindow extends JFrame {
 			PandonWindow pw = new PandonWindow(client, this);
 			pw.setVisible(true);
 		});
-		bt_nickch.addActionListener(e->{
-			String tmpstr = JOptionPane.showInputDialog(this, "바꿀 닉네임을 입력하세요.", "닉네임 변경", JOptionPane.PLAIN_MESSAGE);
-			if(tmpstr!=null) {
-				if(!tmpstr.equals("")) {
-					if(tmpstr.length()<9) {
-						if(!tmpstr.equals(client.getMe().getUser().getNickname())) {
-							client.ChangeNick(tmpstr);
-						}
-					} else {
-						JOptionPane.showMessageDialog(this, "닉네임은 8글자 이하로 해주세요!", "글자수 초과", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			}
-		});
+//		bt_nickch.addActionListener(e->{
+//			String tmpstr = JOptionPane.showInputDialog(this, "바꿀 닉네임을 입력하세요.", "닉네임 변경", JOptionPane.PLAIN_MESSAGE);
+//			if(tmpstr!=null) {
+//				if(!tmpstr.equals("")) {
+//					if(tmpstr.length()<9) {
+//						if(!tmpstr.equals(client.getMe().getUser().getNickname())) {
+//							client.ChangeNick(tmpstr);
+//						}
+//					} else {
+//						JOptionPane.showMessageDialog(this, "닉네임은 8글자 이하로 해주세요!", "글자수 초과", JOptionPane.ERROR_MESSAGE);
+//					}
+//				}
+//			}
+//		});
 		bt_ready.addActionListener(e->{
 			if(client.getMe().getReady()==0) {
 				bt_ready.setIcon(img_bt_ready_yes);
@@ -586,6 +596,7 @@ public class Mainwindow extends JFrame {
 		});
 		bt_exit.addActionListener(e->{
 			int result = JOptionPane.showConfirmDialog(this, "정말로 나가시겠습니까?", "나가기", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			mw.moneyst(client.getMe().getUser().getMoney());
 			if(result==0) {
 				client.Leave();
 				try {
@@ -699,8 +710,8 @@ public class Mainwindow extends JFrame {
 			img_bt_start_no = new ImageIcon(ImageIO.read(new File("Images\\start_no.png")));
 			img_bt_start_yes = new ImageIcon(ImageIO.read(new File("Images\\start_ok.png")));
 			img_bt_start_on = new ImageIcon(ImageIO.read(new File("Images\\start_on.png")));
-			img_bt_invite = new ImageIcon(ImageIO.read(new File("Images\\invite.png")));
-			img_bt_invite_on = new ImageIcon(ImageIO.read(new File("Images\\invite_on.png")));
+//			img_bt_invite = new ImageIcon(ImageIO.read(new File("Images\\invite.png")));
+//			img_bt_invite_on = new ImageIcon(ImageIO.read(new File("Images\\invite_on.png")));
 			img_bt_leave_ok = new ImageIcon(ImageIO.read(new File("Images\\leave_ok.png")));
 			img_bt_leave_on = new ImageIcon(ImageIO.read(new File("Images\\leave_on.png")));
 			img_alarmclock = new ImageIcon(ImageIO.read(new File("Images\\alarmclock.png")));
@@ -765,6 +776,8 @@ public class Mainwindow extends JFrame {
 	}
 	public void ImBanned() {
 		JOptionPane.showMessageDialog(this, "방장에 의해 강제퇴장당하셨습니다.", "강제퇴장", JOptionPane.WARNING_MESSAGE);
+		mw.moneyst(client.getMe().getUser().getMoney());
+		mw.setVisible(true);
 		setBan(true);
 		dispose();
 		return;
@@ -1423,7 +1436,7 @@ public class Mainwindow extends JFrame {
 		bt_exit.setEnabled(false);
 		bt_start.setIcon(img_bt_start_no);
 		bt_start.setEnabled(false);
-		bt_invite.setEnabled(false);
+//		bt_invite.setEnabled(false);
 		bt_moneymod.setEnabled(false);
 		return;
 	}
@@ -1432,7 +1445,7 @@ public class Mainwindow extends JFrame {
 		bt_ready.setRolloverIcon(img_bt_ready_no_roll);
 		bt_ready.setEnabled(true);
 		bt_exit.setEnabled(true);
-		bt_invite.setEnabled(true);
+//		bt_invite.setEnabled(true);
 		Lbl_myset.setText("");
 		Lbl_2p_set.setText("");
 		Lbl_3p_set.setText("");

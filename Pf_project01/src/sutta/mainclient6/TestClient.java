@@ -12,6 +12,7 @@ import java.net.Socket;
 //방 목록 업데이트 상황 변경 사항 적용되는지 확인하기 
 
 public class TestClient {
+	
 
 	public static void main(String[] args) {
 		try {

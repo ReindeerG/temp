@@ -83,6 +83,19 @@ public class MainServer extends Thread{
 			e.printStackTrace();
 		}
 	}	
+	
+	public void setMoney(String id, int money) {
+		System.out.println(id+"가"+money+"원 되라고");
+		for(User user : user_list) {
+			if(user.getId().equals(id)) {
+				user.setMoney(money);
+				BackUpManager.backUpUserInfo(f, user_list);
+				break;
+			}
+		}
+		return;
+	}
+	
 
 	/**
 	 * 방 목록을 접속자 전체에게 뿌려주는 메소드
@@ -289,7 +302,7 @@ public class MainServer extends Thread{
 				//로그인 하면 저장된 정보를 사용자에게 보내준다 
 				out.writeObject(user);
 				out.flush();
-				Process p  = new Process(this, roomList,roomPort, serverList, user_list);
+				Process p  = new Process(this, roomList,roomPort, serverList, user_list, MainServer.this);
 				p.process();
 				BackUpManager.backUpUserInfo(f, user_list);
 				System.out.println("user_list = "+ user_list);

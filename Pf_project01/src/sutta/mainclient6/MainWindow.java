@@ -86,8 +86,13 @@ public class MainWindow extends JFrame implements Runnable{
 	
 	private User user;
 	
-
 	
+	
+	public void moneyst(int num) {
+		System.out.println("µ·¹Ù²Þ½ÇÇàµÊ : "+num);
+		money.setText("°¡Áø µ· : "+num+"Àü");
+		return;
+	}
 	
 
 	
@@ -128,7 +133,7 @@ public class MainWindow extends JFrame implements Runnable{
 
 		
 	}
-
+	
 	/**
 	 * ¹æ Âü°¡ ¸Þ¼Òµå
 	 */
@@ -346,6 +351,7 @@ public class MainWindow extends JFrame implements Runnable{
 					model1 = tg;
 					room.repaint();
 					money.repaint();
+					
 //					room.setModel(model2);
 				}
 			}
