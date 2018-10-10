@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import sutta.gamelogic.Logic;
+import sutta.mainserver6.MainServer;
 import sutta.useall.User;
 
 /**
@@ -315,6 +316,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_UNREADY: {
 											p.setReady(0);
 											p.getUser().setMoney(p.getUser().getMoney()+serv.getPandon());
+//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()+serv.getPandon());
 											serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
 											serv.MoneyRefresh();
 											serv.Refresh();
@@ -323,6 +325,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_READY: {
 											p.setReady(1);
 											p.getUser().setMoney(p.getUser().getMoney()-serv.getPandon());
+//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()-serv.getPandon());
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getPandon());
 											serv.MoneyRefresh();
 											serv.Refresh();
@@ -347,6 +350,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_CALL: {
 											p.setBetbool(2);
 											p.getUser().setMoney(p.getUser().getMoney()-serv.getMinforbet());
+//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()-serv.getMinforbet());
 											p.setThisbet(serv.getMinforbet());
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
 											serv.MoneyRefresh();
@@ -356,6 +360,7 @@ class UserThread extends Thread {
 										case Gaming.GAME_HALF: {
 											p.setBetbool(3);
 											p.getUser().setMoney(p.getUser().getMoney()-serv.getMoneythisgame()/2);
+//											serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()-serv.getMoneythisgame()/2);
 											p.setThisbet(serv.getMoneythisgame()/2);
 											serv.setMinforbet(serv.getMoneythisgame()/2);
 											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
@@ -413,6 +418,7 @@ class UserThread extends Thread {
 												if(pl.getUser().getId().equals(target)) {
 													if(pl.getReady()==1) {
 														pl.getUser().setMoney(q.getUser().getMoney()+serv.getPandon());
+//														serv.getMain().불라불라(q.getUser().getId(), q.getUser().getMoney()+serv.getPandon());
 														serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
 														pl.setReady(0);
 														serv.MoneyRefresh();
@@ -494,6 +500,13 @@ public class Server extends Thread {
 	 * nowtimer: 지금 돌아가고 있는 타이머가 담기는 곳.
 	 * pandon: 게임에 참여하기 위해 유저별로 내야하는 초기 기본 베팅금.
 	 */
+	private MainServer main;
+	public MainServer getMain() {
+		return main;
+	}
+	public void setMain(MainServer main) {
+		this.main = main;
+	}
 	private int port;
 	private ServerSocket server;
 	private ArrayList<Player> players = new ArrayList<>();
@@ -1058,6 +1071,7 @@ public class Server extends Thread {
 	 */
 	public void calc(Player p) {
 		p.getUser().setMoney(p.getUser().getMoney()+moneythisgame);
+//		serv.getMain().불라불라(p.getUser().getId(), p.getUser().getMoney()+moneythisgame);
 		setMoneythisgame(0);
 		for(Player q : players) {
 			q.setGameresult(0);

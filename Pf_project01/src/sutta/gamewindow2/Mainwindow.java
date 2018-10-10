@@ -136,7 +136,11 @@ public class Mainwindow extends JFrame {
 		nowsw=null;
 		return;
 	}
-
+	private JokboWindow nowjw=null;
+	public void toemptyjw() {
+		nowjw=null;
+		return;
+	}
 	
 	private ActionListener alcard1 = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
@@ -531,6 +535,12 @@ public class Mainwindow extends JFrame {
 				Lbl_myset.setText("");
 			}
 			client.Bet_Half();
+		});
+		bt_jokbo.addActionListener(e->{
+			if(nowjw==null) {
+				nowjw = new JokboWindow(this);
+				nowjw.setVisible(true);
+			}
 		});
 //		bt_cardset1.addActionListener(e->{
 //			Lbl_myset.setText(bt_cardset1.getText());
