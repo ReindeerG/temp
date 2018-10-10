@@ -51,6 +51,10 @@ public class MainServer extends Thread{
 		f = new File("UserFile","user.txt");
 		if(f.exists()) {
 			user_list = BackUpManager.getUserInfo(f);
+			for(User u : user_list) {
+				//예기치 않은 서버 다운이 일어났을 때 로그인 상태 모두 false처리
+				u.setLogin(false);
+			}
 			System.out.println("user_list = "+user_list);
 		}
 		else {
@@ -235,7 +239,7 @@ public class MainServer extends Thread{
 							if(user.getId().equals(u2.getId()) && user.getPw().equals(u2.getPw())) {
 								isMember = true;
 								if(!user.isLogin()) {
-									u2 = user_list.get(i);	
+									u2 = user_list.get(i);
 									isIng = false;
 								}
 								else {
@@ -250,10 +254,22 @@ public class MainServer extends Thread{
 							user = u2;
 							user.setLogin(true);
 						}
-						System.out.println("전송");
-						out.writeBoolean(isMember && !isIng);
-						out.flush();
-						System.out.println(isMember && !isIng);
+						
+						if(isMember == false) {
+							//회원이 아닐 때
+							out.writeInt(0);
+							out.flush();
+						}
+						else if(isIng) {
+							//회원인데 로그인 중인 아이디 일때
+							out.writeInt(1);
+							out.flush();
+						}
+						else {
+							//회원이며 로그인이 완료되었을 때
+							out.writeInt(2);
+							out.flush();
+						}
 						break;
 					}
 				}
@@ -273,14 +289,21 @@ public class MainServer extends Thread{
 				//로그인 하면 저장된 정보를 사용자에게 보내준다 
 				out.writeObject(user);
 				out.flush();
-				Process p  = new Process(this, roomList,roomPort, serverList);
+				Process p  = new Process(this, roomList,roomPort, serverList, user_list);
 				p.process();
 				BackUpManager.backUpUserInfo(f, user_list);
+				System.out.println("user_list = "+ user_list);
+				System.out.println("정상 로그아웃");
+				list.remove(this);
+				System.out.println("list.size = "+list.size());
+				this.interrupt();
+			}catch(Exception e) {
+				System.out.println("run에러");
 				System.out.println("로그아웃");
 				list.remove(this);
 				System.out.println("list.size = "+list.size());
 				this.interrupt();
-			}catch(Exception e) {}
+			}
 		}
 	}
 	

@@ -248,7 +248,6 @@ public class MainWindow extends JFrame implements Runnable{
 			try {
 				out.writeInt(Signal.QUICKJOIN);
 				out.flush();
-				System.out.println(in.readObject());
 				Room r = (Room)in.readObject();
 				System.out.println(r.getName()+"방에 빠른 참가");
 				Client_Ex client = new Client_Ex(r.getPort(), user);
@@ -346,6 +345,7 @@ public class MainWindow extends JFrame implements Runnable{
 					model2 = model1;
 					model1 = tg;
 					room.repaint();
+					money.repaint();
 //					room.setModel(model2);
 				}
 			}

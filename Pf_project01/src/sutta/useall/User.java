@@ -14,8 +14,10 @@ public class User implements Serializable{
 	private int money;
 	private boolean isLogin;
 
-	
-	
+	@Override
+	public String toString() {
+		return "User [nickname=" + nickname + ", id=" + id + ", money=" + money + ", isLogin=" + isLogin + "]";
+	}
 	public boolean isLogin() {
 		return isLogin;
 	}

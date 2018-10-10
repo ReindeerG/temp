@@ -34,10 +34,10 @@ public class Login extends JDialog {
 	private JButton member = new JButton("회원가입");
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
-	private boolean login = false;
+	private int login;
 	private User user;
 	
-	public boolean isLogin() throws IOException {
+	public int isLogin() throws IOException {
 		return login;
 	}
 	public String getId() {
@@ -89,15 +89,20 @@ public class Login extends JDialog {
 				out.flush();
 				
 //				System.out.println(in.readBoolean());
-				login = in.readBoolean();
+				login = in.readInt();
 				
-				if(login) {
+				//로그인 되었을 때
+				if(login == 2) {
 					this.dispose();
 				}
-				else {
+				//회원정보가 일치하지 않을 때
+				else if(login == 0) {
 					JOptionPane.showMessageDialog(this, "올바르지 않은 아이디 혹은 비밀번호 입니다", "", JOptionPane.PLAIN_MESSAGE);
 					id.setText("");
 					pw.setText("");
+				}
+				else if(login == 1) {
+					JOptionPane.showMessageDialog(this, "이미 접속중입니다", "", JOptionPane.PLAIN_MESSAGE);
 				}
 				
 			}catch (Exception err) {

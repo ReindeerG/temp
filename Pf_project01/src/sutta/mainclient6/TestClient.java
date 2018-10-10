@@ -5,8 +5,6 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import sutta.useall.User;
-
 /**
  * 클라이언트 창
  * 
@@ -30,7 +28,7 @@ public class TestClient {
 			Login login  = new Login(out,in);
 		 	login.setVisible(true);
 			
-			while(!login.isLogin()) {}
+			while(login.isLogin() != 2) {}
 			MainWindow m = new MainWindow(socket, out, in);
 			m.setVisible(true);
 				

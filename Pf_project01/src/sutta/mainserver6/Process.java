@@ -1,5 +1,6 @@
 package sutta.mainserver6;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,58 +19,33 @@ public class Process {
 	private List<Server> serverList;
 	private Room r;
 	private Server server;
+	private ArrayList<User> userList;
 	
+	public void setMoney(String id, int money) {
+		c.user.setMoney(money);
+		System.out.println("userList"+userList);
+		File f =  new File("UserFile\\user.txt");
+		BackUpManager.backUpUserInfo(f, userList);
+	}
 	
-	public Process(Client c, ArrayList<Room> roomList,List<Integer> roomPort, List<Server> serverList) {
+	public Process(Client c, ArrayList<Room> roomList,List<Integer> roomPort, List<Server> serverList, ArrayList<User> userList) {
 		this.c = c;
 		this.roomList = roomList;
 		Collections.sort(roomPort);
 		this.roomPort = roomPort;
 		this.serverList = serverList;
+		this.userList = userList;
 	}
 	
-	public void exitRoom() throws Exception {
-//		Room target = r;
-//		c.user = (User) c.in.readObject();
-//		System.out.println("c.user = "+c.user);
-//		target.removeUser(c.user);
-//		target.minusCnt();
-//		System.out.println("현재 방 인원 = "+target.getCnt());
-//		if(target.getCnt() == 0) {
-//			roomPort.add(target.getPort());
-//			int index = roomList.indexOf(target);
-//			roomList.remove(target);
-//			serverList.get(index).serverClose();
-//			serverList.remove(index);
-//		}
+	public void exitRoom(){
 		r.minusCnt();
-		System.out.println("참가자 수  = "+r.getCnt());
 		System.out.println(c.user.getNickname()+"의 남은 돈 = "+c.user.getMoney());
 		server.removeUser(c.user);
 		if(r.getCnt() == 0) {
-			System.out.println("참가자 수 0일때 실행");
 			roomPort.add(r.getPort());
-			System.out.println("포트 리스트에 반환");
-			System.out.println("방 목록에서 방 제거전"+roomList);
-			for(Room r : roomList) {
-				System.out.println(r);
-			}
 			roomList.remove(r);
-			System.out.println("방 목록에서 방 제거후"+roomList);
-			for(Room r : roomList) {
-				System.out.println(r);
-			}
-			System.out.println("서버 목록에서 서버 제거전"+serverList);
-			for(Server s : serverList) {
-				System.out.println(s);
-			}
 			serverList.remove(server);
-			System.out.println("서버 목록에서 서버 제거후"+serverList);
-			for(Server s : serverList) {
-				System.out.println(s);
-			}
 			server.serverClose();
-			System.out.println("서버 소켓 종료");
 		}
 		server = null;
 		r = null;
@@ -170,11 +146,11 @@ public class Process {
 					//게임 종료
 					r.setIng(false);
 					server.setInggame(false);
+					setMoney("", 3000);
 					break;
 				case 6:
 					//로그아웃
 					c.user.setLogin(false);
-					c.interrupt();
 					isPlay = false;
 					break;
 				}
@@ -183,14 +159,11 @@ public class Process {
 			
 		}catch(Exception e) {
 			e.printStackTrace();
-			try {
+			if(r!=null) {
 				exitRoom();
-				c.user.setLogin(false);
-				c.interrupt();
-				isPlay = false;
-			} catch (Exception e1) {
-				e1.printStackTrace();
 			}
+			c.user.setLogin(false);
+			isPlay = false;
 		}
 	}
 	
