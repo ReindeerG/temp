@@ -13,6 +13,10 @@ public class Room implements Serializable{
 	private List<User> user = new ArrayList<>();
 	private int port;
 	
+	public List<User> getUserList(){
+		return user;
+	}
+	
 	public String getIng(){
 		return ing? "진행중":"대기중";
 	}

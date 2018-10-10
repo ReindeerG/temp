@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import sutta.gameserver.Server;
+import sutta.gameserver2.Server;
 import sutta.useall.Room;
 import sutta.useall.Signal;
 import sutta.useall.User;
@@ -95,7 +95,7 @@ public class MainServer extends Thread{
 			}
 			for(int i=0; i<paint.size();i++) {
 				paint.get(i).send();
-			}
+			}				
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -121,7 +121,7 @@ public class MainServer extends Thread{
 				try {
 					broadCast();
 					//1초에 한 번 씩 - 추후 변경 가능 
-					Thread.sleep(1000);
+					Thread.sleep(1500);
 				} catch (Exception e) {
 					
 					e.printStackTrace();
@@ -275,6 +275,7 @@ public class MainServer extends Thread{
 				out.flush();
 				Process p  = new Process(this, roomList,roomPort, serverList);
 				p.process();
+				BackUpManager.backUpUserInfo(f, user_list);
 				System.out.println("로그아웃");
 				list.remove(this);
 				System.out.println("list.size = "+list.size());

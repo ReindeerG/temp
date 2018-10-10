@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 
 public class User implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final String nickname;
 	private final String id;
 	private String pw;
@@ -11,10 +15,7 @@ public class User implements Serializable{
 	private boolean isLogin;
 
 	
-	@Override
-	public String toString() {
-		return "User [nickname=" + nickname + ", id=" + id + ", money=" + money + ", isLogin=" + isLogin + "]";
-	}
+	
 	public boolean isLogin() {
 		return isLogin;
 	}

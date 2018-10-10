@@ -32,8 +32,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
-import sutta.gameserver.Client_Ex;
-import sutta.gamewindow.Mainwindow;
+import sutta.gameserver2.Client_Ex;
+import sutta.gamewindow2.Mainwindow;
 import sutta.useall.Room;
 import sutta.useall.Signal;
 import sutta.useall.User;
@@ -101,9 +101,9 @@ public class MainWindow extends JFrame implements Runnable{
 		con.add(panel);
 		con.add(nickname);
 		con.add(money);
-		con.setBackground(Color.black);
-		con.add(imagePanel);
-		con.setForeground(Color.WHITE);
+//		con.setBackground(Color.black);
+//		con.add(imagePanel);
+//		con.setForeground(Color.WHITE);
 		
 		
 		room.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -191,7 +191,7 @@ public class MainWindow extends JFrame implements Runnable{
 		WindowListener proc = new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				try {
-					out.writeInt(5);
+					out.writeInt(6);
 					out.flush();
 					socket.close();
 					w_socket.close();
@@ -232,6 +232,7 @@ public class MainWindow extends JFrame implements Runnable{
 					Client_Ex client = new Client_Ex(r.getPort(), user);
 					client.setDaemon(true);
 					client.start();
+					System.out.println("Client_Ex 생성");
 					Mainwindow mw = new Mainwindow(client, out, this);
 					System.out.println("Mainwindow mw 생성 및 시작");
 					client.setWindow(mw);
@@ -282,10 +283,6 @@ public class MainWindow extends JFrame implements Runnable{
 		
 	}
 
-	private void menu() {
-		
-	}
-	
 	/**
 	 * 소켓과의 통로를 생성하고 화면을 설정
 	 * @param socket 소켓 전달
@@ -297,8 +294,8 @@ public class MainWindow extends JFrame implements Runnable{
 	private Socket w_socket;
 	public MainWindow(Socket socket, ObjectOutputStream out, ObjectInputStream in) {
 		try {
-			g_inet = InetAddress.getByName("192.168.0.9");
-			w_inet = InetAddress.getByName("192.168.0.9");
+			g_inet = InetAddress.getByName("localhost");
+			w_inet = InetAddress.getByName("localhost");
 			w_socket = new Socket(w_inet, 54891);
 			w_out = new ObjectOutputStream(w_socket.getOutputStream());
 			w_in = new ObjectInputStream(w_socket.getInputStream());
@@ -321,7 +318,6 @@ public class MainWindow extends JFrame implements Runnable{
 		}
 		this.display();
 		this.event();
-		this.menu();
 		this.setTitle("KG섯다");
 		this.setSize(1000, 800);
 		this.setResizable(false);
@@ -340,7 +336,7 @@ public class MainWindow extends JFrame implements Runnable{
 				ArrayList<String[]> list;
 				list = (ArrayList<String[]>)w_in.readObject();
 //				System.out.println("receive = "+list.hashCode()+" / "+list);
-				if(list!=null && list.size() != 0) {
+				if(list!=null ) {
 					room_list = list;
 					model1.setNumRows(0);
 					for(int i = 0 ; i < list.size(); i++) {
