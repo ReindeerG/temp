@@ -180,8 +180,8 @@ public class Mainwindow extends JFrame {
 	private ImageIcon img_bt_start_no;
 	private ImageIcon img_bt_start_yes;
 	private ImageIcon img_bt_start_on;
-	private ImageIcon img_bt_invite;
-	private ImageIcon img_bt_invite_on;
+//	private ImageIcon img_bt_invite;
+//	private ImageIcon img_bt_invite_on;
 	private ImageIcon img_bt_leave_ok;
 	private ImageIcon img_bt_leave_on;
 	private ImageIcon img_alarmclock;
@@ -213,11 +213,11 @@ public class Mainwindow extends JFrame {
 	private JTextArea chatlog = new JTextArea();
 	private JScrollPane scroll;
 	private JTextField makechat = new JTextField();
-	private JButton bt_nickch = new JButton("닉네임 변경");
+//	private JButton bt_nickch = new JButton("닉네임 변경");
 	
 	private JButton bt_ready = new JButton();
 	private JButton bt_start = new JButton();
-	private JButton bt_invite = new JButton();
+//	private JButton bt_invite = new JButton();
 	private JButton bt_exit = new JButton();
 	private JButton bt_moneymod = new JButton();
 	private JButton bt_jokbo = new JButton();
@@ -287,8 +287,8 @@ public class Mainwindow extends JFrame {
 		makechat.setBounds(0, 780, 450, 20);
 		con.add(makechat);
 		makechat.setColumns(10);
-		bt_nickch.setBounds(0, 560, 100, 20);
-		con.add(bt_nickch);
+//		bt_nickch.setBounds(0, 560, 100, 20);
+//		con.add(bt_nickch);
 		
 		bt_ready.setBounds(1000, 720, 100, 40);
 		bt_ready.setIcon(img_bt_ready_no);
@@ -298,15 +298,15 @@ public class Mainwindow extends JFrame {
 		bt_start.setIcon(img_bt_start_no);
 		bt_start.setEnabled(false);
 		con.add(bt_start);
-		bt_invite.setBounds(1000, 760, 100, 40);
-		bt_invite.setIcon(img_bt_invite);
-		bt_invite.setRolloverIcon(img_bt_invite_on);
-		con.add(bt_invite);
+//		bt_invite.setBounds(1000, 760, 100, 40);
+//		bt_invite.setIcon(img_bt_invite);
+//		bt_invite.setRolloverIcon(img_bt_invite_on);
+//		con.add(bt_invite);
 		bt_exit.setBounds(1100, 760, 100, 40);
 		bt_exit.setIcon(img_bt_leave_ok);
 		bt_exit.setRolloverIcon(img_bt_leave_on);
 		con.add(bt_exit);
-		bt_jokbo.setBounds(1000, 680, 100, 40);
+		bt_jokbo.setBounds(1000, 760, 100, 40);
 		bt_jokbo.setIcon(img_bt_jokbo);
 		bt_jokbo.setRolloverIcon(img_bt_jokbo_on); 
 		con.add(bt_jokbo);
@@ -558,20 +558,20 @@ public class Mainwindow extends JFrame {
 			PandonWindow pw = new PandonWindow(client, this);
 			pw.setVisible(true);
 		});
-		bt_nickch.addActionListener(e->{
-			String tmpstr = JOptionPane.showInputDialog(this, "바꿀 닉네임을 입력하세요.", "닉네임 변경", JOptionPane.PLAIN_MESSAGE);
-			if(tmpstr!=null) {
-				if(!tmpstr.equals("")) {
-					if(tmpstr.length()<9) {
-						if(!tmpstr.equals(client.getMe().getUser().getNickname())) {
-							client.ChangeNick(tmpstr);
-						}
-					} else {
-						JOptionPane.showMessageDialog(this, "닉네임은 8글자 이하로 해주세요!", "글자수 초과", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			}
-		});
+//		bt_nickch.addActionListener(e->{
+//			String tmpstr = JOptionPane.showInputDialog(this, "바꿀 닉네임을 입력하세요.", "닉네임 변경", JOptionPane.PLAIN_MESSAGE);
+//			if(tmpstr!=null) {
+//				if(!tmpstr.equals("")) {
+//					if(tmpstr.length()<9) {
+//						if(!tmpstr.equals(client.getMe().getUser().getNickname())) {
+//							client.ChangeNick(tmpstr);
+//						}
+//					} else {
+//						JOptionPane.showMessageDialog(this, "닉네임은 8글자 이하로 해주세요!", "글자수 초과", JOptionPane.ERROR_MESSAGE);
+//					}
+//				}
+//			}
+//		});
 		bt_ready.addActionListener(e->{
 			if(client.getMe().getReady()==0) {
 				bt_ready.setIcon(img_bt_ready_yes);
@@ -613,29 +613,29 @@ public class Mainwindow extends JFrame {
 		KeyListener chatenter = new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode()==KeyEvent.VK_ENTER && !makechat.getText().equals("")) {
-					if(makechat.getText().equals("/분배")) {
-						DrawCards();
-					} else if(makechat.getText().equals("/제자리")) {
-						ResetCards();
-					} else if(makechat.getText().equals("/카드")) {
-						allOpen();
-					} else if(makechat.getText().equals("/새로고침")) {
-						client.callRefresh();
-						for(Player p : client.getPlayers()) {
-							System.out.println(p.getOrder()+": "+p.getUser().getId());
-						}
-					} else if(makechat.getText().equals("/판돈")) {
-						client.callRefresh();
-						System.out.println(client.getPandon());
-					} else if(makechat.getText().equals("/뽑아")) {
-						DrawCards2();
-					} else if(makechat.getText().equals("/최저")) {
-						System.out.println(client.getMinforbet());
-					}
-					else {
+//					if(makechat.getText().equals("/분배")) {
+//						DrawCards();
+//					} else if(makechat.getText().equals("/제자리")) {
+//						ResetCards();
+//					} else if(makechat.getText().equals("/카드")) {
+//						allOpen();
+//					} else if(makechat.getText().equals("/새로고침")) {
+//						client.callRefresh();
+//						for(Player p : client.getPlayers()) {
+//							System.out.println(p.getOrder()+": "+p.getUser().getId());
+//						}
+//					} else if(makechat.getText().equals("/판돈")) {
+//						client.callRefresh();
+//						System.out.println(client.getPandon());
+//					} else if(makechat.getText().equals("/뽑아")) {
+//						DrawCards2();
+//					} else if(makechat.getText().equals("/최저")) {
+//						System.out.println(client.getMinforbet());
+//					}
+//					else {
 						client.MakeChat(makechat.getText());
 						makechat.setText("");
-					}
+//					}
 				}
 			}
 		};
@@ -709,8 +709,8 @@ public class Mainwindow extends JFrame {
 			img_bt_start_no = new ImageIcon(ImageIO.read(new File("Images\\start_no.png")));
 			img_bt_start_yes = new ImageIcon(ImageIO.read(new File("Images\\start_ok.png")));
 			img_bt_start_on = new ImageIcon(ImageIO.read(new File("Images\\start_on.png")));
-			img_bt_invite = new ImageIcon(ImageIO.read(new File("Images\\invite.png")));
-			img_bt_invite_on = new ImageIcon(ImageIO.read(new File("Images\\invite_on.png")));
+//			img_bt_invite = new ImageIcon(ImageIO.read(new File("Images\\invite.png")));
+//			img_bt_invite_on = new ImageIcon(ImageIO.read(new File("Images\\invite_on.png")));
 			img_bt_leave_ok = new ImageIcon(ImageIO.read(new File("Images\\leave_ok.png")));
 			img_bt_leave_on = new ImageIcon(ImageIO.read(new File("Images\\leave_on.png")));
 			img_alarmclock = new ImageIcon(ImageIO.read(new File("Images\\alarmclock.png")));
@@ -1433,7 +1433,7 @@ public class Mainwindow extends JFrame {
 		bt_exit.setEnabled(false);
 		bt_start.setIcon(img_bt_start_no);
 		bt_start.setEnabled(false);
-		bt_invite.setEnabled(false);
+//		bt_invite.setEnabled(false);
 		bt_moneymod.setEnabled(false);
 		return;
 	}
@@ -1442,7 +1442,7 @@ public class Mainwindow extends JFrame {
 		bt_ready.setRolloverIcon(img_bt_ready_no_roll);
 		bt_ready.setEnabled(true);
 		bt_exit.setEnabled(true);
-		bt_invite.setEnabled(true);
+//		bt_invite.setEnabled(true);
 		Lbl_myset.setText("");
 		Lbl_2p_set.setText("");
 		Lbl_3p_set.setText("");

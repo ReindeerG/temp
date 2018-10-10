@@ -39,30 +39,19 @@ class Timer extends Thread {
 			}
 			else {
 				try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();}
-//				players = serv.getPlayers();
-//				System.out.println("턴:"+serv.getWhosturn()+"/"+i);
 				for(Player p2 : serv.getPlayers()) {
 					try {
 						ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p2.getSocket().getOutputStream()));
 						out.writeObject(Gaming.Timer(serv.getWhosturn(), i, turn));
-//						out.writeObject(new Gaming(Gaming.GAME_TIMER, serv.getWhosturn(), i));
 						out.flush();
 					} catch(Exception e) {e.printStackTrace();}
 				}
-//				System.out.println("타이머 계속 보내고 있단다");
 			}
 			i--;
 		}
 		Player p = serv.getPlayers().get(serv.getWhosturn());
 		p.getUth().IncreaseTurn();
 		p.getUth().toDie();
-//		for(Player p2 : players) {
-//			try {
-//				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p2.getSocket().getOutputStream()));
-//				out.writeObject(new Gaming(p.getUserid(), Gaming.GAME_DIE, players));
-//				out.flush();
-//			} catch(Exception e) {e.printStackTrace();}
-//		}
 		this.interrupt();
 		return;
 	}
@@ -106,70 +95,6 @@ class BanTh extends Thread {
 	}
 }
 
-/*
-class CheckMem extends Thread {
-	Server serv;
-	private boolean stop=false;
-	public boolean isStop() {
-		return stop;
-	}
-	public void setStop(boolean stop) {
-		this.stop = stop;
-	}
-	public CheckMem(Server serv) {
-		this.serv=serv;
-	}
-	public void run() {
-		while(true) {
-			if(stop==true) { break; }
-			else {
-//				System.out.println("돌긴하니");
-				boolean del = false;
-				
-				ArrayList<Player> tmpplayer = (ArrayList<Player>)serv.getPlayers().clone();
-				for(Player pl : tmpplayer) {
-					System.out.println(pl.getOrder()+"번: "+pl.getUth().isAlive());
-					if(pl.getUth().isAlive()==false || pl.getUth().isStop()==true) {
-						tmpplayer.remove(pl);
-						
-						del = true;
-//						break;
-					}
-				}
-				if(del==true) {
-					
-					
-//					ArrayList<Player> tmpplayer1 = (ArrayList<Player>)serv.getPlayers().clone();
-//					for(Player p : tmpplayer1) {
-//						if(p.getUth().isAlive()==false) {
-//							tmpplayer1.remove(p);
-//						}
-//					}
-					int index=0;
-					for(Player p : tmpplayer) {
-						p.setOrder(index++);
-					}
-					serv.setPlayers(tmpplayer);
-					serv.setCm(new CheckMem(serv));
-					serv.getCm().setDaemon(true);
-					serv.getCm().start();
-					return;
-					
-					
-					
-					
-					
-					
-					
-//					setStop(true); serv.remakecheck(); interrupt(); return;
-				}
-				
-			}
-		}
-		return;
-	}
-}
-*/
 
 class UserThread extends Thread {
 	private Socket socket;
