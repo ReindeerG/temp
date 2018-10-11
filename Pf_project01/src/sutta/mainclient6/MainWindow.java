@@ -177,18 +177,22 @@ public class MainWindow extends JFrame implements Runnable, Signal{
 	 * 해당 버튼에 따른 신호 전송
 	 */
 	private void event() {
-
+		this.setDefaultCloseOperation(this.DO_NOTHING_ON_CLOSE);
 		WindowListener proc = new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				try {
-					out.writeInt(LOGOUT);
-					out.flush();
-					socket.close();
-					w_socket.close();
-				} catch (Exception e1) {
-					e1.printStackTrace();
+				int sign = JOptionPane.showConfirmDialog(MainWindow.this, "정말로 종료 하시겠습니까?","게임 종료",JOptionPane.YES_NO_OPTION);
+				
+				if(sign == 0) {
+					try {
+						out.writeInt(LOGOUT);
+						out.flush();
+						socket.close();
+						w_socket.close();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					System.exit(0);
 				}
-				System.exit(0);
 			}
 		};
 		this.addWindowListener(proc);
