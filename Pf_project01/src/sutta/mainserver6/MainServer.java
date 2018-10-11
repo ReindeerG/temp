@@ -152,7 +152,7 @@ public class MainServer extends Thread{
 				try {
 					//2초에 한 번 씩  방 목록을 전체에게 전송- 추후 변경 가능 
 					broadCast();
-					Thread.sleep(2000);
+					Thread.sleep(1500);
 				} catch (Exception e) {
 					
 					e.printStackTrace();

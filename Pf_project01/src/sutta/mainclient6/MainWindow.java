@@ -214,7 +214,12 @@ public class MainWindow extends JFrame implements Runnable, Signal{
 				if(name!= null) {
 					Room r = (Room)in.readObject();
 					//방 정보를 받아와 그 서버에 접속시켜준다
-					showGameRoom(r);
+					if(r !=  null) {
+						showGameRoom(r);						
+					}
+					else {
+						JOptionPane.showMessageDialog(this, "더이상 방을 만들 수 없습니다", "", JOptionPane.PLAIN_MESSAGE);
+					}
 				}
 				
 			} catch (Exception e1) {
@@ -226,7 +231,12 @@ public class MainWindow extends JFrame implements Runnable, Signal{
 				out.writeInt(QUICKJOIN);
 				out.flush();
 				Room r = (Room)in.readObject();
-				showGameRoom(r);
+				if(r !=  null) {
+					showGameRoom(r);						
+				}
+				else {
+					JOptionPane.showMessageDialog(this, "더이상 방을 만들 수 없습니다", "", JOptionPane.PLAIN_MESSAGE);
+				}
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}

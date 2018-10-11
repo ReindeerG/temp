@@ -24,6 +24,7 @@ public class TestClient {
 			InetAddress inet = InetAddress.getByName("localhost");
 			ObjectOutputStream out = null;
 			ObjectInputStream in = null;
+			
 
 			Socket socket = new Socket(inet, 54890);
 				

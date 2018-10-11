@@ -111,7 +111,7 @@ public class Login extends JDialog  implements Signal{
 			}
 		});
 		cancel.addActionListener(e->{
-			dispose();
+			System.exit(0);
 		});
 		member.addActionListener(e->{
 			SignUp signup = new SignUp(out, in);

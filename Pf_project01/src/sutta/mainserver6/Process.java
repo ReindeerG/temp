@@ -82,24 +82,30 @@ public class Process implements Signal{
 	
 	//새로운 방을 만들때 메소드
 	public void newRoom(String name) throws ClassNotFoundException, IOException {
-		r = new Room(name, roomPort.get(0));
-		roomPort.remove(0);
-		//방 정보 받아서 port부여
-		int port = r.getPort();
-		Server sv = new Server(port, r.getUserList(), main);
-		server =sv;
-		sv.setDaemon(true);
-		sv.start();
-		serverList.add(sv);
-		r.setPort(port);
-		roomList.add(r);
-		//새 방 접속
-		joinRoom(roomList.indexOf(r));
+		if(roomPort.size() > 0) {
+			r = new Room(name, roomPort.get(0));
+			roomPort.remove(0);
+			//방 정보 받아서 port부여
+			int port = r.getPort();
+			Server sv = new Server(port, r.getUserList(), main);
+			server =sv;
+			sv.setDaemon(true);
+			sv.start();
+			serverList.add(sv);
+			r.setPort(port);
+			roomList.add(r);
+			//새 방 접속
+			joinRoom(roomList.indexOf(r));			
+		}
+		else {
+			//방이 1000개 다 만들어 졌을 때
+			c.out.writeObject(null);
+			c.out.flush();
+		}
 	}
 	//게임이 시작했는지 설정
 	public void setIng(boolean ing) {
-		r.setIng(true);
-		server.setInggame(true);
+		r.setIng(ing);
 	}
 	//게임이 끝났을 때 끝났음을 알림
 	public void logout() {
@@ -132,7 +138,8 @@ public class Process implements Signal{
 					//빠른 방 참여 
 					Room target2 = null;
 					for(Room r2 : roomList) {
-						if(r2.getCnt() < 4) {
+						System.out.println(r2.getName()+"방 참가 가능 여부"+(r2.getCnt() < 4 && !r2.isIng()));
+						if(r2.getCnt() < 4 && !r2.isIng()) {
 							target2 = r2;
 							break;
 						}

@@ -20,6 +20,45 @@ import sutta.mainserver6.MainServer;
 import sutta.useall.User;
 
 /**
+ * TimerExist
+ * 게임 시작시 실행되고, 게임 종료시 종료되는데,
+ * 이게 생존한 동안 오픈패나 최종패 시간이 아니라
+ * 특정 플레이어끼리의 타이머일 때, 그 타이머에 해당하는 서버의  nowtimer가 동작하지 않는 현상이 1초이상 지속되면(플레이어 타이머는 0.1초씩 진행됨) 대신 다음턴 연산을 가해줌(보통 일어날 일 없을 것으로 예상됨)
+ */
+class TimerExist extends Thread {
+	Server serv=null;
+	boolean kill=false;
+	public void toKill() {
+		this.kill=true;
+	}
+	public TimerExist(Server serv) {
+		this.serv = serv;
+	}
+	public void run() {
+		while(true) {
+			if(serv.isInggame()==false || kill==true) { break; }
+			else {
+				for(Player p : serv.getPlayers()) {
+					if(p.getGameresult()>0) return;
+				}
+				if(serv.getWhosturn()>3) {
+				} else {
+					System.out.println(serv.getNowtimer().getThreadGroup());
+					if(serv.getNowtimer().getThreadGroup()==null) {
+						try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
+						if(serv.getNowtimer().getThreadGroup()==null) {
+							System.out.println("타이머주거서새로쥼");
+							serv.nextTurn();
+						}
+					}
+				}
+			}
+		}
+		return;
+	}
+}
+
+/**
  * 어떤 플레이어의 턴에 돌아가게 될 타이머쓰레드
  */
 class Timer extends Thread {
@@ -39,7 +78,12 @@ class Timer extends Thread {
 	public void run() {
 		for(int i=0;i<100;i++) {
 			if(p.getBetbool()!=0 || isKill()==true) {
-				serv.IncreaseTurn();				// 타이머 종료되면 턴 증가하면서 끝나게 됨.
+				Thread th = new Thread() {
+					public void run() {
+						serv.IncreaseTurn();				// 타이머 종료되면 턴 증가하면서 끝나게 됨.
+					}
+				};
+				th.start();
 				this.interrupt();
 				return;
 			}
@@ -56,7 +100,12 @@ class Timer extends Thread {
 		}
 		Player p = serv.getPlayers().get(serv.getWhosturn());
 		serv.IncreaseTurn();
-		p.getUth().toDie();
+		Thread th = new Thread() {
+			public void run() {
+				p.getUth().toDie();
+			}
+		};
+		th.start();
 		this.setKill(true);
 		this.interrupt();
 		return;
@@ -93,7 +142,13 @@ class OpenTimer extends Timer {
 				if (allsel==true) {
 					serv.setWhosturn(serv.getWhosturn()-1);
 					serv.setTurn(serv.getTurn()-1);
-					serv.nextTurn();
+					Thread th = new Thread() {
+						public void run() {
+							serv.nextTurn();
+							return;
+						}
+					};
+					th.start();
 					this.setKill(true);
 					this.interrupt();
 					return;
@@ -116,7 +171,13 @@ class OpenTimer extends Timer {
 		}
 		serv.setWhosturn(serv.getWhosturn()-1);
 		serv.setTurn(serv.getTurn()-1);
-		serv.nextTurn();
+		Thread th = new Thread() {
+			public void run() {
+				serv.nextTurn();
+				return;
+			}
+		};
+		th.start();
 		this.setKill(true);
 		this.interrupt();
 		return;
@@ -152,7 +213,13 @@ class SelSetTimer extends Timer {
 					}
 				}
 				if (allsel==true) {
-					serv.whosWin(players);
+					Thread th = new Thread() {
+						public void run() {
+							serv.whosWin(players);
+							return;
+						}
+					};
+					th.start();
 					this.setKill(true);
 					this.interrupt();
 					return;
@@ -172,7 +239,13 @@ class SelSetTimer extends Timer {
 				p.SelectSet(1);
 			}
 		}
-		serv.whosWin(players);
+		Thread th = new Thread() {
+			public void run() {
+				serv.whosWin(players);
+				return;
+			}
+		};
+		th.start();
 		this.setKill(true);
 		this.interrupt();
 		return;
@@ -336,7 +409,9 @@ class UserThread extends Thread {
 											break;
 										}
 										case Gaming.GAME_DIE: {
-											toDie();
+											if(p.getOrder()==serv.getWhosturn()) {
+												toDie();
+											}
 											break;
 										}
 										case Gaming.GAME_OPEN: {
@@ -348,31 +423,37 @@ class UserThread extends Thread {
 											break;
 										}
 										case Gaming.GAME_CALL: {
-											p.setBetbool(2);
-											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMinforbet());
-											p.getUser().setMoney(p.getUser().getMoney()-serv.getMinforbet());
-											p.setThisbet(serv.getMinforbet());
-											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
-											serv.MoneyRefresh();
-											serv.nextTurn();
+											if(p.getOrder()==serv.getWhosturn()) {
+												p.setBetbool(2);
+												serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMinforbet());
+												p.getUser().setMoney(p.getUser().getMoney()-serv.getMinforbet());
+												p.setThisbet(serv.getMinforbet());
+												serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
+												serv.MoneyRefresh();
+												serv.nextTurn();
+											}
 											break;
 										}
 										case Gaming.GAME_HALF: {
-											p.setBetbool(3);
-											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMoneythisgame()/2);
-											p.getUser().setMoney(p.getUser().getMoney()-serv.getMoneythisgame()/2);
-											p.setThisbet(serv.getMoneythisgame()/2);
-											serv.setMinforbet(serv.getMoneythisgame()/2);
-											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
-											serv.MoneyRefresh();
-											serv.nextTurn();
+											if(p.getOrder()==serv.getWhosturn()) {
+												p.setBetbool(3);
+												serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMoneythisgame()/2);
+												p.getUser().setMoney(p.getUser().getMoney()-serv.getMoneythisgame()/2);
+												p.setThisbet(serv.getMoneythisgame()/2);
+												serv.setMinforbet(serv.getMoneythisgame()/2);
+												serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
+												serv.MoneyRefresh();
+												serv.nextTurn();
+											}
 											break;
 										}
 										case Gaming.GAME_CHECK: {
-											p.setBetbool(4);
-											serv.setMinforbet(0);
-											serv.MoneyRefresh();
-											serv.nextTurn();
+											if(p.getOrder()==serv.getWhosturn()) {
+												p.setBetbool(4);
+												serv.setMinforbet(0);
+												serv.MoneyRefresh();
+												serv.nextTurn();
+											}
 											break;
 										}
 										case Gaming.MUCHPANDON: {
@@ -498,6 +579,7 @@ public class Server extends Thread {
 	 * thisplaynum: 현재 경기시작시 참여한 플레이어 수.
 	 * f: 채팅창에 알림 등에 사용될 시간의 포맷양식.
 	 * nowtimer: 지금 돌아가고 있는 타이머가 담기는 곳.
+	 * nowexitemer: 타이머 없이 교착상태를 방지하지 위한 타이머 상태 확인용.
 	 * pandon: 게임에 참여하기 위해 유저별로 내야하는 초기 기본 베팅금.
 	 */
 	private MainServer main;
@@ -524,6 +606,7 @@ public class Server extends Thread {
 
 	private Format f = new SimpleDateFormat("a hh:mm");
 	private Timer nowtimer;
+	private TimerExist nowexitemer;
 
 	public ArrayList<Player> getPlayers() { return players; }
 	public void setPlayers(ArrayList<Player> players) { this.players=players; }
@@ -547,9 +630,10 @@ public class Server extends Thread {
 	public int getMinforbet() { return minforbet; }
 	public void setMinforbet(int minforbet) { this.minforbet = minforbet; }
 	
-	
 	public Timer getNowtimer() { return nowtimer; }
 	public void setNowtimer(Timer nowtimer) { this.nowtimer = nowtimer; }
+	public TimerExist getNowexitemer() { return nowexitemer; }
+	public void setNowexitemer(TimerExist nowexitemer) { this.nowexitemer = nowexitemer; }
 	
 	private List<User> userList;
 	private User user;
@@ -772,7 +856,7 @@ public class Server extends Thread {
 	 */
 	public void nextTurn() {
 		getNowtimer().setKill(true);
-		while(!getNowtimer().isAlive()) {
+		while(getNowtimer().isKill()==false) {
 		}
 		/**
 		 * alive: 다이베팅하지 않은 유저의 수를 셈.
@@ -806,6 +890,7 @@ public class Server extends Thread {
 			for(Player p : players) {
 				if (p.getBetbool()!=1) {
 					// 얘가 우승자임
+					getNowexitemer().toKill();
 					ArrayList<String> tmplist = new ArrayList<>();
 					for(Player q : players) {
 						q.setGameresult(0);
@@ -864,6 +949,7 @@ public class Server extends Thread {
 				}
 				if(alive==ischecked+sumcall && isPhase2()==true) {
 					// 결판
+					getNowexitemer().toKill();
 					ArrayList<Player> tmplist = new ArrayList<>();
 					for(Player p : players) {
 						if(p.getBetbool()!=1) tmplist.add(p);
@@ -875,6 +961,7 @@ public class Server extends Thread {
 						Draw2Phase();
 					} else {
 						// 결판
+						getNowexitemer().toKill();
 						ArrayList<Player> tmplist = new ArrayList<>();
 						for(Player p : players) {
 							if(p.getBetbool()!=1) tmplist.add(p);
@@ -1254,6 +1341,9 @@ public class Server extends Thread {
 		giveFirstCards();
 		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
 		makeOpenTimer();
+		setNowexitemer(new TimerExist(this));
+		getNowexitemer().setDaemon(true);
+		getNowexitemer().start();
 		return;
 	}
 	/**
@@ -1269,4 +1359,5 @@ public class Server extends Thread {
 		}
 		return;
 	}
+	
 }

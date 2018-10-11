@@ -385,9 +385,6 @@ public class Client_Ex extends Thread {
 						System.out.println("getUser() = "+getUser());
 						System.out.println("받은 players"+players);
 						for(Player p : players) {
-							System.out.println("p = "+p);
-							System.out.println("p안에유저:"+p.getUser());
-							System.out.println("player getUser() = "+p.getUser());
 							if(p.getUser().getId().equals(user.getId())) {
 								me=p;
 								break;

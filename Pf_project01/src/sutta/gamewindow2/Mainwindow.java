@@ -1359,6 +1359,14 @@ public class Mainwindow extends JFrame {
 	//				bt_bet_call.setToolTipText("첫 베팅은 하프로 이루어져야 합니다.");
 	//				bt_bet_call.setEnabled(false);
 	//			} else
+				int someoneminmoney = 0;
+				for(Player p : client.getPlayers()) {
+					if(someoneminmoney==0) {
+						someoneminmoney=p.getUser().getMoney();
+					} else if(someoneminmoney>p.getUser().getMoney()) {
+						someoneminmoney=p.getUser().getMoney();
+					}
+				}
 				if(client.getMinforbet()==0 && client.isPhase2()==false) {
 					bt_bet_call.setIcon(img_bt_call_no);
 					bt_bet_call.setRolloverIcon(img_bt_call_no);
@@ -1373,6 +1381,11 @@ public class Mainwindow extends JFrame {
 					bt_bet_call.setIcon(img_bt_call_no);
 					bt_bet_call.setRolloverIcon(img_bt_call_no);
 					bt_bet_call.setToolTipText(client.getMinforbet()+"전의 베팅금이 필요합니다.");
+					bt_bet_call.setEnabled(false);
+				} else if(client.isPhase2()==true && client.getTurn()==1 && someoneminmoney<client.getMinforbet()) {
+					bt_bet_call.setIcon(img_bt_call_no);
+					bt_bet_call.setRolloverIcon(img_bt_call_no);
+					bt_bet_call.setToolTipText("다른 플레이어가 베팅금이 부족해집니다. 체크해주세요.");
 					bt_bet_call.setEnabled(false);
 				} else {
 					bt_bet_call.setIcon(img_bt_call_ok);
@@ -1390,6 +1403,11 @@ public class Mainwindow extends JFrame {
 					bt_bet_half.setIcon(img_bt_half_no);
 					bt_bet_half.setRolloverIcon(img_bt_half_no);
 					bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전의 베팅금이 필요합니다.");
+					bt_bet_half.setEnabled(false);
+				} else if(someoneminmoney<(int)((client.getMoneythisgame()*1.5)/2)-1) {
+					bt_bet_half.setIcon(img_bt_half_no);
+					bt_bet_half.setRolloverIcon(img_bt_half_no);
+					bt_bet_half.setToolTipText("다른 플레이어가 베팅금이 부족해집니다.");
 					bt_bet_half.setEnabled(false);
 				} else {
 					bt_bet_half.setIcon(img_bt_half_ok);
