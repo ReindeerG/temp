@@ -80,22 +80,26 @@ class SignUp extends JDialog implements Signal{
 //		label_2.setBounds(22, 218, 315, 15);
 //		getContentPane().add(label_2);
 	}
-
+	
+	String regexId = "^(?=.*?[a-zA-Z])[a-zA-Z0-9]{6,12}$";
+	String regexPassword = "^((?=.*?[a-zA-Z])(?=.*?[0-9])(?=.*?[!@#$])[a-zA-Z0-9!@#$]{6,12})||((?=.*?[a-zA-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,12})||((?=.*?[a-zA-Z])(?=.*?[!@#$])[a-zA-Z!@#$]{6,12})$";
+	String regexNickname = "^[a-zA-Z°¡-ÆR0-9]{2,8}$";
+	
+	boolean isId = Pattern.matches(regexId, id.getText());
+	boolean isNickname = Pattern.matches(regexNickname, nickname.getText());
+	boolean isPw = Pattern.matches(regexPassword, String.valueOf(pw.getPassword()));
+	
 	private void event() {
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		FocusListener fcl = new FocusAdapter() {
-			String regexId = "^(?=.*?[a-zA-Z])[a-zA-Z0-9]{6,12}$";
-			String regexPassword = "^((?=.*?[a-zA-Z])(?=.*?[0-9])(?=.*?[!@#$])[a-zA-Z0-9!@#$]{6,12})||((?=.*?[a-zA-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,12})||((?=.*?[a-zA-Z])(?=.*?[!@#$])[a-zA-Z!@#$]{6,12})$";
-			String regexNickname = "^[a-zA-Z°¡-ÆR0-9]{2,8}$";
-			@Override
 			public void focusLost(FocusEvent e) {
 				//¾ÆÀÌµð ÅØ½ºÆ® Ã¢¿¡ ÀÔ·ÂÇÑ °ÍÀÌ Á¶°Ç¿¡ ¸ÂÁö ¾ÊÀº »óÅÂ·Î Æ÷Ä¿½º°¡ ³Ñ¾î°¬À» ¶§ ¶óº§ ¶ç¿ì±â
-				boolean isId = Pattern.matches(regexId, id.getText());
-				boolean isNickname = Pattern.matches(regexNickname, nickname.getText());
-				boolean isPw = Pattern.matches(regexPassword, String.valueOf(pw.getPassword()));
+				isId = Pattern.matches(regexId, id.getText());
+				isNickname = Pattern.matches(regexNickname, nickname.getText());
+				isPw = Pattern.matches(regexPassword, String.valueOf(pw.getPassword()));
 				if(!id.getText().equals("")) {
 					if(!isId) {
-						idlabel.setText("¿µ¾î ´ë¼Ò¹®ÀÚ, ¼ýÀÚ Á¶ÇÕ 6~12ÀÚ");
+						idlabel.setText("¿µ¾î ´ë¼Ò¹®ÀÚ 1±ÛÀÚ ÀÌ»ó, ¼ýÀÚ Á¶ÇÕ 6~12 ±ÛÀÚ");
 					}
 					else {
 						idlabel.setText("¿Ã¹Ù¸¥ Çü½ÄÀÇ ¾ÆÀÌµð ÀÔ´Ï´Ù");
@@ -111,7 +115,7 @@ class SignUp extends JDialog implements Signal{
 				}
 				if(!String.valueOf(pw.getPassword()).equals("")) {
 					if(!isPw) {
-						pwlabel.setText("¿µ¾î ´ë¼Ò¹®ÀÚ 1±ÛÀÚ, ¼ýÀÚ, Æ¯¼ö¹®ÀÚ!@#$ Á¶ÇÕ 6~12ÀÚ");
+						pwlabel.setText("¿µ¾î ´ë¼Ò¹®ÀÚ 1±ÛÀÚ, ¼ýÀÚ, Æ¯¼ö¹®ÀÚ!@#$ 2°¡Áö ÀÌ»ó »ç¿ëÇÏ¿© 6~12±ÛÀÚ");
 					}		
 					else {
 						pwlabel.setText("¿Ã¹Ù¸¥ Çü½ÄÀÇ ºñ¹Ð¹øÈ£ÀÔ´Ï´Ù");
@@ -126,28 +130,33 @@ class SignUp extends JDialog implements Signal{
 		
 		ok.addActionListener(e->{
 			try {
-//				if(isId && isNickname && isPw)
 				
-				
-				out.writeInt(NEWMEMBERPROC);
-				out.flush();
-				
-				User u = new User(id.getText(), nickname.getText());
-				u.setPw(String.valueOf(pw.getPassword()));
-				out.writeObject(u);
-				out.flush();
-				
-				Boolean isSignUp = in.readBoolean();
-				if(isSignUp) {
-					JOptionPane.showMessageDialog(this, "È¸¿ø °¡ÀÔÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù", "", JOptionPane.PLAIN_MESSAGE);
-					this.dispose();
+				if(isId && isNickname && isPw) {
+					out.writeInt(NEWMEMBERPROC);
+					out.flush();
+					
+					User u = new User(id.getText(), nickname.getText());
+					u.setPw(String.valueOf(pw.getPassword()));
+					out.writeObject(u);
+					out.flush();
+					
+					Boolean isSignUp = in.readBoolean();
+					if(isSignUp) {
+						JOptionPane.showMessageDialog(this, "È¸¿ø °¡ÀÔÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù", "", JOptionPane.PLAIN_MESSAGE);
+						this.dispose();
+					}
+					else {
+						JOptionPane.showMessageDialog(this, "ÀÌ¹Ì Á¸ÀçÇÏ´Â ¾ÆÀÌµð ÀÔ´Ï´Ù", "", JOptionPane.PLAIN_MESSAGE);
+						id.setText("");
+						nickname.setText("");
+						pw.setText("");
+					}					
 				}
 				else {
-					JOptionPane.showMessageDialog(this, "ÀÌ¹Ì Á¸ÀçÇÏ´Â ¾ÆÀÌµð ÀÔ´Ï´Ù", "", JOptionPane.PLAIN_MESSAGE);
-					id.setText("");
-					nickname.setText("");
-					pw.setText("");
+					JOptionPane.showMessageDialog(this, "¿Ã¹Ù¸£Áö ¾ÊÀº Çü½ÄÀÔ´Ï´Ù", "", JOptionPane.PLAIN_MESSAGE);
 				}
+				
+				
 			}catch(Exception err) {
 				err.getMessage();
 			}

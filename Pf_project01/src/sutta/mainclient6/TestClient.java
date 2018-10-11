@@ -21,7 +21,7 @@ public class TestClient {
 	public static void main(String[] args) {
 		try{ UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }catch(Exception e) {}
 		try {
-			InetAddress inet = InetAddress.getByName("localhost");
+			InetAddress inet = InetAddress.getByName("192.168.6.9");
 			ObjectOutputStream out = null;
 			ObjectInputStream in = null;
 			

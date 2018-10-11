@@ -41,6 +41,38 @@ public class Login extends JDialog  implements Signal{
 	private int login;
 	private User user;
 	
+	public void loginSeq() {
+		try {
+			out.writeInt(LOGINPROC);
+			out.flush();
+			
+			User u = new User(id.getText());
+			u.setPw(String.valueOf(pw.getPassword()));
+			
+			out.writeObject(u);
+			out.flush();
+			
+//			System.out.println(in.readBoolean());
+			login = in.readInt();
+			
+			//로그인 되었을 때
+			if(login == SUCCESSLOGIN) {
+				this.dispose();
+			}
+			//회원정보가 일치하지 않을 때
+			else if(login == NOTMEMBER) {
+				JOptionPane.showMessageDialog(this, "올바르지 않은 아이디 혹은 비밀번호 입니다", "", JOptionPane.PLAIN_MESSAGE);
+				id.setText("");
+				pw.setText("");
+			}
+			else if(login == PLAYINGMEMBER) {
+				JOptionPane.showMessageDialog(this, "이미 접속중입니다", "", JOptionPane.PLAIN_MESSAGE);
+			}
+			
+		}catch (Exception err) {
+			err.printStackTrace();
+		}
+	}
 	public int isLogin() throws IOException {
 		return login;
 	}
@@ -72,6 +104,7 @@ public class Login extends JDialog  implements Signal{
 		cancel.setBounds(156, 131, 67, 34);
 		
 	}
+	
 
 	private void event() {
 		WindowListener exit = new WindowAdapter() {
@@ -82,36 +115,7 @@ public class Login extends JDialog  implements Signal{
 		};
 		this.addWindowListener(exit);
 		ok.addActionListener(e->{
-			try {
-				out.writeInt(LOGINPROC);
-				out.flush();
-				
-				User u = new User(id.getText());
-				u.setPw(String.valueOf(pw.getPassword()));
-
-				out.writeObject(u);
-				out.flush();
-				
-//				System.out.println(in.readBoolean());
-				login = in.readInt();
-				
-				//로그인 되었을 때
-				if(login == SUCCESSLOGIN) {
-					this.dispose();
-				}
-				//회원정보가 일치하지 않을 때
-				else if(login == NOTMEMBER) {
-					JOptionPane.showMessageDialog(this, "올바르지 않은 아이디 혹은 비밀번호 입니다", "", JOptionPane.PLAIN_MESSAGE);
-					id.setText("");
-					pw.setText("");
-				}
-				else if(login == PLAYINGMEMBER) {
-					JOptionPane.showMessageDialog(this, "이미 접속중입니다", "", JOptionPane.PLAIN_MESSAGE);
-				}
-				
-			}catch (Exception err) {
-				err.printStackTrace();
-			}
+			loginSeq();
 		});
 		cancel.addActionListener(e->{
 			System.exit(0);
@@ -123,36 +127,7 @@ public class Login extends JDialog  implements Signal{
 		KeyListener enter = new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-					try {
-						out.writeInt(LOGINPROC);
-						out.flush();
-						
-						User u = new User(id.getText());
-						u.setPw(String.valueOf(pw.getPassword()));
-
-						out.writeObject(u);
-						out.flush();
-						
-//						System.out.println(in.readBoolean());
-						login = in.readInt();
-						
-						//로그인 되었을 때
-						if(login == SUCCESSLOGIN) {
-							Login.this.dispose();
-						}
-						//회원정보가 일치하지 않을 때
-						else if(login == NOTMEMBER) {
-							JOptionPane.showMessageDialog(Login.this, "올바르지 않은 아이디 혹은 비밀번호 입니다", "", JOptionPane.PLAIN_MESSAGE);
-							id.setText("");
-							pw.setText("");
-						}
-						else if(login == PLAYINGMEMBER) {
-							JOptionPane.showMessageDialog(Login.this, "이미 접속중입니다", "", JOptionPane.PLAIN_MESSAGE);
-						}
-						
-					}catch (Exception err) {
-						err.printStackTrace();
-					}
+					loginSeq();
 				}
 			}
 		};pw.addKeyListener(enter);

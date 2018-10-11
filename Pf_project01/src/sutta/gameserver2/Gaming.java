@@ -39,9 +39,13 @@ public class Gaming implements Serializable {
 	public static final int CHAT_RE = 336;
 	public static final int BAN = 444;
 	public static final int IMBANNED = 445;
+	public static final int PLINFO = 86;
 	public static final int REFRESH = 88;
 	public static final int MONEY_REFRESH = 89;
 	public static final int IDMATCH = 77;
+	public static final int RECEIVE1 = 521;
+	public static final int RECEIVE2 = 522;
+	public static final int RECEIVEBAN = 525;
 	
 	private int what;
 	private int who;
@@ -156,9 +160,9 @@ public class Gaming implements Serializable {
 			return g;
 		}
 	// 서버에서 클라이언트들에게 게임 정보를 갱신시켜 줌.
-	public static Gaming GameInfo(String userid, int what, ArrayList<Player> players) {
+	public static Gaming GameInfo(ArrayList<Player> players) {
 		Gaming g = new Gaming();
-		g.setWhat(what); g.setUserid(userid); g.setPlayers(players);
+		g.setWhat(PLINFO); g.setPlayers(players);
 		return g;
 	}
 	// 클라이언트에서 일반 채팅 송출

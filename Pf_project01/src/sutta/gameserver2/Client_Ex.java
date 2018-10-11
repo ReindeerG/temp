@@ -193,7 +193,16 @@ public class Client_Ex extends Thread {
 	public void setOnceneglecttimer(boolean onceneglecttimer) {
 		this.onceneglecttimer = onceneglecttimer;
 	}
-
+	private boolean receiveok1=false;
+	private boolean receiveok2=false;
+	private boolean receiveban=false;
+	public boolean isReceiveok1() { return receiveok1; }
+	public void setReceiveok1(boolean receiveok1) { this.receiveok1 = receiveok1; }
+	public boolean isReceiveok2() { return receiveok2; }
+	public void setReceiveok2(boolean receiveok2) { this.receiveok2 = receiveok2; }
+	public boolean isReceiveban() { return receiveban; }
+	public void setReceiveban(boolean receiveban) { this.receiveban = receiveban; }
+	
 	public void SelectSet(int n, String str) {
 		setCardset(n);
 		System.out.println(getCardset()+"선택했다야");
@@ -278,6 +287,13 @@ public class Client_Ex extends Thread {
 		}catch(Exception e) {e.printStackTrace();}
 		return;
 	}
+	public void WantInfo() {
+		try {
+			out.writeObject(new Gaming(Gaming.PLINFO));
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
 	public void Open(int trash) {
 		try {
 			out.writeObject(Gaming.Open(trash));
@@ -316,8 +332,30 @@ public class Client_Ex extends Thread {
 	public void Bet_Check() {
 		setCanthalf(true);
 		getWindow().NotMyTurn();
+		setTurn(getTurn()+1);
 		try {
 			out.writeObject(Gaming.Check());
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
+	public void ImGetCard1() {
+		try {
+			out.writeObject(new Gaming(Gaming.RECEIVE1));
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
+	public void ImGetCard2() {
+		try {
+			out.writeObject(new Gaming(Gaming.RECEIVE2));
+			out.flush();
+		}catch(Exception e) {e.printStackTrace();}
+		return;
+	}
+	public void ImBanOK() {
+		try {
+			out.writeObject(new Gaming(Gaming.RECEIVEBAN));
 			out.flush();
 		}catch(Exception e) {e.printStackTrace();}
 		return;
@@ -354,13 +392,12 @@ public class Client_Ex extends Thread {
 		try {
 			this.user = user;
 			this.port = port;
-			InetAddress inet = InetAddress.getByName("192.168.6.9");
+			InetAddress inet = InetAddress.getByName("localhost");
 			socket = new Socket(inet, port);
 			out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 		} catch(Exception e) {e.printStackTrace();}
 		return;
 	}
-	
 	public void run() {
 //		try { in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream())); }
 //		catch(Exception e) { e.printStackTrace(); }
@@ -409,6 +446,10 @@ public class Client_Ex extends Thread {
 	//					getWindow().Refresh();
 						break;
 					}
+					case Gaming.PLINFO: {
+						players=gm.getPlayers();
+						break;
+					}
 					case Gaming.TURN_REFRESH: {
 						setTurn(gm.getWho());
 	//					getWindow().Refresh();
@@ -446,13 +487,19 @@ public class Client_Ex extends Thread {
 					case Gaming.BAN: {
 						players=gm.getPlayers();
 						getWindow().ChatBan(gm.getUserid(), gm.getDate());
-	//					getWindow().Refresh();
+						getWindow().Refresh();
 	//					Thread.sleep(500);
 	//					callRefresh();
 						break;
 					}
 					case Gaming.IMBANNED: {
-						getWindow().ImBanned();
+						if(isReceiveban()==false) {
+							getWindow().ImBanned();
+							ImBanOK();
+							setReceiveban(true);
+						} else {
+							ImBanOK();
+						}
 						break;
 					}
 					case Gaming.CHAT_NICKCHANGE: {
@@ -478,46 +525,61 @@ public class Client_Ex extends Thread {
 						break;
 					}
 					case Gaming.GETCARD: {
-						setPhase2(false);
-						getWindow().setReseted(false);
-						getWindow().ResetCards();
-						while(getWindow().isReseted()==false) {
-						}
-						setYetresult(false);
-						setBoolTrash(false);
-						setTrash(0);
-						setCardset(0);
-						players = gm.getPlayers();
-						for(Player p : players) {
-							if(p.getUser().getId().equals(user.getId())) {
-								me=p;
-								break;
+						if(isReceiveok1()==false) {
+							setPhase2(false);
+							getWindow().setReseted(false);
+							getWindow().ResetCards();
+							while(getWindow().isReseted()==false) {
 							}
+							setYetresult(false);
+							setBoolTrash(false);
+							setTrash(0);
+							setCardset(0);
+							players = gm.getPlayers();
+							for(Player p : players) {
+								if(p.getUser().getId().equals(user.getId())) {
+									me=p;
+									break;
+								}
+							}
+							
+							card1 = getMe().getCard1(); card2 = getMe().getCard2(); card3 = getMe().getCard3();
+		//					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
+		//					System.out.println(card1);
+							getWindow().DrawCards();
+							ImGetCard1();
+		//					System.out.println(card1+" "+card2+" "+card3);
+		//					getWindow().DrawCards();
+		//					getWindow().MycardOpen(card1, card2);
+	//						callRefresh();
+							setReceiveok1(true);
+						} else {
+							ImGetCard1();
 						}
-						
-						card1 = getMe().getCard1(); card2 = getMe().getCard2(); card3 = getMe().getCard3();
-	//					card1 = gm.getCard1(); card2 = gm.getCard2(); card3 = gm.getCard3();
-	//					System.out.println(card1);
-						getWindow().DrawCards();
-	//					System.out.println(card1+" "+card2+" "+card3);
-	//					getWindow().DrawCards();
-	//					getWindow().MycardOpen(card1, card2);
-						callRefresh();
 						break;
 					}
 					case Gaming.DRAW2: {
-						setOnceneglecttimer(true);
-						setPhase2(true);
-						setCanthalf(false);
-						setTurn(1);
-						players = gm.getPlayers();
-						for(Player p : players) {
-							if(p.getUser().getId().equals(user.getId())) {
-								me=p;
-								break;
+						if(isReceiveok2()==false) {
+							setOnceneglecttimer(true);
+							setPhase2(true);
+							setCanthalf(false);
+							players = gm.getPlayers();
+							for(Player p : players) {
+								if(p.getUser().getId().equals(user.getId())) {
+									me=p;
+									break;
+								}
 							}
+							while(true) {
+								setTurn(1);
+								if(getTurn()==1) break;
+							}
+							getWindow().DrawCards2();
+							ImGetCard2();
+							setReceiveok2(true);
+						} else {
+							ImGetCard2();
 						}
-						getWindow().DrawCards2();
 						break;
 					}
 					case Gaming.RESETCARDS: {
@@ -526,7 +588,7 @@ public class Client_Ex extends Thread {
 					}
 					case Gaming.GAME_TIMER: {
 						if(isOnceneglecttimer()==false) {
-							setTurn(gm.getTurn());
+//							setTurn(gm.getTurn());
 							getWindow().Timer(gm.getWho(), gm.getTime());
 						} else {
 							setOnceneglecttimer(false);
@@ -534,6 +596,8 @@ public class Client_Ex extends Thread {
 						break;
 					}
 					case Gaming.GAME_START: {
+						setReceiveok1(false);
+						setReceiveok2(false);
 						setOnceneglecttimer(false);
 						thisplaynum=gm.getThisplaynum();
 						setMoneythisgame(gm.getMoneythisgame());
@@ -543,6 +607,7 @@ public class Client_Ex extends Thread {
 						canthalf=false;
 						turn=1;
 						getWindow().StartToButton();
+						getWindow().Refresh();
 						break;
 					}
 	//				case Gaming.GAME_REMATCH: {
@@ -558,6 +623,8 @@ public class Client_Ex extends Thread {
 	//					break;
 	//				}
 					case Gaming.GAME_RESULT: {
+						setReceiveok1(false);
+						setReceiveok2(false);
 	//					if(isYetresult()==false) {
 	//						setYetresult(true);
 							players=gm.getPlayers();

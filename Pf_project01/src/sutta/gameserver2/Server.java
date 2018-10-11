@@ -43,12 +43,18 @@ class TimerExist extends Thread {
 				}
 				if(serv.getWhosturn()>3) {
 				} else {
-					System.out.println(serv.getNowtimer().getThreadGroup());
 					if(serv.getNowtimer().getThreadGroup()==null) {
 						try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
 						if(serv.getNowtimer().getThreadGroup()==null) {
 							System.out.println("타이머주거서새로쥼");
-							serv.nextTurn();
+							
+							Thread th = new Thread() {
+								public void run() {
+									serv.nextTurn();
+									return;
+								}
+							};
+							th.start();
 						}
 					}
 				}
@@ -88,9 +94,6 @@ class Timer extends Thread {
 				return;
 			}
 			else {
-				if(i==0) {
-					serv.Refresh();
-				}
 				try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();}
 				for(Player p2 : serv.getPlayers()) {
 					try {
@@ -348,7 +351,13 @@ class UserThread extends Thread {
 	public void toDie() {
 		Player p = serv.getPlayers().get(serv.getWhosturn());
 		p.setBetbool(1);
-		serv.nextTurn();
+		Thread th = new Thread() {
+			public void run() {
+				serv.nextTurn();
+				return;
+			}
+		};
+		th.start();
 		return;
 	}
 	public void run() {
@@ -370,11 +379,8 @@ class UserThread extends Thread {
 									q = p;
 									switch(gm.getWhat()) {
 										case Gaming.IDMATCH: {
-											System.out.println("게임서버에서 유저데이터받음");
 											q.setUser(gm.getUser());
-											System.out.println("서버가 받은 유저:"+gm.getUser());
 											serv.Refresh();
-											System.out.println("리프레시끝남");
 											break;
 										}
 										case Gaming.REFRESH: {
@@ -383,6 +389,10 @@ class UserThread extends Thread {
 										}
 										case Gaming.MONEY_REFRESH: {
 											serv.MoneyRefresh();
+											break;
+										}
+										case Gaming.PLINFO: {
+											serv.PlayersInfo();
 											break;
 										}
 										case Gaming.GAME_WHOSTURN: {
@@ -419,6 +429,18 @@ class UserThread extends Thread {
 											serv.GameStartBool();
 											break;
 										}
+										case Gaming.RECEIVE1: {
+											q.setReceiveok1(true);
+											break;
+										}
+										case Gaming.RECEIVE2: {
+											q.setReceiveok2(true);
+											break;
+										}
+										case Gaming.RECEIVEBAN: {
+											q.setReceiveban(true);
+											break;
+										}
 										case Gaming.GAME_DIE: {
 											if(p.getOrder()==serv.getWhosturn()) {
 												toDie();
@@ -441,7 +463,13 @@ class UserThread extends Thread {
 												p.setThisbet(serv.getMinforbet());
 												serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMinforbet());
 												serv.MoneyRefresh();
-												serv.nextTurn();
+												Thread th = new Thread() {
+													public void run() {
+														serv.nextTurn();
+														return;
+													}
+												};
+												th.start();
 											}
 											break;
 										}
@@ -454,7 +482,13 @@ class UserThread extends Thread {
 												serv.setMinforbet(serv.getMoneythisgame()/2);
 												serv.setMoneythisgame(serv.getMoneythisgame()+serv.getMoneythisgame()/2);
 												serv.MoneyRefresh();
-												serv.nextTurn();
+												Thread th = new Thread() {
+													public void run() {
+														serv.nextTurn();
+														return;
+													}
+												};
+												th.start();
 											}
 											break;
 										}
@@ -463,7 +497,13 @@ class UserThread extends Thread {
 												p.setBetbool(4);
 												serv.setMinforbet(0);
 												serv.MoneyRefresh();
-												serv.nextTurn();
+												Thread th = new Thread() {
+													public void run() {
+														serv.nextTurn();
+														return;
+													}
+												};
+												th.start();
 											}
 											break;
 										}
@@ -508,24 +548,6 @@ class UserThread extends Thread {
 											String target=gm.getUserid();
 											for(Player pl : players) {
 												if(pl.getUser().getId().equals(target)) {
-													if(pl.getReady()==1) {
-														serv.getMain().setMoney(q.getUser().getId(), q.getUser().getMoney()+serv.getPandon());
-														pl.getUser().setMoney(q.getUser().getMoney()+serv.getPandon());
-														serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
-														pl.setReady(0);
-														serv.MoneyRefresh();
-														serv.Refresh();
-													}
-													try {
-														ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(pl.getSocket().getOutputStream()));
-														out.writeObject(Gaming.UrBanned());
-														out.flush();
-													} catch(Exception e) {e.printStackTrace();}
-													pl.getUth().toStop();
-													while(!pl.getUth().isStop()) {
-													}
-													pl.getUth().getIn().close();
-													pl.getUth().interrupt();
 													BanTh tmpt = new BanTh(pl, serv);
 													tmpt.setDaemon(true);
 													tmpt.start();
@@ -723,7 +745,15 @@ public class Server extends Thread {
 				p.setReady(0);
 			}
 			WhosTurn();
-			GameStart(players.size(), false);
+			
+			Thread th = new Thread() {
+				public void run() {
+					GameStart(players.size(), false);
+					return;
+				}
+			};
+			th.setDaemon(true);
+			th.start();
 		}
 		return;
 	}
@@ -732,11 +762,13 @@ public class Server extends Thread {
 	 */
 	public void Refresh() {
 		for(Player p : players) {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.Refresh(players));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
+			if(!p.getSocket().isClosed()) {
+				try {
+					ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+					out.writeObject(Gaming.Refresh(players));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+			}
 		}
 	}
 	/**
@@ -744,21 +776,45 @@ public class Server extends Thread {
 	 * @param q: 밴 당할 플레이어
 	 */
 	public void Ban(Player q) {
-		while(q.getUth().isAlive()) {	// 밴 당할 유저쓰레드가 아직 살아있다면 우선 죽여줌.
+		if(q.getReady()==1) {
+			setReadychange(true);
+			getMain().setMoney(q.getUser().getId(), q.getUser().getMoney()+getPandon());
+			q.getUser().setMoney(q.getUser().getMoney()+getPandon());
+			setMoneythisgame(getMoneythisgame()-getPandon());
+			q.setReady(0);
+			setReadychange(false);
+			MoneyRefresh();
+			Refresh();
+		}
+		System.out.println("---99999999");
+		while(true) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(q.getSocket().getOutputStream()));
+				out.writeObject(Gaming.UrBanned());
+				out.flush();
+			} catch(Exception e) {e.printStackTrace();}
+			if(q.isReceiveban()==true) break;
+			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+		}
+		System.out.println("---0");
+		while(!q.getUth().isStop()) {	// 밴 당할 유저쓰레드가 아직 살아있다면 우선 죽여줌.
 			q.getUth().toStop();
 			q.getUth().interrupt();
 		}
+		System.out.println("---1");
 		while(!q.getSocket().isClosed()) {
 			try{ q.getSocket().close();	}catch(Exception e) { e.printStackTrace(); }	// 혹시 유저의 Socket이 안닫혔다면, 닫아줌. 닫힐 때까지 반복.
 		}
+		System.out.println("---2");
 		String strtemp = q.getUser().getNickname();		// 누가 밴당했는지 알림메세지도 표시해주기 위해, 플레이어 정보를 날리기 전에 닉네임만 백업.
 		players.remove(q);
 		int index=0;
 		for(Player p : players) {		// 밴당한 플레이어가 중간에 빠졌더라도, 다시 순서대로 order를 0부터 순서대로 재정의.
 			p.setOrder(index++);
 		}
+		System.out.println("---3");
 		checkUth();						// 혹시 밴당하면서 다른 유저의 쓰레드가 영향이 있었는지 살펴보고, 있다면 복구해줌.
-		MoneyRefresh();					// 밴 당하면서 READY한 플레이어라면 판돈 돌려주므로 총 베팅금 상태 최신화.
+		System.out.println("---4");
 		Date d = new Date();			// 누가 밴 당했는지 남아있는 유저들에게 알림메세지 송출.
 		try {
 			for(Player p : players) {
@@ -767,8 +823,7 @@ public class Server extends Thread {
 				out.flush();
 			}
 		} catch(Exception e) {e.printStackTrace();}
-		
-		Refresh();						// 클라이언트들에게 플레이어 정보 최신화시켜줌.
+		System.out.println("---5");
 		return;
 	}
 	/**
@@ -1093,11 +1148,13 @@ public class Server extends Thread {
 	 */
 	public void MoneyRefresh() {
 		for(Player p : players) {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.MoneyRefresh(getMoneythisgame(), getMinforbet()));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
+			if(!p.getSocket().isClosed()) {
+				try {
+					ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+					out.writeObject(Gaming.MoneyRefresh(getMoneythisgame(), getMinforbet()));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+			}
 		}
 		return;
 	}
@@ -1185,6 +1242,19 @@ public class Server extends Thread {
 		}
 	}
 	/**
+	 * 클라이언트들에게 플레이어 정보만 뿌림.
+	 */
+	public void PlayersInfo() {
+		for(Player p : players) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+				out.writeObject(Gaming.GameInfo(players));
+				out.flush();
+			}catch(Exception e) {e.printStackTrace();}
+		}
+		return;
+	}
+	/**
 	 * 클라이언트들에게 방장이 바꾸자고 한 금액의 판돈으로 정보를 최신화.
 	 * @param pandon: 판돈
 	 */
@@ -1217,14 +1287,16 @@ public class Server extends Thread {
 		timeToCardset();				// 생존자 대상으로 카드 3장으로 만들 수 있는 최종패에 대한 3가지 경우의 수를 담아둠.
 //		Refresh();						// 플레이어들은 최종패 3가지 경우의 수를 받게됨.
 		try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();}
-		for(Player p : players) {		// 플레이어들은 아래 신호를 받아 GUI상으로 카드를 받는 액션을 보게됨.
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.Draw2Phase(players));
-				out.flush();
-			}catch(Exception e) {e.printStackTrace();}
+		while(true) {
+			giveThirdCards();
+			boolean allok2=true;
+			for(Player p : players) {
+				if(p.isReceiveok2()==false) allok2=false;
+			}
+			if(allok2==true) break;
+			try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();}
 		}
-		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }		// 카드 액션 기다리고
+//		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }		// 카드 액션 기다리고
 		// 3번째 카드 받되, 순서는 원래 선으로 돌아감(선이 죽었으면 그 다음부터 살아있는 플레이어로부터)
 		for(Player p : players) {
 			if(p.getBetbool()!=1) {
@@ -1232,7 +1304,10 @@ public class Server extends Thread {
 				break;
 			}
 		}
-		setTurn(1);
+		while(true) {
+			setTurn(1);
+			if(getTurn()==1) break;
+		}
 		if(isInggame()==true) {
 			players.get(getWhosturn()).setBetbool(0);
 			Refresh();
@@ -1261,6 +1336,7 @@ public class Server extends Thread {
 	 * 타이머 스레드를 만듦. 타이머 생성시마다 이 쓰레드를 호출.
 	 */
 	public void makeTimer() {
+		System.out.println(getTurn()+"턴 타이머 만듦");
 		Timer t = new Timer(this, players.get(getWhosturn()), getTurn());
 		setNowtimer(t);
 		t.setDaemon(true);
@@ -1308,12 +1384,29 @@ public class Server extends Thread {
 	 */
 	public void giveFirstCards() {
 		for(Player p : players) {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
-				out.writeObject(Gaming.GiveCard(players));
-				out.flush();
+			if(p.isReceiveok1()==false) {
+				try {
+					ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+					out.writeObject(Gaming.GiveCard(players));
+					out.flush();
+				}
+				catch (Exception e) {e.printStackTrace();}
 			}
-			catch (Exception e) {e.printStackTrace();}
+		}
+		return;
+	}
+	/**
+	 * 클라이언트들에게 3번째 카드를 주면서 카드를 받은 GUI 액션을 보게함.
+	 */
+	public void giveThirdCards() {
+		for(Player p : players) {
+			if(p.isReceiveok2()==false) {
+				try {
+					ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
+					out.writeObject(Gaming.Draw2Phase(players));
+					out.flush();
+				}catch(Exception e) {e.printStackTrace();}
+			}
 		}
 		return;
 	}
@@ -1328,6 +1421,8 @@ public class Server extends Thread {
 		setInggame(true);
 		if(rematch==false) setMinforbet(0);		// 재경기가 아니라 아예 새게임이라면 최소판돈을 초기화 
 		for(Player p : players) {
+			p.setReceiveok1(false);
+			p.setReceiveok2(false);
 			p.setThisbet(0);
 			p.setTrash(0);
 			p.setGameresult(0);
@@ -1353,8 +1448,15 @@ public class Server extends Thread {
 		} else {
 			sendStartSignal(players.size());
 		}
-		giveFirstCards();
-		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
+		while(true) {
+			giveFirstCards();
+			boolean allok1=true;
+			for(Player p : players) {
+				if(p.isReceiveok1()==false) allok1=false;
+			}
+			if(allok1==true) break;
+			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+		}
 		makeOpenTimer();
 		setNowexitemer(new TimerExist(this));
 		getNowexitemer().setDaemon(true);

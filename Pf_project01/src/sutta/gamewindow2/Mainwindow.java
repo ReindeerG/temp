@@ -55,6 +55,20 @@ class BG extends JPanel {
 	}
 }
 
+class ReadyTimer extends Thread {
+	private JButton bt;
+	private Client_Ex client;
+	public ReadyTimer(JButton bt, Client_Ex client) {
+		this.bt=bt; this.client=client;
+	}
+	public void run() {
+		bt.setEnabled(false);
+		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
+		if(client.isInggame()==false && bt.isEnabled()==false) bt.setEnabled(true);
+		return;
+	}
+}
+
 class Card extends JLabel {
 	public Card() {
 		this.setLayout(null);
@@ -579,11 +593,17 @@ public class Mainwindow extends JFrame {
 				bt_ready.setRolloverIcon(img_bt_ready_yes_roll);
 				client.GameReady();
 				bt_exit.setEnabled(false);
+				ReadyTimer rt = new ReadyTimer(bt_ready, client);
+				rt.setDaemon(true);
+				rt.start();
 			} else {
 				bt_ready.setIcon(img_bt_ready_no);
 				bt_ready.setRolloverIcon(img_bt_ready_no_roll);
 				client.GameUnready();
 				bt_exit.setEnabled(true);
+				ReadyTimer rt = new ReadyTimer(bt_ready, client);
+				rt.setDaemon(true);
+				rt.start();
 			}
 		});
 		bt_start.addActionListener(e->{
@@ -810,6 +830,39 @@ public class Mainwindow extends JFrame {
 		Lbl_myset.setText(str);
 		return;
 	}
+	public void OpencardRefresh() {
+		int temporder = client.getMe().getOrder();
+		for(Player p : players) {
+			if((p.getOrder()%4)==((temporder+1)%4)) {
+				if(client.isInggame()==true && p.getTrash()!=0) {
+					switch(p.getTrash()) {
+					case 1: p2card1.setIcon(cardimages[p.getCard1()-1]); break;
+					case 2: p2card2.setIcon(cardimages[p.getCard2()-1]); break;
+					default: break;
+					}
+				}
+			}
+			if((p.getOrder()%4)==((temporder+2)%4)) {
+				if(client.isInggame()==true && p.getTrash()!=0) {
+					switch(p.getTrash()) {
+					case 1: p3card1.setIcon(cardimages[p.getCard1()-1]); break;
+					case 2: p3card2.setIcon(cardimages[p.getCard2()-1]); break;
+					default: break;
+					}
+				}
+			}
+			if((p.getOrder()%4)==((temporder+3)%4)) {
+				if(client.isInggame()==true && p.getTrash()!=0) {
+					switch(p.getTrash()) {
+					case 1: p4card1.setIcon(cardimages[p.getCard1()-1]); break;
+					case 2: p4card2.setIcon(cardimages[p.getCard2()-1]); break;
+					default: break;
+					}
+				}
+			}
+		}
+		return;
+	}
 	public void Refresh() {
 		if(client.getMe().getReady()==0) {
 			bt_ready.setIcon(img_bt_ready_no);
@@ -870,7 +923,7 @@ public class Mainwindow extends JFrame {
 		if(client.getMe().getOrder()==0) { Lbl_mynick.setText("<"+client.getMe().getUser().getNickname()+"> (방장)"); }
 		else { Lbl_mynick.setText("<"+client.getMe().getUser().getNickname()+">"); }
 		Lbl_mymoney.setText("가진 돈: "+client.getMe().getUser().getMoney()+"전");
-		if(client.isInggame()==true) {
+		if(client.isInggame()==true && client.getWhosturn()!=client.getMe().getOrder()) {
 			switch(client.getMe().getBetbool()) {
 			case 0:
 				Lbl_mybet.setIcon(null); break;
@@ -1026,6 +1079,9 @@ public class Mainwindow extends JFrame {
 		return;
 	}
 	public void Timer(int who, int time) {
+		if(time%10==0) {
+			client.WantInfo();
+		}
 //		System.out.println("타이머 받고있음");
 		boolean isOver = false;
 		for(Player p : client.getPlayers()) {
@@ -1414,7 +1470,7 @@ public class Mainwindow extends JFrame {
 					bt_bet_half.setRolloverIcon(img_bt_half_no);
 					bt_bet_half.setToolTipText(client.getMoneythisgame()/2+"전의 베팅금이 필요합니다.");
 					bt_bet_half.setEnabled(false);
-				} else if(someoneminmoney<(int)((client.getMoneythisgame()*1.5)/2)-1) {
+				} else if(someoneminmoney<(int)(client.getMoneythisgame()*1.5)+1) {
 					bt_bet_half.setIcon(img_bt_half_no);
 					bt_bet_half.setRolloverIcon(img_bt_half_no);
 					bt_bet_half.setToolTipText("다른 플레이어가 베팅금이 부족해집니다.");
