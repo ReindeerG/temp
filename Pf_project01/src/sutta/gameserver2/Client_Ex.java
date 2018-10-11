@@ -494,9 +494,9 @@ public class Client_Ex extends Thread {
 					}
 					case Gaming.IMBANNED: {
 						if(isReceiveban()==false) {
-							getWindow().ImBanned();
 							ImBanOK();
 							setReceiveban(true);
+							getWindow().ImBanned();
 						} else {
 							ImBanOK();
 						}

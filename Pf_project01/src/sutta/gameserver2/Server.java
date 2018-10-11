@@ -776,17 +776,23 @@ public class Server extends Thread {
 	 * @param q: 밴 당할 플레이어
 	 */
 	public void Ban(Player q) {
-		if(q.getReady()==1) {
-			setReadychange(true);
-			getMain().setMoney(q.getUser().getId(), q.getUser().getMoney()+getPandon());
-			q.getUser().setMoney(q.getUser().getMoney()+getPandon());
-			setMoneythisgame(getMoneythisgame()-getPandon());
-			q.setReady(0);
-			setReadychange(false);
-			MoneyRefresh();
-			Refresh();
-		}
-		System.out.println("---99999999");
+//		Thread th1 = new Thread() {
+//			public void run() {
+				if(q.getReady()==1) {
+					setReadychange(true);
+					getMain().setMoney(q.getUser().getId(), q.getUser().getMoney()+getPandon());
+					q.getUser().setMoney(q.getUser().getMoney()+getPandon());
+					setMoneythisgame(getMoneythisgame()-getPandon());
+					q.setReady(0);
+					setReadychange(false);
+					MoneyRefresh();
+					Refresh();
+				}
+//				return;
+//			}
+//		};
+//		th1.setDaemon(true);
+//		th1.start();
 		while(true) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(q.getSocket().getOutputStream()));
@@ -796,25 +802,20 @@ public class Server extends Thread {
 			if(q.isReceiveban()==true) break;
 			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
 		}
-		System.out.println("---0");
 		while(!q.getUth().isStop()) {	// 밴 당할 유저쓰레드가 아직 살아있다면 우선 죽여줌.
 			q.getUth().toStop();
 			q.getUth().interrupt();
 		}
-		System.out.println("---1");
 		while(!q.getSocket().isClosed()) {
 			try{ q.getSocket().close();	}catch(Exception e) { e.printStackTrace(); }	// 혹시 유저의 Socket이 안닫혔다면, 닫아줌. 닫힐 때까지 반복.
 		}
-		System.out.println("---2");
 		String strtemp = q.getUser().getNickname();		// 누가 밴당했는지 알림메세지도 표시해주기 위해, 플레이어 정보를 날리기 전에 닉네임만 백업.
 		players.remove(q);
 		int index=0;
 		for(Player p : players) {		// 밴당한 플레이어가 중간에 빠졌더라도, 다시 순서대로 order를 0부터 순서대로 재정의.
 			p.setOrder(index++);
 		}
-		System.out.println("---3");
 		checkUth();						// 혹시 밴당하면서 다른 유저의 쓰레드가 영향이 있었는지 살펴보고, 있다면 복구해줌.
-		System.out.println("---4");
 		Date d = new Date();			// 누가 밴 당했는지 남아있는 유저들에게 알림메세지 송출.
 		try {
 			for(Player p : players) {
@@ -823,7 +824,6 @@ public class Server extends Thread {
 				out.flush();
 			}
 		} catch(Exception e) {e.printStackTrace();}
-		System.out.println("---5");
 		return;
 	}
 	/**
