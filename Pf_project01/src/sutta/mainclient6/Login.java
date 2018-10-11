@@ -3,6 +3,9 @@ package sutta.mainclient6;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -117,6 +120,42 @@ public class Login extends JDialog  implements Signal{
 			SignUp signup = new SignUp(out, in);
 			signup.setVisible(true);
 		});
+		KeyListener enter = new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					try {
+						out.writeInt(LOGINPROC);
+						out.flush();
+						
+						User u = new User(id.getText());
+						u.setPw(String.valueOf(pw.getPassword()));
+
+						out.writeObject(u);
+						out.flush();
+						
+//						System.out.println(in.readBoolean());
+						login = in.readInt();
+						
+						//로그인 되었을 때
+						if(login == SUCCESSLOGIN) {
+							Login.this.dispose();
+						}
+						//회원정보가 일치하지 않을 때
+						else if(login == NOTMEMBER) {
+							JOptionPane.showMessageDialog(Login.this, "올바르지 않은 아이디 혹은 비밀번호 입니다", "", JOptionPane.PLAIN_MESSAGE);
+							id.setText("");
+							pw.setText("");
+						}
+						else if(login == PLAYINGMEMBER) {
+							JOptionPane.showMessageDialog(Login.this, "이미 접속중입니다", "", JOptionPane.PLAIN_MESSAGE);
+						}
+						
+					}catch (Exception err) {
+						err.printStackTrace();
+					}
+				}
+			}
+		};pw.addKeyListener(enter);
 	}
 	
 	private void setDialogLocation() {

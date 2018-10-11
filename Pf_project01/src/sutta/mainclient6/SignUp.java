@@ -126,6 +126,9 @@ class SignUp extends JDialog implements Signal{
 		
 		ok.addActionListener(e->{
 			try {
+//				if(isId && isNickname && isPw)
+				
+				
 				out.writeInt(NEWMEMBERPROC);
 				out.flush();
 				

@@ -7,6 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 
 import sutta.gameserver2.Client_Ex;
+import sutta.gameserver2.Player;
 
 public class PandonWindow extends JDialog{
 	private Mainwindow parent;
@@ -54,6 +55,9 @@ public class PandonWindow extends JDialog{
 		getContentPane().add(bt_ok);
 		
 		bt_ok.addActionListener(e->{
+			for(Player p : client.getPlayers()) {
+				if(p.getReady()==1) return;
+			}
 			if(Rd_10.isSelected()) {
 				if(client.getPandon()!=10) client.Pandon(10);
 			} else if(Rd_20.isSelected()) {

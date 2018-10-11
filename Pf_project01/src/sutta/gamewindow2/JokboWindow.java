@@ -186,7 +186,6 @@ public class JokboWindow extends JFrame implements ComponentListener{
 	private JLabel a24 = new JLabel("[24] 5昌"){
 		public JToolTip createToolTip() {
 	        JToolTip tip = super.createToolTip();
-	        
 	        TooltipColorFont(tip);
 	        return tip;
 	    }
@@ -194,7 +193,6 @@ public class JokboWindow extends JFrame implements ComponentListener{
 	private JLabel a25 = new JLabel("[25] 4昌"){
 		public JToolTip createToolTip() {
 	        JToolTip tip = super.createToolTip();
-	        
 	        TooltipColorFont(tip);
 	        return tip;
 	    }
@@ -245,14 +243,14 @@ public class JokboWindow extends JFrame implements ComponentListener{
 	private JLabel a32 = new JLabel("[32] 港胖备府备荤"){
 		public JToolTip createToolTip() {
 	        JToolTip tip = super.createToolTip();
-	        tip.setFont(font3);
+	        TooltipColorFont(tip);
 	        return tip;
 	    }
 	};
 	private JLabel a33 = new JLabel("[33] 备荤(9·4)"){
 		public JToolTip createToolTip() {
 	        JToolTip tip = super.createToolTip();
-	        tip.setFont(font3);
+	        TooltipColorFont(tip);
 	        return tip;
 	    }
 	};

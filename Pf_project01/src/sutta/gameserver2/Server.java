@@ -88,6 +88,9 @@ class Timer extends Thread {
 				return;
 			}
 			else {
+				if(i==0) {
+					serv.Refresh();
+				}
 				try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();}
 				for(Player p2 : serv.getPlayers()) {
 					try {
@@ -387,21 +390,29 @@ class UserThread extends Thread {
 											break;
 										}
 										case Gaming.GAME_UNREADY: {
-											p.setReady(0);
-											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()+serv.getPandon());
-											p.getUser().setMoney(p.getUser().getMoney()+serv.getPandon());
-											serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
-											serv.MoneyRefresh();
-											serv.Refresh();
+											if(serv.isReadychange()==false) {
+												serv.setReadychange(true);
+												p.setReady(0);
+												serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()+serv.getPandon());
+												p.getUser().setMoney(p.getUser().getMoney()+serv.getPandon());
+												serv.setMoneythisgame(serv.getMoneythisgame()-serv.getPandon());
+												serv.MoneyRefresh();
+												serv.Refresh();
+												serv.setReadychange(false);
+											}
 											break;
 										}
 										case Gaming.GAME_READY: {
-											p.setReady(1);
-											serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getPandon());
-											p.getUser().setMoney(p.getUser().getMoney()-serv.getPandon());
-											serv.setMoneythisgame(serv.getMoneythisgame()+serv.getPandon());
-											serv.MoneyRefresh();
-											serv.Refresh();
+											if(serv.isReadychange()==false) {
+												serv.setReadychange(true);
+												p.setReady(1);
+												serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getPandon());
+												p.getUser().setMoney(p.getUser().getMoney()-serv.getPandon());
+												serv.setMoneythisgame(serv.getMoneythisgame()+serv.getPandon());
+												serv.MoneyRefresh();
+												serv.Refresh();
+												serv.setReadychange(false);
+											}
 											break;
 										}
 										case Gaming.GAME_START: {
@@ -607,6 +618,9 @@ public class Server extends Thread {
 	private Format f = new SimpleDateFormat("a hh:mm");
 	private Timer nowtimer;
 	private TimerExist nowexitemer;
+	private boolean readychange=false;
+	public boolean isReadychange() { return readychange; }
+	public void setReadychange(boolean readychange) { this.readychange = readychange; }
 
 	public ArrayList<Player> getPlayers() { return players; }
 	public void setPlayers(ArrayList<Player> players) { this.players=players; }
@@ -1202,6 +1216,7 @@ public class Server extends Thread {
 		setPhase2(true);				// 3번째 카드 나눠주게 되는 상황이라고 표시
 		timeToCardset();				// 생존자 대상으로 카드 3장으로 만들 수 있는 최종패에 대한 3가지 경우의 수를 담아둠.
 //		Refresh();						// 플레이어들은 최종패 3가지 경우의 수를 받게됨.
+		try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();}
 		for(Player p : players) {		// 플레이어들은 아래 신호를 받아 GUI상으로 카드를 받는 액션을 보게됨.
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(p.getSocket().getOutputStream()));
@@ -1359,5 +1374,6 @@ public class Server extends Thread {
 		}
 		return;
 	}
+	
 	
 }

@@ -354,7 +354,7 @@ public class Client_Ex extends Thread {
 		try {
 			this.user = user;
 			this.port = port;
-			InetAddress inet = InetAddress.getByName("localhost");
+			InetAddress inet = InetAddress.getByName("192.168.6.9");
 			socket = new Socket(inet, port);
 			out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 		} catch(Exception e) {e.printStackTrace();}
