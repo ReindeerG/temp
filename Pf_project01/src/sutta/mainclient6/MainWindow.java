@@ -273,8 +273,8 @@ public class MainWindow extends JFrame implements Runnable, Signal{
 	private Socket w_socket;
 	public MainWindow(Socket socket, ObjectOutputStream out, ObjectInputStream in) {
 		try {
-			g_inet = InetAddress.getByName("192.168.6.9");
-			w_inet = InetAddress.getByName("192.168.6.9");
+			g_inet = InetAddress.getByName("localhost");
+			w_inet = InetAddress.getByName("localhost");
 			w_socket = new Socket(w_inet, 54891);
 			w_out = new ObjectOutputStream(w_socket.getOutputStream());
 			w_in = new ObjectInputStream(w_socket.getInputStream());

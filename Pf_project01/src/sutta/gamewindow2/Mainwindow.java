@@ -869,11 +869,9 @@ public class Mainwindow extends JFrame {
 		if(client.getMe().getReady()==0) {
 			bt_ready.setIcon(img_bt_ready_no);
 			bt_ready.setRolloverIcon(img_bt_ready_no_roll);
-			bt_exit.setEnabled(true);
 		} else {
 			bt_ready.setIcon(img_bt_ready_yes);
 			bt_ready.setRolloverIcon(img_bt_ready_yes_roll);
-			bt_exit.setEnabled(false);
 		}
 		mw.moneyst(client.getMe().getUser().getMoney());
 		players = client.getPlayers();
