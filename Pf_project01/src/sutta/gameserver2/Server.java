@@ -578,6 +578,14 @@ class UserThread extends Thread {
 						} catch(Exception e) {
 							e.printStackTrace();
 							if(isStop()==false) {
+								for(Player p : serv.getPlayers()) {
+									if(p.getSocket().equals(socket)) {
+										p.setBetbool(1);
+										p.setReceiveok1(true);
+										p.setReceiveok2(true);
+										p.setReceiveban(true);
+									}
+								}
 								System.out.println("튕김");
 								toStop();
 								in.close();
@@ -1294,7 +1302,7 @@ public class Server extends Thread {
 				if(p.isReceiveok2()==false) allok2=false;
 			}
 			if(allok2==true) break;
-			try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();}
+			try { Thread.sleep(1000); } catch (InterruptedException e) {e.printStackTrace();}
 		}
 //		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }		// 카드 액션 기다리고
 		// 3번째 카드 받되, 순서는 원래 선으로 돌아감(선이 죽었으면 그 다음부터 살아있는 플레이어로부터)
@@ -1455,7 +1463,7 @@ public class Server extends Thread {
 				if(p.isReceiveok1()==false) allok1=false;
 			}
 			if(allok1==true) break;
-			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+			try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
 		}
 		makeOpenTimer();
 		setNowexitemer(new TimerExist(this));

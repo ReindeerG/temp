@@ -548,10 +548,6 @@ public class Client_Ex extends Thread {
 		//					System.out.println(card1);
 							getWindow().DrawCards();
 							ImGetCard1();
-		//					System.out.println(card1+" "+card2+" "+card3);
-		//					getWindow().DrawCards();
-		//					getWindow().MycardOpen(card1, card2);
-	//						callRefresh();
 							setReceiveok1(true);
 						} else {
 							ImGetCard1();

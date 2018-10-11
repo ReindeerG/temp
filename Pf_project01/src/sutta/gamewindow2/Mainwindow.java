@@ -62,8 +62,10 @@ class ReadyTimer extends Thread {
 		this.bt=bt; this.client=client;
 	}
 	public void run() {
-		bt.setEnabled(false);
-		try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
+		for(int i=0;i<100;i++) {
+			bt.setEnabled(false);
+			try { Thread.sleep(10); } catch (InterruptedException e) { e.printStackTrace(); }
+		}
 		if(client.isInggame()==false && bt.isEnabled()==false) bt.setEnabled(true);
 		return;
 	}
@@ -904,9 +906,9 @@ public class Mainwindow extends JFrame {
 		if(client.isInggame()==true && client.getMe().getTrash()==0 && client.getMe().getBetbool()==1 && client.getMe().getOrder()<client.getThisplaynum()) {
 			surrender();
 		}
-		if(client.isInggame()==false && client.getMe().getUser().getMoney()<client.getPandon() && client.getMe().getReady()==0) {
+		if(client.isInggame()==false && client.getMe().getUser().getMoney()<(client.getPandon()+(int)(client.getPandon()*client.getPlayers().size()/2)) && client.getMe().getReady()==0) {
 			bt_ready.setEnabled(false);
-			bt_ready.setToolTipText("판돈("+client.getPandon()+"전)이 부족합니다.");
+			bt_ready.setToolTipText("판돈+최소베팅(총 "+(client.getPandon()+(int)(client.getPandon()*client.getPlayers().size()/2))+"전)이 부족합니다.");
 		} else if (client.isInggame()==false && client.getMe().getUser().getMoney()>=client.getPandon() && client.getMe().getReady()==0) {
 			bt_ready.setEnabled(true);
 			bt_ready.setToolTipText(null);
@@ -923,7 +925,7 @@ public class Mainwindow extends JFrame {
 		if(client.getMe().getOrder()==0) { Lbl_mynick.setText("<"+client.getMe().getUser().getNickname()+"> (방장)"); }
 		else { Lbl_mynick.setText("<"+client.getMe().getUser().getNickname()+">"); }
 		Lbl_mymoney.setText("가진 돈: "+client.getMe().getUser().getMoney()+"전");
-		if(client.isInggame()==true && client.getWhosturn()!=client.getMe().getOrder()) {
+		if(client.isInggame()==true && client.getMe().getOrder()<client.getThisplaynum() && client.getWhosturn()!=client.getMe().getOrder()) {
 			switch(client.getMe().getBetbool()) {
 			case 0:
 				Lbl_mybet.setIcon(null); break;
@@ -979,7 +981,7 @@ public class Mainwindow extends JFrame {
 				} else {
 					Lbl_2p_ready.setText("(READY!)");
 				}
-				if(client.isInggame()==true) {
+				if(client.isInggame()==true && p.getOrder()<client.getThisplaynum()) {
 					switch(p.getBetbool()) {
 					case 0:
 						Lbl_2p_bet.setIcon(null); break;
@@ -1017,7 +1019,7 @@ public class Mainwindow extends JFrame {
 				} else {
 					Lbl_3p_ready.setText("(READY!)");
 				}
-				if(client.isInggame()==true) {
+				if(client.isInggame()==true && p.getOrder()<client.getThisplaynum()) {
 					switch(p.getBetbool()) {
 					case 0:
 						Lbl_3p_bet.setIcon(null); break;
@@ -1055,7 +1057,7 @@ public class Mainwindow extends JFrame {
 				} else {
 					Lbl_4p_ready.setText("(READY!)");
 				}
-				if(client.isInggame()==true) {
+				if(client.isInggame()==true && p.getOrder()<client.getThisplaynum()) {
 					switch(p.getBetbool()) {
 					case 0:
 						Lbl_4p_bet.setIcon(null); break;
@@ -1504,7 +1506,21 @@ public class Mainwindow extends JFrame {
 //		bt_cardset2.setLocation(-100, -20);
 //		bt_cardset3.setLocation(-100, -20);
 		
-		if(client.isBoolTrash()==false) {
+		
+		
+		if(client.getMe().getBetbool()==1 && client.getMe().getOrder()>=client.getThisplaynum()) {
+			boolean alltrash=true;
+			for(Player p : client.getPlayers()) {
+				if(p.getOrder()<client.getThisplaynum() && p.getTrash()==0) {
+					alltrash=false; break;
+				}
+			}
+			if(alltrash==true) {
+				Lbl_myset.setText("재경기 관전 중");
+			} else {
+				Lbl_myset.setText("생존자간 오픈 패 결정 중");
+			}
+		} else if(client.isBoolTrash()==false) {
 			Lbl_myset.setText("");
 		}
 		bt_bet_call.setIcon(img_bt_call_no);
@@ -2077,6 +2093,14 @@ public class Mainwindow extends JFrame {
 	}
 	
 	public void DrawCards() {
+		Lbl_myset.setText("");
+		Lbl_2p_set.setText("");
+		Lbl_3p_set.setText("");
+		Lbl_4p_set.setText("");
+		Lbl_mybet.setIcon(null);
+		Lbl_2p_bet.setIcon(null);
+		Lbl_3p_bet.setIcon(null);
+		Lbl_4p_bet.setIcon(null);
 		if(nowsw!=null) nowsw.dispose();
 		toemptysw();
 		Lbl_gamemoney.setText("총 베팅금: "+client.getMoneythisgame()+"전");
@@ -2289,7 +2313,6 @@ public class Mainwindow extends JFrame {
 	}
 	public void DrawCards2() {
 		client.setPhase2(true);
-		System.out.println("2페이즈 맞냐"+client.isPhase2());
 		NotMyTurn();
 		Lbl_myclock.setIcon(null);
 		Lbl_2p_clock.setIcon(null);
@@ -2691,8 +2714,8 @@ public class Mainwindow extends JFrame {
 //			bt_cardset3.setBounds(800, 780, 100, 20);
 		}
 		
-		
-		
+		System.out.println("3번째카드제대로받음");
+		return;
 	}
 	
 	
