@@ -443,6 +443,7 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_DIE: {
 											if(p.getOrder()==serv.getWhosturn()) {
+												p.setCancheck(false);
 												toDie();
 											}
 											break;
@@ -457,6 +458,7 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_CALL: {
 											if(p.getOrder()==serv.getWhosturn()) {
+												p.setCancheck(false);
 												p.setBetbool(2);
 												serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMinforbet());
 												p.getUser().setMoney(p.getUser().getMoney()-serv.getMinforbet());
@@ -475,6 +477,7 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_HALF: {
 											if(p.getOrder()==serv.getWhosturn()) {
+												p.setCancheck(false);
 												p.setBetbool(3);
 												serv.getMain().setMoney(p.getUser().getId(), p.getUser().getMoney()-serv.getMoneythisgame()/2);
 												p.getUser().setMoney(p.getUser().getMoney()-serv.getMoneythisgame()/2);
@@ -494,6 +497,7 @@ class UserThread extends Thread {
 										}
 										case Gaming.GAME_CHECK: {
 											if(p.getOrder()==serv.getWhosturn()) {
+												p.setCancheck(false);
 												p.setBetbool(4);
 												serv.setMinforbet(0);
 												serv.MoneyRefresh();
@@ -715,23 +719,23 @@ public class Server extends Thread {
 			server = new ServerSocket(port);
 			while(true) {				
 				Socket receive = server.accept();
-				System.out.println("누군가 접속함");
-				boolean exit = false;
-				for(Player p : players) {
-					if(p.getSocket().equals(receive)) {
-						exit = true;
-						break;
-					};
-				}
-				if(exit==false) {	// accept한 유저가 이미 접속한 유저가 아닐 경우에만 유저쓰레드를 생성하고 플레이어에 추가.
+//				System.out.println("누군가 접속함");
+//				boolean exit = false;
+//				for(Player p : players) {
+//					if(p.getSocket().equals(receive)) {
+//						exit = true;
+//						break;
+//					};
+//				}
+//				if(exit==false) {	// accept한 유저가 이미 접속한 유저가 아닐 경우에만 유저쓰레드를 생성하고 플레이어에 추가.
 					UserThread uth = new UserThread(receive, this);
 					uth.setDaemon(true);
 					Player p = new Player(players.size(), receive, uth, user);
 					players.add(p);
 					uth.start();
-				}
-				while(players.size()>3) {	// 이 방에 접속된 유저의 수가 4명 이상이면 더이상 새 유저를 받지 않음.
-				}
+//				}
+//				while(players.size()>3) {	// 이 방에 접속된 유저의 수가 4명 이상이면 더이상 새 유저를 받지 않음.
+//				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1309,6 +1313,7 @@ public class Server extends Thread {
 		for(Player p : players) {
 			if(p.getBetbool()!=1) {
 				setWhosturn(p.getOrder());
+				p.setCancheck(true);
 				break;
 			}
 		}
@@ -1431,6 +1436,7 @@ public class Server extends Thread {
 		for(Player p : players) {
 			p.setReceiveok1(false);
 			p.setReceiveok2(false);
+			p.setCancheck(false);
 			p.setThisbet(0);
 			p.setTrash(0);
 			p.setGameresult(0);
