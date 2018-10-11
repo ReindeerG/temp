@@ -45,7 +45,7 @@ public class Client_Ex extends Thread {
 		return this.stop;
 	}
 	
-	private int pandon;
+	private int pandon=10;
 	public int getPandon() {
 		return pandon;
 	}
@@ -370,7 +370,6 @@ public class Client_Ex extends Thread {
 				try {
 					in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 					Gaming gm = (Gaming)in.readObject();
-					System.out.println(gm.getWhat()+"받음");
 					switch(gm.getWhat()) {
 					case Gaming.IDMATCH: {
 						System.out.println("처음에 가진 user"+user);
@@ -397,9 +396,13 @@ public class Client_Ex extends Thread {
 						System.out.println("서버가 가진 유저:"+me.getUser());
 						while(true) {
 							if(getWindow()!=null) break;
+//							else System.out.println(getWindow());
+							else Thread.sleep(10);
 						}
-						System.out.println(getWindow());
+//						System.out.println(getWindow());
+						System.out.println("여기까진돼1");
 						getWindow().Refresh();
+						System.out.println("여기까진돼2");
 						break;
 					}
 					case Gaming.MONEY_REFRESH: {
@@ -510,6 +513,7 @@ public class Client_Ex extends Thread {
 						setPhase2(true);
 						setCanthalf(false);
 						setTurn(1);
+						players = gm.getPlayers();
 						for(Player p : players) {
 							if(p.getUser().getId().equals(user.getId())) {
 								me=p;

@@ -94,7 +94,6 @@ public class MainServer extends Thread{
 	}	
 	
 	public void setMoney(String id, int money) {
-		System.out.println(id+"가"+money+"원 되라고");
 		for(User user : user_list) {
 			if(user.getId().equals(id)) {
 				user.setMoney(money);

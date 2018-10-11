@@ -5,6 +5,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import javax.swing.UIManager;
+
 import sutta.useall.Signal;
 
 /**
@@ -17,8 +19,8 @@ public class TestClient {
 	
 
 	public static void main(String[] args) {
+		try{ UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }catch(Exception e) {}
 		try {
-
 			InetAddress inet = InetAddress.getByName("localhost");
 			ObjectOutputStream out = null;
 			ObjectInputStream in = null;

@@ -34,7 +34,6 @@ import sutta.gamelogic.Logic;
 import sutta.gameserver2.Client_Ex;
 import sutta.gameserver2.Player;
 import sutta.mainclient6.MainWindow;
-import sutta.useall.Signal;
 
 class BG extends JPanel {
 	BufferedImage image;
@@ -589,7 +588,7 @@ public class Mainwindow extends JFrame {
 		bt_start.addActionListener(e->{
 			client.GameStart();
 			try {
-				out.writeInt(Signal.GAMESTART);
+				out.writeInt(4);
 				out.flush();
 			} catch (Exception e1) {
 				e1.printStackTrace();
@@ -601,7 +600,7 @@ public class Mainwindow extends JFrame {
 			if(result==0) {
 				client.Leave();
 				try {
-					out.writeInt(Signal.EXITROOM);
+					out.writeInt(3);
 					out.flush();
 					mw.setVisible(true);
 					client.toStop();
@@ -778,12 +777,6 @@ public class Mainwindow extends JFrame {
 	public void ImBanned() {
 		JOptionPane.showMessageDialog(this, "방장에 의해 강제퇴장당하셨습니다.", "강제퇴장", JOptionPane.WARNING_MESSAGE);
 		mw.moneyst(client.getMe().getUser().getMoney());
-		try {
-			out.writeInt(Signal.EXITROOM);
-			out.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		mw.setVisible(true);
 		setBan(true);
 		dispose();

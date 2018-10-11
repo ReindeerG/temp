@@ -114,9 +114,9 @@ public class Gaming implements Serializable {
 		return g;
 	}
 	// 서버에서 2번째 카드 뽑으라고 할 때
-	public static Gaming Draw2Phase() {
+	public static Gaming Draw2Phase(ArrayList<Player> players) {
 		Gaming g = new Gaming();
-		g.setWhat(Gaming.DRAW2);
+		g.setWhat(Gaming.DRAW2); g.setPlayers(players);
 		return g;
 	}
 	// 클라이언트에서 오픈할 카드 정할 때
