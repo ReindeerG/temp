@@ -29,6 +29,7 @@ public class Player implements Serializable {
 	private boolean receiveok1=false;
 	private boolean receiveok2=false;
 	private boolean receiveban=false;
+	private boolean cancheck=false;
 	private int trash;
 	private int[] cardset;
 	private int betbool;
@@ -85,6 +86,13 @@ public class Player implements Serializable {
 	public void setReceiveok1(boolean receiveok1) { this.receiveok1 = receiveok1; }
 	public boolean isReceiveok2() { return receiveok2; }
 	public void setReceiveok2(boolean receiveok2) { this.receiveok2 = receiveok2; }
+	public boolean isCancheck() {
+		return cancheck;
+	}
+	public void setCancheck(boolean cancheck) {
+		this.cancheck = cancheck;
+	}
+
 	public void SelectSet(int num) {
 		int[] tmp = getCardset();
 		switch(num) {
