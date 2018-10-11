@@ -2364,10 +2364,10 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							mycard3=cards[6];
 							Draw_my_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p2card3=cards[7];
 								Draw_2p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p3card3=cards[8];
 									Draw_3p_3();
 								}
@@ -2387,10 +2387,10 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							p4card3=cards[6];
 							Draw_4p_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								mycard3=cards[7];
 								Draw_my_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p2card3=cards[8];
 									Draw_2p_3();
 								}
@@ -2410,10 +2410,10 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							p3card3=cards[6];
 							Draw_3p_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p4card3=cards[7];
 								Draw_4p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									mycard3=cards[8];
 									Draw_my_3();
 								}
@@ -2433,10 +2433,10 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							p2card3=cards[6];
 							Draw_2p_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p3card3=cards[7];
 								Draw_3p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p4card3=cards[8];
 									Draw_4p_3();
 								}
@@ -2462,45 +2462,45 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							mycard3=cards[8];
 							Draw_my_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p2card3=cards[9];
 								Draw_2p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p3card3=cards[10];
 									Draw_3p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p4card3=cards[11];
 										Draw_4p_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p4card3=cards[10];
 										Draw_4p_3();
 									}
 								}
 							} else {
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p3card3=cards[9];
 									Draw_3p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p4card3=cards[10];
 										Draw_4p_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p4card3=cards[9];
 										Draw_4p_3();
 									}
 								}
 							}
 						} else {
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p2card3=cards[8];
 								Draw_2p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p3card3=cards[9];
 									Draw_3p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p4card3=cards[10];
 										Draw_4p_3();
 									}
@@ -2522,45 +2522,45 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							p4card3=cards[8];						// 첫
 							Draw_4p_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								mycard3=cards[9];					// 둘
 								Draw_my_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p2card3=cards[10];				// 셋
 									Draw_2p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p3card3=cards[11];			// 넷
 										Draw_3p_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p3card3=cards[10];			// 넷
 										Draw_3p_3();
 									}
 								}
 							} else {
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p2card3=cards[9];							// 셋
 									Draw_2p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p3card3=cards[10];						// 넷
 										Draw_3p_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p3card3=cards[9];						// 넷
 										Draw_3p_3();
 									}
 								}
 							}
 						} else {
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								mycard3=cards[8];								// 둘
 								Draw_my_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p2card3=cards[9];							// 셋
 									Draw_2p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p3card3=cards[10];						//넷
 										Draw_3p_3();
 									}
@@ -2582,45 +2582,45 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							p3card3=cards[8];						// 첫
 							Draw_3p_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p4card3=cards[9];					// 둘
 								Draw_4p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									mycard3=cards[10];				// 셋
 									Draw_my_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p2card3=cards[11];			// 넷
 										Draw_2p_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p2card3=cards[10];			// 넷
 										Draw_2p_3();
 									}
 								}
 							} else {
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									mycard3=cards[9];							// 셋
 									Draw_my_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p2card3=cards[10];						// 넷
 										Draw_2p_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p2card3=cards[9];						// 넷
 										Draw_2p_3();
 									}
 								}
 							}
 						} else {
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p4card3=cards[8];								// 둘
 								Draw_4p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									mycard3=cards[9];							// 셋
 									Draw_my_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										p2card3=cards[10];						//넷
 										Draw_2p_3();
 									}
@@ -2643,45 +2643,45 @@ public class Mainwindow extends JFrame {
 						if(players.get(0).getBetbool()!=1) {
 							p2card3=cards[8];						// 첫
 							Draw_2p_3();
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p3card3=cards[9];					// 둘
 								Draw_3p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p4card3=cards[10];				// 셋
 									Draw_4p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										mycard3=cards[11];			// 넷
 										Draw_my_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										mycard3=cards[10];			// 넷
 										Draw_my_3();
 									}
 								}
 							} else {
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p4card3=cards[9];							// 셋
 									Draw_4p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										mycard3=cards[10];						// 넷
 										Draw_my_3();
 									}
 								} else {
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										mycard3=cards[9];						// 넷
 										Draw_my_3();
 									}
 								}
 							}
 						} else {
-							if(players.get(1).getBetbool()!=1) {
+							if(client.getPlayers().size()>1 && players.get(1).getBetbool()!=1) {
 								p3card3=cards[8];								// 둘
 								Draw_3p_3();
-								if(players.get(2).getBetbool()!=1) {
+								if(client.getPlayers().size()>2 && players.get(2).getBetbool()!=1) {
 									p4card3=cards[9];							// 셋
 									Draw_4p_3();
-									if(players.get(3).getBetbool()!=1) {
+									if(client.getPlayers().size()>3 && players.get(3).getBetbool()!=1) {
 										mycard3=cards[10];						//넷
 										Draw_my_3();
 									}
