@@ -1,5 +1,9 @@
 package sutta.mainclient6;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -21,12 +25,28 @@ public class TestClient {
 	public static void main(String[] args) {
 		try{ UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }catch(Exception e) {}
 		try {
-			InetAddress inet = InetAddress.getByName("192.168.6.9");
+			File f = new File("Address","address.txt");
+			String ipadd = null;
+			int port = 0;
+			if(f.exists()) {
+				BufferedReader fin = new BufferedReader(new FileReader(f));
+				
+				ipadd = fin.readLine();
+				port = Integer.parseInt(fin.readLine());
+				if(ipadd == null || port == 0 || port == -1) {
+					System.exit(0);
+				}
+			}
+			else {
+				System.exit(0);
+			}
+			
+			InetAddress inet = InetAddress.getByName(ipadd);
 			ObjectOutputStream out = null;
 			ObjectInputStream in = null;
 			
 
-			Socket socket = new Socket(inet, 54890);
+			Socket socket = new Socket(inet, port);
 				
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
