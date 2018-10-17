@@ -637,29 +637,8 @@ public class Mainwindow extends JFrame {
 		KeyListener chatenter = new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode()==KeyEvent.VK_ENTER && !makechat.getText().equals("")) {
-					if(makechat.getText().equals("/분배")) {
-						DrawCards();
-					} else if(makechat.getText().equals("/제자리")) {
-						ResetCards();
-					} else if(makechat.getText().equals("/카드")) {
-						allOpen();
-					} else if(makechat.getText().equals("/새로고침")) {
-						client.callRefresh();
-						for(Player p : client.getPlayers()) {
-							System.out.println(p.getOrder()+": "+p.getUser().getId());
-						}
-					} else if(makechat.getText().equals("/판돈")) {
-						client.callRefresh();
-						System.out.println(client.getPandon());
-					} else if(makechat.getText().equals("/뽑아")) {
-						DrawCards2();
-					} else if(makechat.getText().equals("/최저")) {
-						System.out.println(client.getMinforbet());
-					}
-					else {
-						client.MakeChat(makechat.getText());
-						makechat.setText("");
-					}
+					client.MakeChat(makechat.getText());
+					makechat.setText("");
 				}
 			}
 		};

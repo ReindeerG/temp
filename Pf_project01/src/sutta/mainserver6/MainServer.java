@@ -78,6 +78,7 @@ public class MainServer extends JFrame implements Runnable{
 		this.setTitle("KG섯다 서버");
 		this.setSize(500, 400);
 		this.setLocationByPlatform(true);
+		this.setVisible(true);
 		
 		setRoomPortList();//게임서버에 사용될 포트들을 세팅한다
 		setUserList();	//백업되어 있는 유저 정보를 불러온다
