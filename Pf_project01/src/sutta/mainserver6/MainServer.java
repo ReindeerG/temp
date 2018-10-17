@@ -1,6 +1,7 @@
 package sutta.mainserver6;
 
 
+import java.awt.Container;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,6 +10,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
 
 import sutta.gameserver2.Server;
 import sutta.useall.Room;
@@ -19,7 +23,7 @@ import sutta.useall.User;
 /**
  *메인 서버 클래스
  */
-public class MainServer extends Thread{
+public class MainServer extends JFrame implements Runnable{
 	/**
 	 * 유저 정보 저장 리스트
 	 * 클라이언트 소켓 저장 리스트
@@ -68,14 +72,22 @@ public class MainServer extends Thread{
 	 * 저장소(list)에 저장하는 일을 한다
 	 */
 	private MainServer() {
+		this.display();
+		this.event();
+		this.menu();
+		this.setTitle("KG섯다 서버");
+		this.setSize(500, 400);
+		this.setLocationByPlatform(true);
+		
 		setRoomPortList();//게임서버에 사용될 포트들을 세팅한다
 		setUserList();	//백업되어 있는 유저 정보를 불러온다
 		
 		try {
 			m_server = new ServerSocket(54890);
 //			계속해서 방 목록을 뿌려주는 서버 스레드 시작 
-			this.setDaemon(true);
-			this.start();
+			Thread tt = new Thread(this);
+			tt.setDaemon(true);
+			tt.start();
 			while(true) {
 				Socket socket = m_server.accept();
 				
@@ -322,6 +334,48 @@ public class MainServer extends Thread{
 			}
 		}
 	}
+	
+	private Container con = this.getContentPane();
+	private JButton exit = new JButton("서버 종료");
+	
+	private void display() {
+		con.add(exit);
+	}
+
+	private void event() {
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		exit.addActionListener(e->{
+			for(Client cl : list) {
+				try {
+					cl.socket.close();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+			for(Paint p : paint) {
+				try {
+					p.w_socket.close();
+				}catch(Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+			try {
+				w_server.close();
+				m_server.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			System.exit(0);
+		});
+	}
+
+	private void menu() {
+		
+	}
+	
+	
+	
 	
 	public static void main(String[] args) {
 		MainServer m =new MainServer();
