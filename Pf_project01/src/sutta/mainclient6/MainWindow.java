@@ -15,6 +15,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -277,9 +280,44 @@ public class MainWindow extends JFrame implements Runnable, Signal{
 	private Socket w_socket;
 	public MainWindow(Socket socket, ObjectOutputStream out, ObjectInputStream in) {
 		try {
-			g_inet = InetAddress.getByName("192.168.6.9");
-			w_inet = InetAddress.getByName("192.168.6.9");
-			w_socket = new Socket(w_inet, 54891);
+			
+			File f = new File("Address","gameserveradd.txt");
+			String g_ipadd = null;
+			if(f.exists()) {
+				BufferedReader fin = new BufferedReader(new FileReader(f));
+				
+				g_ipadd = fin.readLine();
+				fin.close();
+				if(g_ipadd == null) {
+					System.exit(0);
+				}
+			}
+			else {
+				System.exit(0);
+			}
+			
+			File f2 = new File("Address","address.txt");
+			String w_ipadd = null;
+			int port = 0;
+			if(f2.exists()) {
+				BufferedReader fin = new BufferedReader(new FileReader(f2));
+				
+				w_ipadd = fin.readLine();
+				port = Integer.parseInt(fin.readLine());
+				fin.close();
+				if(w_ipadd == null || port == 0 || port == -1) {
+					System.exit(0);
+				}
+			}
+			else {
+				System.exit(0);
+			}
+			
+			
+			
+			g_inet = InetAddress.getByName(g_ipadd);
+			w_inet = InetAddress.getByName(w_ipadd);
+			w_socket = new Socket(w_inet, port);
 			w_out = new ObjectOutputStream(w_socket.getOutputStream());
 			w_in = new ObjectInputStream(w_socket.getInputStream());
 			
